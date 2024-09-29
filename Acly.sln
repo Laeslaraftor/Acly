@@ -14,7 +14,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acly.Test2", "Acly.Test2\Acly.Test2.csproj", "{A5058E7F-59FB-46CA-BE65-8AC32F226898}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acly.Test3", "Acly.Test3\Acly.Test3.csproj", "{A15FC20F-71AB-4C1F-91C6-385B301F0BB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acly.Test3", "Acly.Test3\Acly.Test3.csproj", "{A15FC20F-71AB-4C1F-91C6-385B301F0BB7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acly.Usb", "Acly.Usb\Acly.Usb.csproj", "{89C28302-A3F7-4EF6-87EB-F07FF42820DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +40,10 @@ Global
 		{A15FC20F-71AB-4C1F-91C6-385B301F0BB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A15FC20F-71AB-4C1F-91C6-385B301F0BB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A15FC20F-71AB-4C1F-91C6-385B301F0BB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89C28302-A3F7-4EF6-87EB-F07FF42820DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89C28302-A3F7-4EF6-87EB-F07FF42820DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89C28302-A3F7-4EF6-87EB-F07FF42820DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89C28302-A3F7-4EF6-87EB-F07FF42820DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
