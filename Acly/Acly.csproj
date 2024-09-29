@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>10.0</LangVersion>
+    <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+    <SignAssembly>False</SignAssembly>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <EnableNETAnalyzers>True</EnableNETAnalyzers>
+    <AnalysisLevel>6.0-all</AnalysisLevel>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+    <NeutralLanguage>ru</NeutralLanguage>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Acly Main Library</Title>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>acly</PackageTags>
+    <Version>1.7.1</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>
