@@ -29,20 +29,43 @@ namespace Acly.Performing.Tasks
 		}
 
 		/// <summary>
-		/// Вызывается при обновлении прогресса выполнения
+		/// Вызывается при изменении описания
 		/// </summary>
-		public event Action? Completed;
+        public event Action? DescriptionChanged;
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public event Action? Completed;
 		/// <summary>
-		/// Вызывается при обновлении прогресса выполнения
+		/// <inheritdoc/>
 		/// </summary>
 		public event AsyncTaskProgress? ProgressUpdated;
 		/// <summary>
-		/// Вызывается если при выполнении задач произошла какая-то ошибка
+		/// <inheritdoc/>
 		/// </summary>
 		public event AsyncTaskFail? Failed;
 
+		/// <summary>
+		/// Описание текущего этапа загрузки
+		/// </summary>
+		public string? Description
+		{
+			get => _Description;
+			set
+			{
+				if (_Description == value)
+				{
+					return;
+				}
+
+				_Description = value;
+				DescriptionChanged?.Invoke();
+            }
+        }
+
 		private readonly LoadingTasksList _Tasks;
 		private Token? _ProcessingToken;
+		private string? _Description;
 
 		#region Управление
 
@@ -95,11 +118,12 @@ namespace Acly.Performing.Tasks
 		}
 		private async Task<IAsyncTaskError?> TryPerformTask(LoadingAsyncTask TaskFunction, int TaskIndex)
 		{
-#pragma warning disable CS8600
-			IAsyncTask AsyncTask = null;
-#pragma warning restore CS8600
+			IAsyncTask? AsyncTask = null;
+			string? Description = TaskFunction.Description;
 
-			try
+			TrySetDescription(Description, 0);
+
+            try
 			{
 				AsyncTask = await TaskFunction.GetAsyncTask();
 			}
@@ -108,8 +132,14 @@ namespace Acly.Performing.Tasks
 				return new AclyAsyncTaskError(Error);
 			}
 
+			if (AsyncTask == null)
+			{
+				return null;
+			}
+
 			bool Completed = false;
 			IAsyncTaskError? Result = null;
+			bool Failed = false;
 
 			void OnCompleted()
 			{
@@ -122,11 +152,13 @@ namespace Acly.Performing.Tasks
 			void OnProgressUpdated(float Percent)
 			{
 				UpdateProgress(TaskIndex, Percent);
-			};
+                TrySetDescription(Description, Percent);
+            };
 			void OnFailed(IAsyncTaskError Info)
 			{
 				Result = Info;
-				OnCompleted();
+				Failed = true;
+                OnCompleted();
 			};
 
 			AsyncTask.Completed += OnCompleted;
@@ -138,7 +170,31 @@ namespace Acly.Performing.Tasks
 				await Task.Delay(100);
 			}
 
+			if (!Failed)
+			{
+				TrySetDescription(Description, 1);
+			}
+
 			return Result;
+		}
+
+		private bool TrySetDescription(string? Value, float Progress)
+		{
+			if (Value == null)
+			{
+				return false;
+			}
+
+			try
+			{
+				Description = string.Format(Value, Math.Round(Progress * 100) + "%");
+			}
+			catch
+			{
+				return false;
+			}
+
+			return true;
 		}
 
 		#endregion

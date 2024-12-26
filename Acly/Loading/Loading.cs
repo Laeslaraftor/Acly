@@ -25,33 +25,45 @@ namespace Acly.Performing
 		/// </summary>
 		public static event Action<IAsyncTask, IAsyncTaskError>? Failed;
 
-		/// <summary>
-		/// Начать загрузку
-		/// </summary>
-		/// <typeparam name="T">Тип объекта загрузки</typeparam>
-		/// <returns>Задача загрузки</returns>
-		public static IAsyncTask Start<T>(params object[] Arguments) where T : ILoading
+        /// <summary>
+        /// Начать загрузку
+        /// </summary>
+        /// <typeparam name="T">Тип объекта загрузки</typeparam>
+        /// <param name="Arguments">Аргументы для создания загрузки</param>
+        /// <returns>Задача загрузки</returns>
+        public static IAsyncTask Start<T>(params object[] Arguments) where T : ILoading
 		{
-			T Load = (T)Activator.CreateInstance(typeof(T), Arguments);
+			return Start<T>(out var _, Arguments);
+        }
+        /// <summary>
+        /// Начать загрузку
+        /// </summary>
+        /// <typeparam name="T">Тип объекта загрузки</typeparam>
+		/// <param name="Loading">Начатая загрузка</param>
+		/// <param name="Arguments">Аргументы для создания загрузки</param>
+        /// <returns>Задача загрузки</returns>
+        public static IAsyncTask Start<T>(out T Loading, params object[] Arguments) where T : ILoading
+        {
+            Loading = (T)Activator.CreateInstance(typeof(T), Arguments);
 
-			IAsyncTask Task = Load.Start();
-			SetEvents(Task);
+            IAsyncTask Task = Loading.Start();
+            SetEvents(Task);
 
-			try
-			{
-				Started?.Invoke(Task);
-			}
-			catch (Exception Error)
-			{
-				Log.Error(Error);
-			}
+            try
+            {
+                Started?.Invoke(Task);
+            }
+            catch (Exception Error)
+            {
+                Log.Error(Error);
+            }
 
-			return Task;
-		}
+            return Task;
+        }
 
-		#region Управление
+        #region Управление
 
-		private static void SetEvents(IAsyncTask Loading)
+        private static void SetEvents(IAsyncTask Loading)
 		{
 			void OnCompleted()
 			{

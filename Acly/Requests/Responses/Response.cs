@@ -30,34 +30,47 @@ namespace Acly.Requests
 		/// </summary>
 		/// <param name="Exception">Исключение как ответ</param>
 		/// <exception cref="ArgumentNullException">Исключение не указано</exception>
-		public Response(Exception Exception)
+		public Response(Exception Exception) : this(Exception, "{0}")
 		{
-			if (Exception == null)
-			{
-				throw new ArgumentNullException(nameof(Exception), "Исключение не указано");
-			}
-
-			Type ExceptionType = Exception.GetType();
-
-			if (ExceptionType == typeof(LoadingException))
-			{
-				LoadingException Loading = (LoadingException)Exception;
-				Code = Loading.Code;
-			}
-			else
-			{
-				Code = Exception.GetType().Name;
-			}
-
-			Text = Exception.Message;
-			this.Exception = Exception;
 		}
-		/// <summary>
-		/// Создать экземпляр ответа
-		/// </summary>
-		/// <param name="Response">Ответ для копирования</param>
-		/// <exception cref="ArgumentNullException">Ответ не указан</exception>
-		public Response(Response Response)
+        /// <summary>
+        /// Создать экземпляр ответа
+        /// </summary>
+        /// <param name="Exception">Исключение как ответ</param>
+		/// <param name="Format">Формат сообщения об ошибке. {0} - сообщение ошибки, {1} - стек вызовов</param>
+        /// <exception cref="ArgumentNullException">Исключение не указано</exception>
+        public Response(Exception Exception, string Format)
+		{
+            if (Exception == null)
+            {
+                throw new ArgumentNullException(nameof(Exception), "Исключение не указано");
+            }
+			if (Format == null)
+			{
+				throw new ArgumentNullException(nameof(Format), "Формат не указан");
+			}
+
+            Type ExceptionType = Exception.GetType();
+
+            if (ExceptionType == typeof(LoadingException))
+            {
+                LoadingException Loading = (LoadingException)Exception;
+                Code = Loading.Code;
+            }
+            else
+            {
+                Code = Exception.GetType().Name;
+            }
+
+            Text = string.Format(Format, Exception.Message, Exception.StackTrace);
+            this.Exception = Exception;
+        }
+        /// <summary>
+        /// Создать экземпляр ответа
+        /// </summary>
+        /// <param name="Response">Ответ для копирования</param>
+        /// <exception cref="ArgumentNullException">Ответ не указан</exception>
+        public Response(Response Response)
 		{
 			if (Response == null)
 			{

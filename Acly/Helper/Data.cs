@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Acly
 {
@@ -29,5 +30,17 @@ namespace Acly
 
 			return Result;
 		}
-	}
+		/// <summary>
+		/// Сохранить состояние объекта
+		/// </summary>
+		/// <param name="Obj">Объект для сохранения состояния</param>
+		/// <returns>Сохранённое состояние</returns>
+		public static ObjectState SaveState(this object Obj) => new(Obj);
+        /// <summary>
+        /// Сохранить состояние объекта асинхронно
+        /// </summary>
+        /// <param name="Obj">Объект для сохранения состояния</param>
+        /// <returns>Сохранённое состояние</returns>
+        public static async Task<ObjectState> SaveStateAsync(this object Obj) => await Task.Run(() => Obj.SaveState());
+    }
 }

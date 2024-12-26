@@ -19,19 +19,27 @@ Api.BaseFileExtension = "php";
 
 Console.WriteLine("Начато");
 
-//IAsyncTask Load = Loading.Start<TestLoading>();
-//Load.Completed += () =>
-//{
-//	Console.WriteLine("Выполнено");
-//};
-//Load.ProgressUpdated += Value =>
-//{
-//	Console.WriteLine("Прогресс: " + Value);
-//};
-//Load.Failed += Info =>
-//{
-//	Console.WriteLine(Info.ToString());
-//};
+IAsyncTask Load = Loading.Start<TestLoading>(out var L);
+Console.WriteLine(L.Description);
+L.DescriptionChanged += Val =>
+{
+	Console.WriteLine($"Новое описание: {Val.Description}");
+};
+Load.Completed += () =>
+{
+	Console.WriteLine("Выполнено");
+};
+Load.ProgressUpdated += Value =>
+{
+	Console.WriteLine("Прогресс: " + Value);
+};
+Load.Failed += Info =>
+{
+	Console.WriteLine(Info.ToString());
+};
+
+Console.ReadLine();
+return;
 
 //AsyncValueAnimation anim = new();
 //Stopwatch timer = null;

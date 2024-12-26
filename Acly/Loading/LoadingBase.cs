@@ -11,25 +11,48 @@ namespace Acly.Performing
 	public abstract class LoadingBase : ILoading
 	{
 		/// <summary>
-		/// Вызывается сразу после окончания выполнения задач
+		/// <inheritdoc/>
 		/// </summary>
-		public event Action<ILoading>? Completed;
+        public event LoadingEvent? DescriptionChanged;
+        /// <summary>
+        /// Вызывается сразу после окончания выполнения задач
+        /// </summary>
+        public event LoadingEvent? Completed;
 		/// <summary>
 		/// Вызывается при обновлении прогресса выполнения
 		/// </summary>
-		public event Action<ILoading, float>? ProgressUpdated;
+		public event LoadingProgressEvent? ProgressUpdated;
 		/// <summary>
 		/// Вызывается если при выполнении задач произошла какая-то ошибка
 		/// </summary>
-		public event Action<ILoading, IAsyncTaskError>? Failed;
+		public event LoadingFailEvent? Failed;
 
 		/// <summary>
-		/// Последовательность задач, которая будет выполняться во время загрузки.
+		/// <inheritdoc/>
 		/// </summary>
-		protected abstract LoadingTasksList TasksForPerform { get; }
+        public virtual string? Description
+		{
+			get => _Description;
+			set
+			{
+				if (value == _Description)
+				{
+					return;
+				}
 
-		private LoadingAsyncTasksController? _Controller;
+                _Description = value;
+				DescriptionChanged?.Invoke(this);
+            }
+        }
+
+        /// <summary>
+        /// Последовательность задач, которая будет выполняться во время загрузки.
+        /// </summary>
+        protected abstract LoadingTasksList TasksForPerform { get; }
+
+        private LoadingAsyncTasksController? _Controller;
 		private bool _Started;
+		private string? _Description;
 
 		#region Управление
 
@@ -50,17 +73,18 @@ namespace Acly.Performing
 			_Controller.Completed += OnLoadingCompleted;
 			_Controller.ProgressUpdated += OnLoadingProgressUpdated;
 			_Controller.Failed += OnLoadingProgressFailed;
+            _Controller.DescriptionChanged += OnLoadingDescriptionChanged;
 
 			return new AclyAsyncTask(_Controller);
 		}
 
-		/// <summary>
-		/// Получить какое-либо значение
-		/// </summary>
-		/// <typeparam name="T">Тип получаемого значения</typeparam>
-		/// <param name="Name">Название значения</param>
-		/// <returns>Значение</returns>
-		public virtual T? GetValue<T>(string Name)
+        /// <summary>
+        /// Получить какое-либо значение
+        /// </summary>
+        /// <typeparam name="T">Тип получаемого значения</typeparam>
+        /// <param name="Name">Название значения</param>
+        /// <returns>Значение</returns>
+        public virtual T? GetValue<T>(string Name)
 		{
 			return default;
 		}
@@ -94,14 +118,24 @@ namespace Acly.Performing
 		{
 			BreakWithError(new Response(Code, Text));
 		}
+        /// <summary>
+        /// Прервать загрузку с ошибкой
+        /// </summary>
+        /// <param name="Error">Возникшее исключение</param>
+		/// <param name="Format">Формат сообщения об ошибке. {0} - сообщение ошибки, {1} - стек вызовов</param>
+        protected void BreakWithError(Exception Error, string Format)
+        {
+            BreakWithError(new Response(Error, Format));
+        }
 
-		#endregion
+        #endregion
 
-		#region События
+        #region События
 
-		private void OnLoadingCompleted()
+        private void OnLoadingCompleted()
 		{
 			RemoveEvents();
+			Description = null;
 			Completed?.Invoke(this);
 		}
 		private void OnLoadingProgressUpdated(float Percent)
@@ -113,8 +147,12 @@ namespace Acly.Performing
 			RemoveEvents();
 			Failed?.Invoke(this, Response);
 		}
+        private void OnLoadingDescriptionChanged()
+        {
+			Description = _Controller?.Description;
+        }
 
-		private void RemoveEvents()
+        private void RemoveEvents()
 		{
 			if (_Controller == null)
 			{
@@ -124,7 +162,8 @@ namespace Acly.Performing
 			_Controller.Completed -= OnLoadingCompleted;
 			_Controller.ProgressUpdated -= OnLoadingProgressUpdated;
 			_Controller.Failed -= OnLoadingProgressFailed;
-		}
+            _Controller.DescriptionChanged -= OnLoadingDescriptionChanged;
+        }
 
 		#endregion
 	}

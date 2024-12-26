@@ -16,7 +16,7 @@ namespace Acly
         /// </summary>
         /// <param name="Reference">Основная коллекция</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public ReferenceReadOnlyList(ObservableList<T> Reference)
+        public ReferenceReadOnlyList(IObservableList<T> Reference)
         {
             if (Reference == null)
             {
@@ -41,7 +41,7 @@ namespace Acly
         /// </summary>
         public int Count => _Reference.Count;
 
-        private readonly ObservableList<T> _Reference;
+        private readonly IObservableList<T> _Reference;
 
         #region Перечисление
 

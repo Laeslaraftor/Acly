@@ -25,6 +25,45 @@ namespace Acly.Test.Player
         public event Action? SourceChanged;
         public event Action? SourceEnded;
 
+        event SimplePlayerStateEvent? ISimplePlayer.StateChanged
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        event SimplePlayerEvent? ISimplePlayer.SourceChanged
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        event SimplePlayerEvent? ISimplePlayer.SourceEnded
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public float[] GetSpectrumData(int Size, SpectrumWindow Window = SpectrumWindow.Rectangular)
         {
             throw new NotImplementedException();

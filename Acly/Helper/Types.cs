@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -91,7 +92,7 @@ namespace Acly
         /// <param name="MethodName">Название метода</param>
         /// <param name="Result">Информация о методе (если найден)</param>
         /// <returns>Найден ли метод</returns>
-        public static bool TryFindMethod(this Type Type, string MethodName, out MethodInfo? Result)
+        public static bool TryFindMethod(this Type Type, string MethodName, [NotNullWhen(true)] out MethodInfo? Result)
         {
             Result = Type.FindMethod(MethodName);
             return Result != null;

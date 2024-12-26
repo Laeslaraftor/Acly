@@ -1,5 +1,6 @@
 ﻿using Acly.Performing;
 using Acly.Tasks;
+using System.ComponentModel;
 
 namespace Acly.Test
 {
@@ -32,7 +33,7 @@ namespace Acly.Test
 
 			for (int i = 0; i < Amount; i++)
 			{
-				Result.Add(() =>
+				Result.Add([Description("Проверка описание {0}")] () =>
 				{
 					int Time = Helper.Random.Next(10, 1000);
 
@@ -42,7 +43,7 @@ namespace Acly.Test
 						return new TestLoading(false).Start();
 					}
 
-					return new AclyAsyncTask(async () =>
+					return new AclyAsyncTask([Description("Золька {0}")] async () =>
 					{
 						await Task.Delay(Time);
 					});

@@ -10,7 +10,7 @@ namespace Acly.Performing
 	/// <summary>
 	/// Список задач для загрузки
 	/// </summary>
-	public class LoadingTasksList : IList<LoadingAsyncTask>, IList<Func<Task<IAsyncTask>>>, IList<Func<IAsyncTask>>, IList<Func<Task>>
+	public class LoadingTasksList : IList<LoadingAsyncTask>, IList<Func<Task<IAsyncTask?>>>, IList<Func<IAsyncTask?>>, IList<Func<Task>>
 	{
 		/// <summary>
 		/// Создать список задач для загрузки
@@ -22,7 +22,7 @@ namespace Acly.Performing
 		/// Создать список задач для загрузки
 		/// </summary>
 		/// <param name="TaskForPerform">Задача для загрузки</param>
-		public LoadingTasksList(Func<Task<IAsyncTask>> TaskForPerform)
+		public LoadingTasksList(Func<Task<IAsyncTask?>> TaskForPerform)
 		{
 			if (TaskForPerform == null)
 			{
@@ -35,7 +35,7 @@ namespace Acly.Performing
 		/// Создать список задач для загрузки
 		/// </summary>
 		/// <param name="TasksForPerform">Список задач для загрузки</param>
-		public LoadingTasksList(IEnumerable<Func<Task<IAsyncTask>>> TasksForPerform)
+		public LoadingTasksList(IEnumerable<Func<Task<IAsyncTask?>>> TasksForPerform)
 		{
 			if (TasksForPerform == null)
 			{
@@ -51,7 +51,7 @@ namespace Acly.Performing
 		/// Создать список задач для загрузки
 		/// </summary>
 		/// <param name="TaskForPerform">Задача для загрузки</param>
-		public LoadingTasksList(Func<IAsyncTask> TaskForPerform)
+		public LoadingTasksList(Func<IAsyncTask?> TaskForPerform)
 		{
 			if (TaskForPerform == null)
 			{
@@ -64,7 +64,7 @@ namespace Acly.Performing
 		/// Создать список задач для загрузки
 		/// </summary>
 		/// <param name="TasksForPerform">Список задач для загрузки</param>
-		public LoadingTasksList(IEnumerable<Func<IAsyncTask>> TasksForPerform)
+		public LoadingTasksList(IEnumerable<Func<IAsyncTask?>> TasksForPerform)
 		{
 			if (TasksForPerform == null)
 			{
@@ -164,11 +164,11 @@ namespace Acly.Performing
 		}
 
 		private readonly List<LoadingAsyncTask> _List = new();
-		private List<Func<Task<IAsyncTask>>> TasksList
+		private List<Func<Task<IAsyncTask?>>> TasksList
 		{
 			get
 			{
-				List<Func<Task<IAsyncTask>>> Result = new();
+				List<Func<Task<IAsyncTask?>>> Result = new();
 
 				foreach (var Func in _List)
 				{
@@ -183,11 +183,11 @@ namespace Acly.Performing
 				return Result;
 			}
 		}
-		private List<Func<IAsyncTask>> AsyncTasksFuncList
+		private List<Func<IAsyncTask?>> AsyncTasksFuncList
 		{
 			get
 			{
-				List<Func<IAsyncTask>> Result = new();
+				List<Func<IAsyncTask?>> Result = new();
 
 				foreach (var Func in _List)
 				{
@@ -235,7 +235,7 @@ namespace Acly.Performing
 				_List[Index] = new(value);
 			}
 		}
-		Func<IAsyncTask> IList<Func<IAsyncTask>>.this[int Index]
+		Func<IAsyncTask?> IList<Func<IAsyncTask?>>.this[int Index]
 		{
 			get => throw new InvalidOperationException(ActionNotImplemented + "LoadingAsyncTask this[int Index]");
 			set
@@ -248,7 +248,7 @@ namespace Acly.Performing
 				_List[Index] = new(value);
 			}
 		}
-		Func<Task<IAsyncTask>> IList<Func<Task<IAsyncTask>>>.this[int Index]
+		Func<Task<IAsyncTask?>> IList<Func<Task<IAsyncTask?>>>.this[int Index]
 		{
 			get => throw new InvalidOperationException(ActionNotImplemented + "LoadingAsyncTask this[int Index]");
 			set
@@ -408,7 +408,7 @@ namespace Acly.Performing
 		/// <param name="Index">Позиция</param>
 		/// <param name="Item">Задача</param>
 		/// <exception cref="InvalidOperationException">Изменения заблокированы</exception>
-		public void Insert(int Index, Func<Task<IAsyncTask>> Item)
+		public void Insert(int Index, Func<Task<IAsyncTask?>> Item)
 		{
 			Insert(Index, new LoadingAsyncTask(Item));
 		}
@@ -417,7 +417,7 @@ namespace Acly.Performing
 		/// </summary>
 		/// <param name="Item">Задача</param>
 		/// <exception cref="InvalidOperationException">Изменения заблокированы</exception>
-		public void Add(Func<Task<IAsyncTask>> Item)
+		public void Add(Func<Task<IAsyncTask?>> Item)
 		{
 			Add(new LoadingAsyncTask(Item));
 		}
@@ -428,7 +428,7 @@ namespace Acly.Performing
 		/// <param name="Item">Задача</param>
 		/// <returns>Была ли удалена задача</returns>
 		/// <exception cref="InvalidOperationException">Изменения заблокированы</exception>
-		public bool Remove(Func<Task<IAsyncTask>> Item)
+		public bool Remove(Func<Task<IAsyncTask?>> Item)
 		{
 			if (IsReadOnly)
 			{
@@ -452,7 +452,7 @@ namespace Acly.Performing
 		/// </summary>
 		/// <param name="Item">Задача для проверки</param>
 		/// <returns>Содержится ли указанная задача в списке</returns>
-		public bool Contains(Func<Task<IAsyncTask>> Item)
+		public bool Contains(Func<Task<IAsyncTask?>> Item)
 		{
 			return IndexOf(Item) != -1;
 		}
@@ -461,7 +461,7 @@ namespace Acly.Performing
 		/// </summary>
 		/// <param name="Array">Массив к который будет копироваться список</param>
 		/// <param name="ArrayIndex">Позиция с которой надо начать копирование</param>
-		public void CopyTo(Func<Task<IAsyncTask>>[] Array, int ArrayIndex)
+		public void CopyTo(Func<Task<IAsyncTask?>>[] Array, int ArrayIndex)
 		{
 			TasksList.CopyTo(Array, ArrayIndex);
 		}
@@ -470,7 +470,7 @@ namespace Acly.Performing
 		/// </summary>
 		/// <param name="Item">Задача для поиска позиции</param>
 		/// <returns>Позиция задачи в списке. Если задачи нет в списке то будет возвращено -1</returns>
-		public int IndexOf(Func<Task<IAsyncTask>> Item)
+		public int IndexOf(Func<Task<IAsyncTask?>> Item)
 		{
 			for (int i = 0; i < Count; i++)
 			{
@@ -485,7 +485,7 @@ namespace Acly.Performing
 			return -1;
 		}
 
-		IEnumerator<Func<Task<IAsyncTask>>> IEnumerable<Func<Task<IAsyncTask>>>.GetEnumerator()
+		IEnumerator<Func<Task<IAsyncTask?>>> IEnumerable<Func<Task<IAsyncTask?>>>.GetEnumerator()
 		{
 			return TasksList.GetEnumerator();
 		}
@@ -500,7 +500,7 @@ namespace Acly.Performing
 		/// <param name="Index">Позиция</param>
 		/// <param name="Item">Задача</param>
 		/// <exception cref="InvalidOperationException">Изменения заблокированы</exception>
-		public void Insert(int Index, Func<IAsyncTask> Item)
+		public void Insert(int Index, Func<IAsyncTask?> Item)
 		{
 			Insert(Index, new LoadingAsyncTask(Item));
 		}
@@ -509,7 +509,7 @@ namespace Acly.Performing
 		/// </summary>
 		/// <param name="Item">Задача</param>
 		/// <exception cref="InvalidOperationException">Изменения заблокированы</exception>
-		public void Add(Func<IAsyncTask> Item)
+		public void Add(Func<IAsyncTask?> Item)
 		{
 			Add(new LoadingAsyncTask(Item));
 		}
@@ -520,7 +520,7 @@ namespace Acly.Performing
 		/// <param name="Item">Задача</param>
 		/// <returns>Была ли удалена задача</returns>
 		/// <exception cref="InvalidOperationException">Изменения заблокированы</exception>
-		public bool Remove(Func<IAsyncTask> Item)
+		public bool Remove(Func<IAsyncTask?> Item)
 		{
 			if (IsReadOnly)
 			{
@@ -544,7 +544,7 @@ namespace Acly.Performing
 		/// </summary>
 		/// <param name="Item">Задача для проверки</param>
 		/// <returns>Содержится ли указанная задача в списке</returns>
-		public bool Contains(Func<IAsyncTask> Item)
+		public bool Contains(Func<IAsyncTask?> Item)
 		{
 			return IndexOf(Item) != -1;
 		}
@@ -553,7 +553,7 @@ namespace Acly.Performing
 		/// </summary>
 		/// <param name="Array">Массив к который будет копироваться список</param>
 		/// <param name="ArrayIndex">Позиция с которой надо начать копирование</param>
-		public void CopyTo(Func<IAsyncTask>[] Array, int ArrayIndex)
+		public void CopyTo(Func<IAsyncTask?>[] Array, int ArrayIndex)
 		{
 			AsyncTasksFuncList.CopyTo(Array, ArrayIndex);
 		}
@@ -562,7 +562,7 @@ namespace Acly.Performing
 		/// </summary>
 		/// <param name="Item">Задача для поиска позиции</param>
 		/// <returns>Позиция задачи в списке. Если задачи нет в списке то будет возвращено -1</returns>
-		public int IndexOf(Func<IAsyncTask> Item)
+		public int IndexOf(Func<IAsyncTask?> Item)
 		{
 			for (int i = 0; i < Count; i++)
 			{
@@ -577,7 +577,7 @@ namespace Acly.Performing
 			return -1;
 		}
 
-		IEnumerator<Func<IAsyncTask>> IEnumerable<Func<IAsyncTask>>.GetEnumerator()
+		IEnumerator<Func<IAsyncTask?>> IEnumerable<Func<IAsyncTask?>>.GetEnumerator()
 		{
 			return AsyncTasksFuncList.GetEnumerator();
 		}
@@ -711,7 +711,7 @@ namespace Acly.Performing
 		/// Добавить список задач
 		/// </summary>
 		/// <param name="Tasks">Список задач</param>
-		public void AddRange(IEnumerable<Func<Task<IAsyncTask>>> Tasks)
+		public void AddRange(IEnumerable<Func<Task<IAsyncTask?>>> Tasks)
 		{
 			if (Tasks == null)
 			{
@@ -727,7 +727,7 @@ namespace Acly.Performing
 		/// Добавить список задач
 		/// </summary>
 		/// <param name="Tasks">Список задач</param>
-		public void AddRange(IEnumerable<Func<IAsyncTask>> Tasks)
+		public void AddRange(IEnumerable<Func<IAsyncTask?>> Tasks)
 		{
 			if (Tasks == null)
 			{
