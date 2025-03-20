@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Acly.Data;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -234,6 +235,89 @@ namespace Acly
             }
 
             Method.Invoke(Instance, Parameters);
+        }
+
+        /// <summary>
+        /// Проверить является ли тип стандартной структурой
+        /// </summary>
+        /// <param name="ObjType">Проверяемый тип</param>
+        /// <returns>Является ли тип стандартной структурой</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static bool IsStandardStruct(this Type ObjType)
+        {
+            if (ObjType == null)
+            {
+                throw new ArgumentNullException("Тип не указан", nameof(ObjType));
+            }
+            if (!ObjType.IsValueType || !ObjType.IsPrimitive)
+            {
+                return false;
+            }
+
+            return ObjType.Namespace == "System" || ObjType.Namespace.StartsWith("System.");
+        }
+
+        /// <summary>
+        /// Получить копию объекта (копируются только публичные доступные для чтения/записи поля)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="Object">Копируемый объект</param>
+        /// <param name="DeepCopy">Делать ли копию значений</param>
+        /// <param name="CtorArgument">Аргументы конструктора</param>
+        /// <returns>Копия объекта</returns>
+        public static T SoftCopy<T>(this T Object, bool DeepCopy = true, params object[]? CtorArgument)
+        {
+            return Object.SoftCopy(DeepCopy, ObjectCopyMaker.Instance, null);
+        }
+        /// <summary>
+        /// Получить копию объекта (копируются только публичные доступные для чтения/записи поля)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="Object">Копируемый объект</param>
+        /// <param name="DeepCopy">Делать ли копию значений</param>
+        /// <param name="CtorArgument">Аргументы конструктора</param>
+        /// <param name="CopyMaker">Создатель копий</param>
+        /// <returns>Копия объекта</returns>
+        public static T SoftCopy<T>(this T Object, bool DeepCopy, ObjectCopyMaker CopyMaker, params object[]? CtorArgument)
+        {
+            if (Object == null)
+            {
+                throw new ArgumentNullException(nameof(Object));
+            }
+            if (CopyMaker == null)
+            {
+                throw new ArgumentNullException(nameof(CopyMaker));
+            }
+
+            return (T)CopyMaker.CreateCopy(Object, DeepCopy, CtorArgument);
+        }
+        /// <summary>
+        /// Скопировать значения из одного объекта в другой
+        /// </summary>
+        /// <param name="Object">Копируемый объект</param>
+        /// <param name="Destination">Объект в который будут вставлены значения</param>
+        /// <param name="DeepCopy">Делать ли копию значений</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static void SoftCopyTo(this object Object, ref object Destination, bool DeepCopy = true)
+        {
+            Object.SoftCopyTo(ref Destination, ObjectCopyMaker.Instance, DeepCopy);
+        }
+        /// <summary>
+        /// Скопировать значения из одного объекта в другой
+        /// </summary>
+        /// <param name="Object">Копируемый объект</param>
+        /// <param name="Destination">Объект в который будут вставлены значения</param>
+        /// <param name="DeepCopy">Делать ли копию значений</param>
+        /// <param name="CopyMaker">Создатель копий</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static void SoftCopyTo(this object Object, ref object Destination, ObjectCopyMaker CopyMaker, bool DeepCopy = true)
+        {
+            if (CopyMaker == null)
+            {
+                throw new ArgumentNullException(nameof(CopyMaker));
+            }
+
+            CopyMaker.CopyTo(Object, ref Destination, DeepCopy);
         }
     }
 }

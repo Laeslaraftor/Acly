@@ -129,15 +129,22 @@ namespace Acly
 		public static float Lerp(float A, float B, float T)
 		{
 			T = Math.Clamp(T, 0, 1);
-			return A + (B - A) * T;
+			return LerpUnclamped(A, B, T);
 		}
+        /// <summary>
+        /// a + (b - a) * t;
+        /// </summary>
+        public static float LerpUnclamped(float A, float B, float T)
+        {
+            return A + (B - A) * T;
+        }
 
-		/// <summary>
-		/// Получить значение к рамках от 0 до 1
-		/// </summary>
-		/// <param name="Value">Значение</param>
-		/// <returns>Значение к рамках от 0 до 1</returns>
-		public static float Clamp01(float Value)
+        /// <summary>
+        /// Получить значение к рамках от 0 до 1
+        /// </summary>
+        /// <param name="Value">Значение</param>
+        /// <returns>Значение к рамках от 0 до 1</returns>
+        public static float Clamp01(float Value)
 		{
 			return Clamp(Value, 0, 1);
 		}
