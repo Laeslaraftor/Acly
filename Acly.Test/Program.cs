@@ -11,7 +11,15 @@ using Acly.Commands;
 using Acly.JsonData;
 using Acly.Player;
 using System.Net;
-using Acly.Serialize;
+
+//await TestTaskController.BeginAsync();
+EditableCollection<string> list1 = new();
+list1.Add("awdad");
+list1.Add("ddd");
+CollectionSynchronizer<string> sync = new(list1);
+
+
+return;
 
 Api.BaseUrl = "https://api.acly.ru";
 Api.BaseFileExtension = "php";

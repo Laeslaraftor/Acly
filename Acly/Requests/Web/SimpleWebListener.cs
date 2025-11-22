@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 
 namespace Acly.Requests
 {
@@ -19,6 +20,10 @@ namespace Acly.Requests
         /// Вызывается при получении запроса
         /// </summary>
         public event SimpleWebListenerRequestEvent? RequestHandled;
+        /// <summary>
+        /// Вызывается при обработке исключения
+        /// </summary>
+        public event SimpleWebListenerExceptionEvent? ExceptionHandled;
 
         /// <summary>
         /// Префиксы
@@ -36,6 +41,15 @@ namespace Acly.Requests
         /// </summary>
         /// <param name="Context"><inheritdoc/></param>
         protected override void OnHandledRequest(HttpListenerContext Context) => RequestHandled?.Invoke(this, Context);
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="Error"><inheritdoc/></param>
+        protected override void OnHandledException(Exception Error)
+        {
+            base.OnHandledException(Error);
+            ExceptionHandled?.Invoke(this, Error);
+        }
 
         #endregion
     }

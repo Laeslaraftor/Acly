@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Runtime.Serialization;
+using System.ComponentModel;
 
 namespace Acly
 {
@@ -28,7 +28,11 @@ namespace Acly
         {
             _List = new(Items);
         }
-        
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        [field: NonSerialized] public event PropertyChangedEventHandler? PropertyChanged;
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
@@ -39,10 +43,21 @@ namespace Acly
         /// </summary>
         /// <param name="Index"><inheritdoc/></param>
         /// <returns><inheritdoc/></returns>
-        public T this[int Index]
+        public virtual T this[int Index]
         {
             get => _List[Index];
-            set => _List[Index] = value;
+            set
+            {
+                var Item = _List[Index];
+
+                if (Item?.Equals(value) == true)
+                {
+                    return;
+                }
+
+                _List[Index] = value;
+                InvokeReplace(value, Item, Index);
+            }
         }
         /// <summary>
         /// <inheritdoc/>
@@ -51,7 +66,7 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public bool IsReadOnly { get; }
+        public virtual bool IsReadOnly { get; }
 
         private readonly List<T> _List;
 
@@ -61,20 +76,20 @@ namespace Acly
         /// <inheritdoc/>
         /// </summary>
         /// <param name="Item"><inheritdoc/></param>
-        public void Add(T Item)
+        public virtual void Add(T Item)
         {
             _List.Add(Item);
-            InvokeChanged();
+            InvokeAdd(Item);
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
         /// <param name="Index"><inheritdoc/></param>
         /// <param name="Item"><inheritdoc/></param>
-        public void Insert(int Index, T Item)
+        public virtual void Insert(int Index, T Item)
         {
             _List.Insert(Index, Item);
-            InvokeChanged();
+            InvokeInsert(Item, Index);
         }
 
         /// <summary>
@@ -82,33 +97,37 @@ namespace Acly
         /// </summary>
         /// <param name="Item"><inheritdoc/></param>
         /// <returns><inheritdoc/></returns>
-        public bool Remove(T Item)
+        public virtual bool Remove(T Item)
         {
-            bool Result = _List.Remove(Item);
+            int Index = IndexOf(Item);
 
-            if (Result)
+            if (Index >= 0)
             {
-                InvokeChanged();
+                _List.Remove(Item);
+                InvokeRemove(Item, Index);
+                return true;
             }
 
-            return Result;
+            return false;
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
         /// <param name="Index"><inheritdoc/></param>
-        public void RemoveAt(int Index)
+        public virtual void RemoveAt(int Index)
         {
+            T Item = _List[Index];
+
             _List.RemoveAt(Index);
-            InvokeChanged();
+            InvokeRemove(Item, Index);
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void Clear()
+        public virtual void Clear()
         {
             _List.Clear();
-            InvokeChanged();
+            InvokeClear();
         }
 
         /// <summary>
@@ -146,9 +165,46 @@ namespace Acly
 
         #region События
 
-        private void InvokeChanged()
+        /// <summary>
+        /// Вызывать событие изменения поля
+        /// </summary>
+        /// <param name="PropertyName">Изменённое поле</param>
+        protected void InvokePropertyChanged(string PropertyName)
         {
-            CollectionChanged?.Invoke(this, new(NotifyCollectionChangedAction.Reset));
+            PropertyChanged?.Invoke(this, new(PropertyName));
+        }
+        /// <summary>
+        /// Вызвать событие изменения коллекции
+        /// </summary>
+        /// <param name="Args">Данные события</param>
+        protected void InvokeCollectionChanged(NotifyCollectionChangedEventArgs Args)
+        {
+            CollectionChanged?.Invoke(this, Args);
+            InvokePropertyChanged(nameof(Count));
+        }
+
+        private void InvokeReplace(T? NewItem, T? OldItem, int Index)
+        {
+            InvokeCollectionChanged( 
+                new(NotifyCollectionChangedAction.Replace, NewItem, OldItem, Index));
+        }
+        private void InvokeAdd(T? NewItem)
+        {
+            InvokeInsert(NewItem, Count - 1);
+        }
+        private void InvokeRemove(T? NewItem, int Index)
+        {
+            InvokeCollectionChanged(
+                new(NotifyCollectionChangedAction.Remove, NewItem, Index));
+        }
+        private void InvokeInsert(T? NewItem, int Index)
+        {
+            InvokeCollectionChanged(
+                new(NotifyCollectionChangedAction.Add, NewItem, Index));
+        }
+        private void InvokeClear()
+        {
+            InvokeCollectionChanged(new(NotifyCollectionChangedAction.Reset));
         }
 
         #endregion

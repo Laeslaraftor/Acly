@@ -1,8 +1,10 @@
 ﻿using Acly.Numbers;
 using Acly.Platforms;
+using Acly.Player.Extensions;
 using Acly.Player.Implementations;
 using Acly.Tokens;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -236,6 +238,23 @@ namespace Acly.Player
 				
 				return _Player;
 			}
+			set
+			{
+				if (_Player != null)
+				{
+                    _Player.StateChanged -= OnPlayerStateChanged;
+                    _Player.SourceChanged -= OnPlayerSourceChanged;
+                    _Player.SourceEnded -= OnPlayerSourceEnded;
+                }
+				if (value != null)
+				{
+                    value.StateChanged += OnPlayerStateChanged;
+                    value.SourceChanged += OnPlayerSourceChanged;
+                    value.SourceEnded += OnPlayerSourceEnded;
+                }
+
+				_Player = value;
+			}
 		}
 		private static string DefaultTempFolder
 		{
@@ -252,15 +271,16 @@ namespace Acly.Player
 			}
 		}
 		private static ISimplePlayer? _Player;
+		private static ISimplePlayer? _SecondPlayer;
 		private static string? _TempFolder;
 
 		private static bool _IsInitialized;
 		private static bool _IsInitializing;
 
-		private static ValueAnimation? _PauseAnimation;
 		private static Token? _DemoToken;
 
 		private static readonly TimeSpan _DefaultFadeDuration = TimeSpan.FromSeconds(0.5);
+		private static readonly Dictionary<ISimplePlayer, List<ValueAnimation>> _Animations = new();
 
 		#region Получение плеера текущей платформы
 
@@ -405,18 +425,11 @@ namespace Acly.Player
 
 			try
 			{
-				_Player = await GetCurrentPlatformImplementation();
+				Player = await GetCurrentPlatformImplementation();
 			}
 			catch (Exception Error)
 			{
 				Log.Error(Error);
-			}
-
-			if (_Player != null)
-			{
-				_Player.StateChanged += OnPlayerStateChanged;
-				_Player.SourceChanged += OnPlayerSourceChanged;
-				_Player.SourceEnded += OnPlayerSourceEnded;
 			}
 
 			_IsInitialized = true;
@@ -597,11 +610,18 @@ namespace Acly.Player
 		/// <param name="Duration">Продолжительность отрывка</param>
 		public static void PlayDemo(TimeSpan StartPosition, TimeSpan Duration)
 		{
+			var CurrentPlayer = Player;
+
+			if (CurrentPlayer == null)
+			{
+				return;
+			}
+
 			RemoveAnimation();
 			Play(StartPosition);
 
 			_DemoToken = new();
-			DemoTimerTick(_DemoToken.Value, StartPosition, Duration);
+			DemoTimerTick(CurrentPlayer, _DemoToken.Value, StartPosition, Duration);
 		}
 
 		/// <summary>
@@ -612,22 +632,24 @@ namespace Acly.Player
 		{
 			RemoveAnimation();
 
-			Volume = 0;
+			var CurrentPlayer = Player;
 
-			if (_DemoToken == null)
+			if (CurrentPlayer == null)
 			{
-				Play();
-			}
-			else
-			{
-				Player?.Play();
+				return;
 			}
 
-			_PauseAnimation = GetAnimation(0, 1, Duration, Easing.Linear, Val =>
+			_DemoToken = null;
+            CurrentPlayer.Volume = 0;
+            CurrentPlayer.Play();
+
+            var Animation = GetAnimation(0, 1, Duration, Easing.Linear, Val =>
 			{
-				Volume = Val;
+				CurrentPlayer.Volume = Val;
 			});
-		}
+
+            AddAnimation(Animation);
+        }
 		/// <summary>
 		/// Плавное возобновление проигрывания
 		/// </summary>
@@ -646,17 +668,25 @@ namespace Acly.Player
 			RemoveAnimation();
 
 			float StartVolume = Volume;
+			var CurrentPlayer = Player;
 
-			_PauseAnimation = GetAnimation(Volume, 0, Duration, Easing.Linear, Val =>
+			if (CurrentPlayer == null)
 			{
-				Volume = Val;
+				return;
+			}
+
+			var Animation = GetAnimation(Volume, 0, Duration, Easing.Linear, Val =>
+			{
+                CurrentPlayer.Volume = Val;
 			}, () =>
 			{
-				Pause();
-				Volume = StartVolume;
+				CurrentPlayer.Pause();
+                CurrentPlayer.Volume = StartVolume;
 				Paused?.Invoke();
 			});
-		}
+
+            AddAnimation(Animation);
+        }
 		/// <summary>
 		/// Плавная остановка проигрывания
 		/// </summary>
@@ -675,18 +705,26 @@ namespace Acly.Player
 		{
 			RemoveAnimation();
 
+			var CurrentPlayer = Player;
 			float StartSpeed = Speed;
 
-			_PauseAnimation = GetAnimation(StartSpeed, 0, Duration, Easing.Linear, Val =>
+			if (CurrentPlayer == null)
 			{
-				Speed = Val;
+				return;
+			}
+
+			var Animation = GetAnimation(StartSpeed, 0, Duration, Easing.Linear, Val =>
+			{
+                CurrentPlayer.Speed = Val;
 			}, () =>
 			{
 				Pause();
-				Speed = StartSpeed;
+                CurrentPlayer.Speed = StartSpeed;
 				Paused?.Invoke();
 			});
-		}
+
+			AddAnimation(Animation);
+        }
 		/// <summary>
 		/// Плавная остановка проигрывания через замедление скорости
 		/// </summary>
@@ -696,48 +734,154 @@ namespace Acly.Player
 			PitchPause(_DefaultFadeDuration, Paused);
 		}
 
-		private static async void DemoTimerTick(Token Token, TimeSpan StartPosition, TimeSpan Duration)
+		/// <summary>
+		/// Плавно сменить источник плеера
+		/// </summary>
+		/// <param name="SourceSetter">Установщик источника</param>
+		/// <param name="StartPosition">Начальная позиция проигрывания</param>
+		/// <param name="Duration">Продолжительность плавного перехода</param>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static async void SmoothSwitchSource(Func<ISimplePlayer, Task> SourceSetter, TimeSpan StartPosition, TimeSpan Duration)
+		{
+			if (Player == null)
+			{
+				throw new InvalidOperationException("Невозможно плавно сменить источник, так как плеер не был создан");
+			}
+			if (SourceSetter == null)
+			{
+				throw new ArgumentNullException(nameof(SourceSetter));
+			}
+
+			_SecondPlayer ??= await GetCurrentPlatformImplementation();
+
+			if (_SecondPlayer == null)
+			{
+				throw new InvalidOperationException("Не удалось начать плавную смену источника, так как не удалось создать второй экземпляр плеера");
+			}
+
+			bool AutoPlayEnabled = Player.AutoPlay;
+			float Volume = Player.Volume;
+			_SecondPlayer.CopyValues(Player);
+			_SecondPlayer.AutoPlay = false;
+
+			await SourceSetter(_SecondPlayer);
+
+            var CurrentPlayer = Player;
+			Player = _SecondPlayer;
+			_SecondPlayer = CurrentPlayer;
+
+			CurrentPlayer = Player;
+			var SecondPlayer = _SecondPlayer;
+
+            void VolumeAnimationTick(ValueAnimation Animation, float Value)
+            {
+                CurrentPlayer.Volume = Value;
+                SecondPlayer.Volume = Volume - Value;
+            }
+			void VolumeAnimationEnded(ValueAnimation Animation, AnimationMode Mode)
+			{
+				SecondPlayer.Stop();
+			}
+
+            ValueAnimation Animation = new(0, Volume)
+			{
+				Duration = Duration
+			};
+			Animation.Tick += VolumeAnimationTick;
+            Animation.Ended += VolumeAnimationEnded;
+
+            CurrentPlayer.Volume = 0;
+            CurrentPlayer.Position = StartPosition;
+
+            CurrentPlayer.Play();
+			Animation.Start();
+        }
+
+		/// <summary>
+		/// Переключиться на другой экземпляр плеера, при этом сохранив текущие действия.
+		/// Например, если начать плавную остановку проигрывания и переключить экземпляр,
+		/// то плавная остановка продолжится на том экземпляре на котором была начала
+		/// </summary>
+		public static async void SwitchInstances()
+		{
+			_SecondPlayer ??= await GetCurrentPlatformImplementation();
+
+			if (_SecondPlayer == null)
+			{
+				throw new InvalidOperationException("Невозможно переключиться на другой экземпляр, так как не удалось создать второй экземпляр плеера");
+			}
+
+			var CurrentPlayer = Player;
+			Player = _SecondPlayer;
+			_SecondPlayer = CurrentPlayer;
+        }
+
+		private static async void DemoTimerTick(ISimplePlayer Player, Token Token, TimeSpan StartPosition, TimeSpan Duration)
 		{
 			await Task.Delay(Duration);
 
-			if (Token != _DemoToken)
+			if (Token != _DemoToken || SimplePlayer.Player != Player)
 			{
 				return;
 			}
 
-			SimplePlayerState StartState = State;
+			SimplePlayerState StartState = Player.State;
 
 			FadePause(() =>
 			{
-				Position = StartPosition;
+                Player.Position = StartPosition;
 
 				if (StartState == SimplePlayerState.Playing)
 				{
-					Player?.Play();
+					Player.Play();
 				}
 			});
 
-			DemoTimerTick(Token, StartPosition, Duration);
+			DemoTimerTick(Player, Token, StartPosition, Duration);
 		}
 
 		#endregion
 
 		#region Анимация значения
 
-		private static void RemoveAnimation()
+		private static void AddAnimation(ValueAnimation Animation)
 		{
-			if (_PauseAnimation == null)
+			var CurrentPlayer = Player;
+
+			if (CurrentPlayer == null)
 			{
 				return;
 			}
+			if (!_Animations.TryGetValue(CurrentPlayer, out var AnimationsList))
+			{
+				AnimationsList = new();
+				_Animations.Add(CurrentPlayer, AnimationsList);
+			}
 
-			_PauseAnimation.Stop();
-			_PauseAnimation = null;
+			AnimationsList.Add(Animation);
+        }
+		private static void RemoveAnimation()
+		{
+			var CurrentPlayer = Player;
+
+            if (CurrentPlayer == null)
+            {
+				return;
+            }
+
+			if (_Animations.TryGetValue(CurrentPlayer, out var Animations))
+			{
+				foreach (var Animation in Animations)
+				{
+					Animation.Stop();
+				}
+
+				Animations.Clear();
+            }
 		}
 		private static ValueAnimation GetAnimation(float From, float To, TimeSpan Duration, Easing Easing, Action<float> Updated, Action? Completed = null)
 		{
-			ValueAnimation? Anim = _PauseAnimation;
-			Anim ??= new();
+			ValueAnimation Anim = new();
 
 			Anim.SetFrom(From).SetTo(To).SetDuration(Duration).SetEasing(Easing).SetTickEvent((a, v) =>
 			{

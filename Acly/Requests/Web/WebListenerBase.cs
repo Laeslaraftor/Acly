@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Acly.Requests
@@ -18,7 +20,7 @@ namespace Acly.Requests
             Listener = new();
             Listener.Prefixes.Add(Prefix);
 
-            StartListenTask();
+            //StartListenTask();
         }
 
         /// <summary>
@@ -87,7 +89,10 @@ namespace Acly.Requests
         protected virtual void Dispose(bool OnlyLocal)
         {
             Disposed = true;
+            Listener.Stop();
+            Listener.Abort();
             Listener.Close();
+
         }
 
         #endregion
@@ -100,21 +105,53 @@ namespace Acly.Requests
             {
                 while (!Disposed)
                 {
-                    Listen();
+                    if (!Listen())
+                    {
+                        Debug.WriteLine("Http прослушивание остановлено из-за возникшей проблемы!");
+                        break;
+                    }
                 }
             }).ConfigureAwait(true);
+
+            if (IsStarted)
+            {
+                Stop();
+            }
         }
-        private void Listen()
+        private bool Listen()
         {
             if (Listener.IsListening)
             {
-                HttpListenerContext context = Listener.GetContext();
+                HttpListenerContext context;
+
+                try
+                {
+                    context = Listener.GetContext();
+                }
+                catch (Exception Error)
+                {
+                    OnHandledException(Error);
+                    PrintException(Error);
+                    return false;
+                }
 
                 if (context != null)
                 {
                     OnHandledRequest(context);
                 }
             }
+
+            return true;
+        }
+
+        private static void PrintException(Exception Error)
+        {
+            StringBuilder Builder = new();
+            Builder.AppendLine($"Произошла ошибка {Error.GetType().Name}");
+            Builder.AppendLine(Error.Message);
+            Builder.AppendLine(Error.StackTrace);
+
+            Debug.WriteLine(Builder.ToString());
         }
 
         #endregion
@@ -126,6 +163,13 @@ namespace Acly.Requests
         /// </summary>
         /// <param name="Context">Запрос</param>
         protected abstract void OnHandledRequest(HttpListenerContext Context);
+        /// <summary>
+        /// Вызывается при обработке исключения
+        /// </summary>
+        /// <param name="Error">Обрабатываемое исключение</param>
+        protected virtual void OnHandledException(Exception Error)
+        {
+        }
 
         #endregion
     }

@@ -16,7 +16,9 @@ namespace Acly.Requests
 			/// <summary>
 			/// Создать класс для отправки запросов на сервер
 			/// </summary>
-			public Server() { }
+			public Server()
+			{
+			}
 			/// <summary>
 			/// Создать класс для отправки запросов на сервер
 			/// </summary>

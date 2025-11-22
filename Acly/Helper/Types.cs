@@ -64,6 +64,96 @@ namespace Acly
 		}
 
         /// <summary>
+        /// Найти поле в типе
+        /// </summary>
+        /// <param name="Type">Тип в котором надо найти поле</param>
+        /// <param name="Condition">Условие отбора</param>
+        /// <returns>Поле (если найдено)</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static PropertyInfo? FindProperty(this Type Type, Predicate<PropertyInfo> Condition)
+        {
+            if (Type == null)
+            {
+                throw new ArgumentNullException(nameof(Type), "Тип не указан");
+            }
+            if (Condition == null)
+            {
+                throw new ArgumentNullException(nameof(Condition), "Условие не указано");
+            }
+
+            foreach (var Property in Type.GetProperties())
+            {
+                if (Condition(Property))
+                {
+                    return Property;
+                }
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Найти поле в типе
+        /// </summary>
+        /// <param name="Type">Тип в котором надо найти поле</param>
+        /// <param name="PropertyName">Название поля</param>
+        /// <returns>Поле (если найдено)</returns>
+        public static PropertyInfo? FindProperty(this Type Type, string PropertyName)
+        {
+            return Type.FindProperty(P => P.Name == PropertyName);
+        }
+        /// <summary>
+        /// Попытаться найти поле в типе
+        /// </summary>
+        /// <param name="Type">Тип в котором надо попытаться найти поле</param>
+        /// <param name="Condition">Условие отбора</param>
+        /// <param name="Result">Поле (если найдено)</param>
+        /// <returns>Найдено ли поле</returns>
+        public static bool TryFindProperty(this Type Type, Predicate<PropertyInfo> Condition, [NotNullWhen(true)] out PropertyInfo? Result)
+        {
+            Result = Type.FindProperty(Condition);
+            return Result != null;
+        }
+        /// <summary>
+        /// Попытаться найти поле в типе
+        /// </summary>
+        /// <param name="Type">Тип в котором надо попытаться найти поле</param>
+        /// <param name="PropertyName">Название поля</param>
+        /// <param name="Result">Поле (если найдено)</param>
+        /// <returns>Найдено ли поле</returns>
+        public static bool TryFindProperty(this Type Type, string PropertyName, [NotNullWhen(true)] out PropertyInfo? Result)
+        {
+            Result = Type.FindProperty(PropertyName);
+            return Result != null;
+        }
+
+        /// <summary>
+        /// Найти метод в типе
+        /// </summary>
+        /// <param name="Type">Тип для поиска метода</param>
+        /// <param name="Condition">Условие отбора</param>
+        /// <returns>Информация о методе (если найден)</returns>
+        public static MethodInfo? FindMethod(this Type Type, Predicate<MethodInfo> Condition)
+        {
+            if (Type == null)
+            {
+                throw new ArgumentNullException(nameof(Type), "Тип не указан");
+            }
+            if (Condition == null)
+            {
+                throw new ArgumentNullException(nameof(Condition), "Условие не указано");
+            }
+
+            foreach (var Method in Type.GetMethods())
+            {
+                if (Condition(Method))
+                {
+                    return Method;
+                }
+            }
+
+            return null;
+        }
+        /// <summary>
         /// Найти метод в типе
         /// </summary>
         /// <param name="Type">Тип для поиска метода</param>
@@ -71,20 +161,19 @@ namespace Acly
         /// <returns>Информация о методе (если найден)</returns>
         public static MethodInfo? FindMethod(this Type Type, string MethodName)
         {
-            if (Type == null)
-            {
-                throw new ArgumentNullException(nameof(Type), "Тип не указан");
-            }
-
-            foreach (var Method in Type.GetMethods())
-            {
-                if (Method.Name == MethodName)
-                {
-                    return Method;
-                }
-            }
-
-            return null;
+            return Type.FindMethod(M => M.Name == MethodName);
+        }
+        /// <summary>
+        /// Попытаться найти метод в типе
+        /// </summary>
+        /// <param name="Type">Тип в котором будет осуществлён поиск</param>
+        /// <param name="Condition">Условие отбора</param>
+        /// <param name="Result">Информация о методе (если найден)</param>
+        /// <returns>Найден ли метод</returns>
+        public static bool TryFindMethod(this Type Type, Predicate<MethodInfo> Condition, [NotNullWhen(true)] out MethodInfo? Result)
+        {
+            Result = Type.FindMethod(Condition);
+            return Result != null;
         }
         /// <summary>
         /// Попытаться найти метод в типе

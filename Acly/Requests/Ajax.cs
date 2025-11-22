@@ -21,6 +21,18 @@ namespace Acly.Requests
 
 		#region Запросы
 
+		public static async Task<string> Post(string Url, IEnumerable<KeyValuePair<string, object>> Parameters)
+		{
+			using var Content = await CreateHttpContent(Parameters);
+			var ResultContent = await SendRequest(Web =>
+			{
+				Log.Message("Запрос: " + Url);
+				return Web.PostAsync(Url, Content);
+            });
+
+            return await ResultContent.ReadAsStringAsync();
+        }
+
 		/// <summary>
 		/// Получить строку по указанному адресу
 		/// </summary>
@@ -96,7 +108,7 @@ namespace Acly.Requests
 
 			Log.Message("Запрос: " + Url);
 
-			HttpResponseMessage Result = await Web.GetAsync(Url);
+            HttpResponseMessage Result = await Web.GetAsync(Url);
 			string ResultText = await Result.Content.ReadAsStringAsync();
 
 			if (!Result.IsSuccessStatusCode)
@@ -508,6 +520,21 @@ namespace Acly.Requests
 			return new AclyAsyncTask(Controller);
 		}
 
+		private static async Task<HttpContent> SendRequest(Func<HttpClient, Task<HttpResponseMessage>> ResponseMessageFactory)
+		{
+            using HttpClient Web = new();
+            Web.Timeout = TimeSpan.FromMinutes(1);
+
+            HttpResponseMessage Result = await ResponseMessageFactory(Web);
+
+            if (!Result.IsSuccessStatusCode)
+            {
+                throw new RequestException(Result.Headers.Location.AbsoluteUri, Result.StatusCode);
+            }
+
+            return Result.Content;
+        }
+
 		#endregion
 
 		#region Работа с адресами
@@ -562,6 +589,14 @@ namespace Acly.Requests
 			}
 
 			return '?' + Result;
+		}
+
+		private static async Task<HttpContent> CreateHttpContent(IEnumerable<KeyValuePair<string, object>> Parameters)
+		{
+			string JsonParameters = await Json.Convert(Parameters);
+			var FormContent = await Json.Convert<Dictionary<string, string>>(JsonParameters);
+ 
+			return new FormUrlEncodedContent(FormContent);
 		}
 
 		#endregion

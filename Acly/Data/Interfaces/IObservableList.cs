@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace Acly
 {
@@ -7,7 +8,7 @@ namespace Acly
     /// Список с отслеживанием изменений
     /// </summary>
     /// <typeparam name="T">Тип данных списка</typeparam>
-    public interface IObservableList<T> : IList<T>, INotifyCollectionChanged
+    public interface IObservableList<T> : IList<T>, INotifyCollectionChanged, INotifyPropertyChanged
     {
     }
 }
