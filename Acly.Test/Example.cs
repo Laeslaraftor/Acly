@@ -19,4 +19,30 @@
 			throw new NotImplementedException();
 		}
 	}
+	public class Person1
+	{
+		public string? Name { get; set; }
+	}
+    public class Person2
+    {
+        public string? SpecialName { get; set; }
+    }
+    public class PersonsConverter : IValueConverter<Person1, Person2>
+    {
+        public Person2 Convert(Person1 Value)
+        {
+			return new()
+			{
+				SpecialName = Value.Name
+			};
+        }
+
+        public Person1 ConvertBack(Person2 Value)
+        {
+			return new()
+			{
+				Name = Value.SpecialName
+			};
+        }
+    }
 }

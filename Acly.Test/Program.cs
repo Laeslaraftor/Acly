@@ -13,10 +13,17 @@ using Acly.Player;
 using System.Net;
 
 //await TestTaskController.BeginAsync();
-EditableCollection<string> list1 = new();
-list1.Add("awdad");
-list1.Add("ddd");
-CollectionSynchronizer<string> sync = new(list1);
+EditableCollection<Person1> list1 = new();
+EditableCollection<Person2> list2 = new();
+CollectionSynchronizer<Person1, Person2> sync = new(list1, list2, new PersonsConverter());
+list1.Add(new()
+{
+	Name = "Юра"
+});
+list1.Add(new()
+{
+    Name = "zeWhite"
+});
 
 
 return;

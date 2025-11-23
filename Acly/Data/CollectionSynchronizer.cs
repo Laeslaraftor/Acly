@@ -1,23 +1,34 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace Acly
 {
     /// <summary>
     /// Синхронизатор списков
     /// </summary>
-    public class CollectionSynchronizer<T> : INotifyPropertyChanged, IDisposable
+    public class CollectionSynchronizer<T1, T2> : INotifyPropertyChanged, IDisposable
     {
         /// <summary>
         /// Создать новый экземпляр синхронизатора коллекций
         /// </summary>
         /// <param name="First"><inheritdoc cref="_FirstCollection"/></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public CollectionSynchronizer(INotifyCollectionChanged First) : this(First, new ObservableCollection<T>())
+        public CollectionSynchronizer(INotifyCollectionChanged First) 
+            : this(First, new ObservableCollection<T1>())
+        {
+        }
+        /// <summary>
+        /// Создать новый экземпляр синхронизатора коллекций
+        /// </summary>
+        /// <param name="First"><inheritdoc cref="_FirstCollection"/></param>
+        /// <param name="Converter"><inheritdoc cref="Converter"/></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public CollectionSynchronizer(INotifyCollectionChanged First, IValueConverter<T1, T2> Converter) 
+            : this(First, new ObservableCollection<T2>(), Converter)
         {
         }
         /// <summary>
@@ -25,17 +36,26 @@ namespace Acly
         /// </summary>
         /// <param name="First"><inheritdoc cref="_FirstCollection"/></param>
         /// <param name="Second"><inheritdoc cref="_SecondCollection"/></param>
+        /// <param name="Converter"><inheritdoc cref="Converter"/></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public CollectionSynchronizer(INotifyCollectionChanged First, INotifyCollectionChanged Second)
+        public CollectionSynchronizer(INotifyCollectionChanged First, INotifyCollectionChanged Second, IValueConverter<T1, T2>? Converter = null)
         {
+            bool TypesNotEquals = typeof(T1) != typeof(T2);
+
+            if (TypesNotEquals && Converter == null)
+            {
+                throw new ArgumentNullException("При указании разных типов необходимо указать и конвертер!", nameof(Converter));
+            }
+
             FirstCollection = First ?? throw new ArgumentNullException(nameof(First));
             SecondCollection = Second ?? throw new ArgumentNullException(nameof(Second));
+            this.Converter = Converter;
 
-            if (First is not IList<T> Collection)
+            if (First is not IEnumerable Collection)
             {
                 throw new ArgumentException($"Объект не является списком!", nameof(First));
             }
-            if (Second is not IList<T> Collection2)
+            if (Second is not IEnumerable Collection2)
             {
                 throw new ArgumentException($"Объект не является списком!", nameof(Second));
             }
@@ -43,8 +63,38 @@ namespace Acly
             FirstCollection.CollectionChanged += FirstCollectionChanged;
             SecondCollection.CollectionChanged += SecondCollectionChanged;
 
-            _FirstCollection = Collection;
-            _SecondCollection = Collection2;
+            Func<object?, object?> ConvertMethod;
+            Func<object?, object?> ConvertBackMethod;
+
+            if (TypesNotEquals && Converter != null)
+            {
+                ConvertMethod = o =>
+                {
+                    if (o != null)
+                    {
+                        return Converter.Convert((T1)o);
+                    }
+
+                    return null;
+                };
+                ConvertBackMethod = o =>
+                {
+                    if (o != null)
+                    {
+                        return Converter.ConvertBack((T2)o);
+                    }
+
+                    return null;
+                };
+            }
+            else
+            {
+                ConvertMethod = o => o;
+                ConvertBackMethod = ConvertMethod;
+            }
+
+            _FirstCollection = new(Collection, ConvertBackMethod);
+            _SecondCollection = new(Collection2, ConvertMethod);
 
             SynchronizeFromFirstToSecond();
         }
@@ -72,6 +122,10 @@ namespace Acly
         /// </summary>
         public INotifyCollectionChanged SecondCollection { get; }
         /// <summary>
+        /// Конвертер значений
+        /// </summary>
+        public IValueConverter<T1, T2>? Converter { get; }
+        /// <summary>
         /// Обновляются ли сейчас коллекции
         /// </summary>
         public bool IsUpdating
@@ -87,13 +141,35 @@ namespace Acly
             }
         }
 
-        private readonly IList<T> _FirstCollection;
-        private readonly IList<T> _SecondCollection;
+        private readonly ReflectionList _FirstCollection;
+        private readonly ReflectionList _SecondCollection;
         private bool _IsUpdating;
 
         #region Управление
 
-        private bool TrySync(IList<T> From, IList<T> To, NotifyCollectionChangedEventArgs Args)
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Очистка синхронизатора
+        /// </summary>
+        /// <param name="IsDisposing"></param>
+        protected virtual void Dispose(bool IsDisposing)
+        {
+            FirstCollection.CollectionChanged -= FirstCollectionChanged;
+            SecondCollection.CollectionChanged -= SecondCollectionChanged;
+
+            _FirstCollection.Dispose();
+            _SecondCollection.Dispose();
+        }
+
+        private bool TrySync(ReflectionList From, ReflectionList To, NotifyCollectionChangedEventArgs Args)
         {
             if (IsUpdating)
             {
@@ -119,9 +195,10 @@ namespace Acly
             try
             {
                 _SecondCollection.Clear();
-                foreach (var item in _FirstCollection)
+
+                foreach (var Item in _FirstCollection)
                 {
-                    _SecondCollection.Add(item);
+                    _SecondCollection.Add(Item);
                 }
             }
             finally
@@ -151,7 +228,7 @@ namespace Acly
 
         #region Статика
 
-        private static void Sync(IList<T> From, IList<T> To, NotifyCollectionChangedEventArgs Args)
+        private static void Sync(ReflectionList From, ReflectionList To, NotifyCollectionChangedEventArgs Args)
         {
             switch (Args.Action)
             {
@@ -163,11 +240,11 @@ namespace Acly
                             var newIndex = Args.NewStartingIndex + i;
                             if (newIndex <= To.Count)
                             {
-                                To.Insert(newIndex, (T)Args.NewItems[i]);
+                                To.Insert(newIndex, Args.NewItems[i]);
                             }
                             else
                             {
-                                To.Add((T)Args.NewItems[i]);
+                                To.Add(Args.NewItems[i]);
                             }
                         }
                     }
@@ -186,7 +263,7 @@ namespace Acly
                 case NotifyCollectionChangedAction.Replace:
                     if (Args.NewStartingIndex >= 0 && Args.NewStartingIndex < To.Count)
                     {
-                        To[Args.NewStartingIndex] = (T)Args.NewItems[0];
+                        To[Args.NewStartingIndex] = Args.NewItems[0];
                     }
                     break;
 
@@ -212,23 +289,103 @@ namespace Acly
 
         #endregion
 
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public void Dispose()
+        #region Классы
+
+        private sealed class ReflectionList : IEnumerable, IDisposable
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            public ReflectionList(IEnumerable List, Func<object?, object?> Converter)
+            {
+                Enumerable = List;
+                this.Converter = Converter;
+
+                Type ListType = List.GetType();
+                var properties = ListType.GetProperties();
+
+                if (ListType.TryFindMethod("Add", out var AddMethod) &&
+                    ListType.TryFindMethod("Insert", out var InsertMethod) &&
+                    ListType.TryFindMethod("RemoveAt", out var RemoveAtMethod) &&
+                    ListType.TryFindMethod("Clear", out var ClearMethod) &&
+                    ListType.TryFindProperty("Count", out var CountProperty) &&
+                    ListType.TryFindProperty("Item", out var ItemProperty))
+                {
+                    _AddMethod = AddMethod;
+                    _InsertMethod = InsertMethod;
+                    _RemoveAtMethod = RemoveAtMethod;
+                    _ClearMethod = ClearMethod;
+                    _CountProperty = CountProperty;
+                    _ItemProperty = ItemProperty;
+                }
+                else
+                {
+                    throw new ArgumentException($"Объект не является списком!", nameof(List));
+                }
+            }
+            ~ReflectionList()
+            {
+                Dispose();
+            }
+
+            public Func<object?, object?> Converter { get; }
+            public IEnumerable Enumerable { get; }
+            public int Count => (int)_CountProperty.GetValue(Enumerable);
+            public object this[int Index]
+            {
+                get
+                {
+                    _MethodParams[0] = Index;
+                    return _ItemProperty.GetValue(Enumerable, _MethodParams);
+                }
+                set
+                {
+                    _MethodParams[0] = Index;
+                    _ItemProperty.SetValue(Enumerable, Converter(value), _MethodParams);
+                }
+            }
+
+            private readonly MethodInfo _RemoveAtMethod;
+            private readonly MethodInfo _InsertMethod;
+            private readonly MethodInfo _AddMethod;
+            private readonly MethodInfo _ClearMethod;
+            private readonly PropertyInfo _CountProperty;
+            private readonly PropertyInfo _ItemProperty;
+            private readonly object?[] _MethodParams = new object?[1];
+            private readonly object?[] _MethodParams2 = new object?[2];
+
+            public void Add(object? Item)
+            {
+                _MethodParams[0] = Converter(Item);
+                _AddMethod.Invoke(Enumerable, _MethodParams);
+            }
+            public void Clear()
+            {
+                _ClearMethod.Invoke(Enumerable, Array.Empty<object>());
+            }
+            public void RemoveAt(int Index)
+            {
+                _MethodParams[0] = Index;
+                _RemoveAtMethod.Invoke(Enumerable, _MethodParams);
+            }
+            public void Insert(int Index, object? Item)
+            {
+                _MethodParams2[0] = Index;
+                _MethodParams2[1] = Converter(Item);
+                _InsertMethod.Invoke(Enumerable, _MethodParams2);
+            }
+            public IEnumerator GetEnumerator()
+            {
+                return Enumerable.GetEnumerator();
+            }
+
+            public void Dispose()
+            {
+                _MethodParams[0] = null;
+                _MethodParams2[0] = null;
+                _MethodParams2[1] = null;
+
+                GC.SuppressFinalize(this);
+            }
         }
 
-        /// <summary>
-        /// Очистка синхронизатора
-        /// </summary>
-        /// <param name="IsDisposing"></param>
-        protected virtual void Dispose(bool IsDisposing)
-        {
-            FirstCollection.CollectionChanged -= FirstCollectionChanged;
-            SecondCollection.CollectionChanged -= SecondCollectionChanged;
-        }
+        #endregion
     }
 }
