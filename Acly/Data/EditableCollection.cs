@@ -266,11 +266,8 @@ namespace Acly
             SaveValues(TypedItem);
             CurrentEdit = TypedItem;
         }
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        /// <param name="Item"><inheritdoc/></param>
-        public void Remove(object Item)
+
+        void IEditableList.Remove(object Item)
         {
             if (Item is not T TypedItem)
             {
