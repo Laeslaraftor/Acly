@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Acly
@@ -408,5 +409,42 @@ namespace Acly
 
             CopyMaker.CopyTo(Object, ref Destination, DeepCopy);
         }
+
+        /// <summary>
+        /// Получить Enum из массива байтов
+        /// </summary>
+        /// <typeparam name="T">Enum тип</typeparam>
+        /// <param name="Bytes">Массив байтов, представляющий Enum значение</param>
+        /// <returns>Enum значение</returns>
+        /// <exception cref="NotSupportedException"></exception>
+        public static T BytesToEnum<T>(byte[] Bytes) where T : Enum
+        {
+            if (Bytes == null)
+            {
+                throw new ArgumentNullException(nameof(Bytes));
+            }
+
+            Type underlyingType = Enum.GetUnderlyingType(typeof(T));
+
+            if (underlyingType == typeof(int))
+                return (T)(object)BitConverter.ToInt32(Bytes, 0);
+            else if (underlyingType == typeof(long))
+                return (T)(object)BitConverter.ToInt64(Bytes, 0);
+            else if (underlyingType == typeof(short))
+                return (T)(object)BitConverter.ToInt16(Bytes, 0);
+            else if (underlyingType == typeof(byte))
+                return (T)(object)Bytes[0];
+            else if (underlyingType == typeof(uint))
+                return (T)(object)BitConverter.ToUInt32(Bytes, 0);
+            else if (underlyingType == typeof(ulong))
+                return (T)(object)BitConverter.ToUInt64(Bytes, 0);
+            else if (underlyingType == typeof(ushort))
+                return (T)(object)BitConverter.ToUInt16(Bytes, 0);
+            else if (underlyingType == typeof(sbyte))
+                return (T)(object)(sbyte)Bytes[0];
+
+            throw new NotSupportedException($"Тип {underlyingType} не поддерживается");
+        }
+
     }
 }

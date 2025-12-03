@@ -43,7 +43,7 @@ namespace Acly
         /// <summary>
         /// Событие добавления, удаления, перемещения объекта списка
         /// </summary>
-        public event EventHandler<CollectionItemEventArgs<T>>? ItemChanged;
+        [field: NonSerialized] public event EventHandler<CollectionItemEventArgs<T>>? ItemChanged;
 
         /// <summary>
         /// <inheritdoc/>
@@ -109,8 +109,8 @@ namespace Acly
         /// </summary>
         protected T? CurrentEdit { get; private set; }
 
-        private readonly Func<T> _Fabric;
-        private readonly Dictionary<PropertyInfo, object?> _EditingItemSavedValues;
+        [field: NonSerialized] private readonly Func<T> _Fabric;
+        [field: NonSerialized] private readonly Dictionary<PropertyInfo, object?> _EditingItemSavedValues;
 
         #region Управление
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -10,7 +11,7 @@ namespace Acly
     /// <summary>
     /// Синхронизатор списков
     /// </summary>
-    public class CollectionSynchronizer<T1, T2> : INotifyPropertyChanged, IDisposable
+    public class CollectionSynchronizer<T1, T2> : IEnumerable<T1>, INotifyPropertyChanged, IDisposable
     {
         /// <summary>
         /// Создать новый экземпляр синхронизатора коллекций
@@ -96,14 +97,12 @@ namespace Acly
             _FirstCollection = new(Collection, ConvertBackMethod);
             _SecondCollection = new(Collection2, ConvertMethod);
 
-            SynchronizeFromFirstToSecond();
+            SyncFirstToSecond();
         }
         /// <summary>
         /// Очистка синхронизатора
         /// </summary>
-#pragma warning disable CA1063 // Правильно реализуйте IDisposable
         ~CollectionSynchronizer()
-#pragma warning restore CA1063 // Правильно реализуйте IDisposable
         {
             Dispose(false);
         }
@@ -111,7 +110,7 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public event PropertyChangedEventHandler? PropertyChanged;
+        [field: NonSerialized] public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Первая отслеживаемая коллекция
@@ -146,6 +145,21 @@ namespace Acly
         private bool _IsUpdating;
 
         #region Управление
+
+        /// <summary>
+        /// Синхронизировать значения второй коллекции с первой.
+        /// </summary>
+        public void SyncFirstToSecond()
+        {
+            ForceSync(_FirstCollection, _SecondCollection);
+        }
+        /// <summary>
+        /// Синхронизировать значения первой коллекции со второй.
+        /// </summary>
+        public void SyncSecondToFirst()
+        {
+            ForceSync(_SecondCollection, _FirstCollection);
+        }
 
         /// <summary>
         /// <inheritdoc/>
@@ -188,23 +202,40 @@ namespace Acly
 
             return true;
         }
-        private void SynchronizeFromFirstToSecond()
+        private void ForceSync(ReflectionList From, ReflectionList To)
         {
             _IsUpdating = true;
 
             try
             {
-                _SecondCollection.Clear();
+                To.Clear();
 
-                foreach (var Item in _FirstCollection)
+                foreach (var Item in From)
                 {
-                    _SecondCollection.Add(Item);
+                    To.Add(Item);
                 }
             }
             finally
             {
                 _IsUpdating = false;
             }
+        }
+
+        #endregion
+
+        #region Перечисление
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <returns><inheritdoc/></returns>
+        public IEnumerator<T1> GetEnumerator()
+        {
+            return ((IEnumerable<T1>)FirstCollection).GetEnumerator();
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         #endregion

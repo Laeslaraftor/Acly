@@ -79,11 +79,11 @@ namespace Acly
         /// <returns><inheritdoc/></returns>
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            return new List<KeyValuePair<TKey, TValue>>(_Reference).GetEnumerator();
+            return _Reference.GetEnumerator();
         }
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new List<KeyValuePair<TKey, TValue>>(_Reference).GetEnumerator();
+            return GetEnumerator();
         }
 
         #endregion

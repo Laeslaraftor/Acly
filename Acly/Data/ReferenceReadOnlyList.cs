@@ -51,7 +51,7 @@ namespace Acly
         /// <returns><inheritdoc/></returns>
         public IEnumerator<T> GetEnumerator()
         {
-            return new List<T>(_Reference).GetEnumerator();
+            return _Reference.GetEnumerator();
         }
         /// <summary>
         /// <inheritdoc/>
@@ -59,7 +59,7 @@ namespace Acly
         /// <returns><inheritdoc/></returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new List<T>(_Reference).GetEnumerator();
+            return GetEnumerator();
         }
 
         #endregion
