@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace Acly
@@ -36,10 +37,31 @@ namespace Acly
         /// Создать новый экземпляр синхронизатора коллекций
         /// </summary>
         /// <param name="First"><inheritdoc cref="_FirstCollection"/></param>
+        /// <param name="Converter"><inheritdoc cref="Converter"/></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public CollectionSynchronizer(INotifyCollectionChanged First, ICollectionValueConverter<T1, T2> Converter)
+            : this(First, new ObservableCollection<T2>(), Converter)
+        {
+        }
+        /// <summary>
+        /// Создать новый экземпляр синхронизатора коллекций
+        /// </summary>
+        /// <param name="First"><inheritdoc cref="_FirstCollection"/></param>
         /// <param name="Second"><inheritdoc cref="_SecondCollection"/></param>
         /// <param name="Converter"><inheritdoc cref="Converter"/></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public CollectionSynchronizer(INotifyCollectionChanged First, INotifyCollectionChanged Second, IValueConverter<T1, T2>? Converter = null)
+        public CollectionSynchronizer(INotifyCollectionChanged First, INotifyCollectionChanged Second, IValueConverter<T1, T2>? Converter)
+            : this(First, Second, CreateIfNotNull(Converter))
+        {
+        }
+        /// <summary>
+        /// Создать новый экземпляр синхронизатора коллекций
+        /// </summary>
+        /// <param name="First"><inheritdoc cref="_FirstCollection"/></param>
+        /// <param name="Second"><inheritdoc cref="_SecondCollection"/></param>
+        /// <param name="Converter"><inheritdoc cref="Converter"/></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public CollectionSynchronizer(INotifyCollectionChanged First, INotifyCollectionChanged Second, ICollectionValueConverter<T1, T2>? Converter = null)
         {
             bool TypesNotEquals = typeof(T1) != typeof(T2);
 
@@ -64,38 +86,35 @@ namespace Acly
             FirstCollection.CollectionChanged += FirstCollectionChanged;
             SecondCollection.CollectionChanged += SecondCollectionChanged;
 
-            Func<object?, object?> ConvertMethod;
-            Func<object?, object?> ConvertBackMethod;
+            ConvertCollectionValue? ConvertMethod = null;
+            ConvertCollectionValue? ConvertBackMethod = null;
+            _FirstCollection = new(Collection);
+            _SecondCollection = new(Collection2);
 
             if (TypesNotEquals && Converter != null)
             {
-                ConvertMethod = o =>
+                ConvertMethod = (Obj, Index, List) =>
                 {
-                    if (o != null)
+                    if (Obj != null)
                     {
-                        return Converter.Convert((T1)o);
+                        return Converter.Convert((T1)Obj, Index, _FirstCollection, _SecondCollection);
                     }
 
                     return null;
                 };
-                ConvertBackMethod = o =>
+                ConvertBackMethod = (Obj, Index, List) =>
                 {
-                    if (o != null)
+                    if (Obj != null)
                     {
-                        return Converter.ConvertBack((T2)o);
+                        return Converter.ConvertBack((T2)Obj, Index, _FirstCollection, _SecondCollection);
                     }
 
                     return null;
                 };
             }
-            else
-            {
-                ConvertMethod = o => o;
-                ConvertBackMethod = ConvertMethod;
-            }
 
-            _FirstCollection = new(Collection, ConvertBackMethod);
-            _SecondCollection = new(Collection2, ConvertMethod);
+            _FirstCollection.Converter = ConvertBackMethod;
+            _SecondCollection.Converter = ConvertMethod;
 
             SyncFirstToSecond();
         }
@@ -123,7 +142,7 @@ namespace Acly
         /// <summary>
         /// Конвертер значений
         /// </summary>
-        public IValueConverter<T1, T2>? Converter { get; }
+        public ICollectionValueConverter<T1, T2>? Converter { get; }
         /// <summary>
         /// Обновляются ли сейчас коллекции
         /// </summary>
@@ -195,6 +214,10 @@ namespace Acly
                 IsUpdating = true;
                 Sync(From, To, Args);
             }
+            catch (Exception Error)
+            {
+                Debug.WriteLine(Error);
+            }
             finally
             {
                 IsUpdating = false;
@@ -214,6 +237,10 @@ namespace Acly
                 {
                     To.Add(Item);
                 }
+            }
+            catch (Exception Error)
+            {
+                Debug.WriteLine(Error);
             }
             finally
             {
@@ -320,101 +347,16 @@ namespace Acly
 
         #endregion
 
-        #region Классы
+        #region Статика
 
-        private sealed class ReflectionList : IEnumerable, IDisposable
+        private static ICollectionValueConverter<T1, T2>? CreateIfNotNull(IValueConverter<T1, T2>? Converter)
         {
-            public ReflectionList(IEnumerable List, Func<object?, object?> Converter)
+            if (Converter == null)
             {
-                Enumerable = List;
-                this.Converter = Converter;
-
-                Type ListType = List.GetType();
-                var properties = ListType.GetProperties();
-
-                if (ListType.TryFindMethod("Add", out var AddMethod) &&
-                    ListType.TryFindMethod("Insert", out var InsertMethod) &&
-                    ListType.TryFindMethod("RemoveAt", out var RemoveAtMethod) &&
-                    ListType.TryFindMethod("Clear", out var ClearMethod) &&
-                    ListType.TryFindProperty("Count", out var CountProperty) &&
-                    ListType.TryFindProperty("Item", out var ItemProperty))
-                {
-                    _AddMethod = AddMethod;
-                    _InsertMethod = InsertMethod;
-                    _RemoveAtMethod = RemoveAtMethod;
-                    _ClearMethod = ClearMethod;
-                    _CountProperty = CountProperty;
-                    _ItemProperty = ItemProperty;
-                }
-                else
-                {
-                    throw new ArgumentException($"Объект не является списком!", nameof(List));
-                }
-            }
-            ~ReflectionList()
-            {
-                Dispose();
+                return null;
             }
 
-            public Func<object?, object?> Converter { get; }
-            public IEnumerable Enumerable { get; }
-            public int Count => (int)_CountProperty.GetValue(Enumerable);
-            public object this[int Index]
-            {
-                get
-                {
-                    _MethodParams[0] = Index;
-                    return _ItemProperty.GetValue(Enumerable, _MethodParams);
-                }
-                set
-                {
-                    _MethodParams[0] = Index;
-                    _ItemProperty.SetValue(Enumerable, Converter(value), _MethodParams);
-                }
-            }
-
-            private readonly MethodInfo _RemoveAtMethod;
-            private readonly MethodInfo _InsertMethod;
-            private readonly MethodInfo _AddMethod;
-            private readonly MethodInfo _ClearMethod;
-            private readonly PropertyInfo _CountProperty;
-            private readonly PropertyInfo _ItemProperty;
-            private readonly object?[] _MethodParams = new object?[1];
-            private readonly object?[] _MethodParams2 = new object?[2];
-
-            public void Add(object? Item)
-            {
-                _MethodParams[0] = Converter(Item);
-                _AddMethod.Invoke(Enumerable, _MethodParams);
-            }
-            public void Clear()
-            {
-                _ClearMethod.Invoke(Enumerable, Array.Empty<object>());
-            }
-            public void RemoveAt(int Index)
-            {
-                _MethodParams[0] = Index;
-                _RemoveAtMethod.Invoke(Enumerable, _MethodParams);
-            }
-            public void Insert(int Index, object? Item)
-            {
-                _MethodParams2[0] = Index;
-                _MethodParams2[1] = Converter(Item);
-                _InsertMethod.Invoke(Enumerable, _MethodParams2);
-            }
-            public IEnumerator GetEnumerator()
-            {
-                return Enumerable.GetEnumerator();
-            }
-
-            public void Dispose()
-            {
-                _MethodParams[0] = null;
-                _MethodParams2[0] = null;
-                _MethodParams2[1] = null;
-
-                GC.SuppressFinalize(this);
-            }
+            return new CollectionValueConverterToCommonConverter<T1, T2>(Converter);
         }
 
         #endregion

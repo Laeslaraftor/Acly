@@ -11,7 +11,7 @@ namespace Acly
     /// </summary>
     /// <typeparam name="T">Тип данных списка</typeparam>
     [Serializable]
-    public class ObservableList<T> : IObservableList<T>
+    public class ObservableList<T> : IObservableList<T>, IReadOnlyCollection<T>, IReadOnlyList<T>
     {
         /// <summary>
         /// Создать новый экземпляр отслеживаемого списка

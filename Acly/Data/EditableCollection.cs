@@ -44,6 +44,23 @@ namespace Acly
         /// Событие добавления, удаления, перемещения объекта списка
         /// </summary>
         [field: NonSerialized] public event EventHandler<CollectionItemEventArgs<T>>? ItemChanged;
+        event EventHandler<CollectionItemEventArgs>? IEditableList.ItemChanged
+        {
+            add
+            {
+                if (value != null)
+                {
+                    _ChangeEventHandlers.Add(value);
+                }
+            }
+            remove
+            {
+                if (value != null)
+                {
+                    _ChangeEventHandlers.Remove(value);
+                }
+            }
+        }
 
         /// <summary>
         /// <inheritdoc/>
@@ -111,6 +128,7 @@ namespace Acly
 
         [field: NonSerialized] private readonly Func<T> _Fabric;
         [field: NonSerialized] private readonly Dictionary<PropertyInfo, object?> _EditingItemSavedValues;
+        [field: NonSerialized] private readonly List<EventHandler<CollectionItemEventArgs>> _ChangeEventHandlers = new();
 
         #region Управление
 
@@ -130,22 +148,10 @@ namespace Acly
         /// <param name="Item"><inheritdoc/></param>
         public override void Insert(int Index, T Item)
         {
-            List<T> MovedItems = new(Count - Index);
-
-            for (int i = Index; i < Count; i++)
-            {
-                MovedItems.Add(this[i]);
-            }
-
             base.Insert(Index, Item);
 
-            foreach (var MovedItem in MovedItems)
-            {
-                InvokeItemChanged(CollectionItemAction.Move, MovedItem);
-            }
-
-            MovedItems.Clear();
-            MovedItems.Capacity = 0;
+            HandleMovedItems(Index + 1, Count);
+            InvokeItemChanged(CollectionItemAction.Add, Item);
         }
 
         /// <summary>
@@ -173,8 +179,11 @@ namespace Acly
         /// <returns><inheritdoc/></returns>
         public override bool Remove(T Item)
         {
+            int ItemIndex = IndexOf(Item);
+
             if (base.Remove(Item))
             {
+                HandleMovedItems(ItemIndex, Count);
                 InvokeItemChanged(CollectionItemAction.Remove, Item);
                 return true;
             }
@@ -187,10 +196,25 @@ namespace Acly
         /// <param name="Index"><inheritdoc/></param>
         public override void RemoveAt(int Index)
         {
+            if (0 > Index || Index >= Count)
+            {
+                return;
+            }
+
             var Item = this[Index];
 
             base.RemoveAt(Index);
+
+            HandleMovedItems(Index, Count);
             InvokeItemChanged(CollectionItemAction.Remove, Item);
+        }
+
+        private void HandleMovedItems(int StartIndex, int Count)
+        {
+            for (int i = StartIndex; i < Count; i++)
+            {
+                InvokeItemChanged(CollectionItemAction.Move, this[i]);
+            }
         }
 
         #endregion
@@ -207,6 +231,19 @@ namespace Acly
             CurrentAdd = Item;
 
             return Item;
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="Item"><inheritdoc/></param>
+        public void AddNew(object? Item)
+        {
+            if (Item is not T TypedItem)
+            {
+                throw new ArgumentException($"Недопустимый тип объекта!", nameof(Item));
+            }
+
+            Add(TypedItem);
         }
         /// <summary>
         /// <inheritdoc/>
@@ -266,6 +303,21 @@ namespace Acly
             SaveValues(TypedItem);
             CurrentEdit = TypedItem;
         }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="Item"><inheritdoc/></param>
+        /// <param name="Index"><inheritdoc/></param>
+        /// <exception cref="ArgumentException"></exception>
+        public void SetValue(object? Item, int Index)
+        {
+            if (Item is not T TypedItem)
+            {
+                throw new ArgumentException($"Недопустимый тип объекта!", nameof(Item));
+            }
+
+            this[Index] = TypedItem;
+        }
 
         void IEditableList.Remove(object Item)
         {
@@ -303,6 +355,15 @@ namespace Acly
         /// <param name="Item">Изменённый элемент списка</param>
         protected void InvokeItemChanged(CollectionItemAction Action, T Item)
         {
+#pragma warning disable CS8604 // Возможно, аргумент-ссылка, допускающий значение NULL.
+            CollectionItemEventArgs Args = new(Action, Item);
+#pragma warning restore CS8604 // Возможно, аргумент-ссылка, допускающий значение NULL.
+
+            foreach (var Handler in _ChangeEventHandlers)
+            {
+                Handler(this, Args);
+            }
+
             ItemChanged?.Invoke(this, new(Action, Item));
         }
 

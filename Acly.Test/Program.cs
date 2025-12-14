@@ -13,8 +13,16 @@ using Acly.Player;
 using System.Net;
 
 //await TestTaskController.BeginAsync();
-EditableCollection<Person1> list1 = new();
+ObservableList<Person1> list1 = new();
 EditableCollection<Person2> list2 = new();
+
+list2.ItemChanged += OnList2ItemChanged;
+
+void OnList2ItemChanged(object? sender, CollectionItemEventArgs<Person2> e)
+{
+	Console.WriteLine($"{e.Action}: {e.Item}");
+}
+
 CollectionSynchronizer<Person1, Person2> sync = new(list1, list2, new PersonsConverter());
 list1.Add(new()
 {

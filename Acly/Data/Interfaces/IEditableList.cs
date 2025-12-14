@@ -1,10 +1,20 @@
-﻿namespace Acly
+﻿using System;
+using System.Collections;
+
+namespace Acly
 {
     /// <summary>
     /// Интерфейс изменяемого списка
     /// </summary>
-    public interface IEditableList
+#pragma warning disable CA1010 // Также необходимо реализовать универсальный интерфейс
+    public interface IEditableList : IEnumerable
+#pragma warning restore CA1010 // Также необходимо реализовать универсальный интерфейс
     {
+        /// <summary>
+        /// Событие добавления, удаления, перемещения объекта списка
+        /// </summary>
+        public event EventHandler<CollectionItemEventArgs>? ItemChanged;
+
         /// <summary>
         /// Возвращает значение, указывающее, можно ли добавить новый элемент в коллекцию.
         /// </summary>
@@ -43,6 +53,11 @@
         /// </summary>
         public object? AddNew();
         /// <summary>
+        /// Добавляет новый элемент в коллекцию.
+        /// </summary>
+        /// <param name="Item">Объект, который надо добавить</param>
+        public void AddNew(object? Item);
+        /// <summary>
         /// Завершает транзакцию изменения и, если это возможно, восстанавливает исходное значение для элемента.
         /// </summary>
         public void CancelEdit();
@@ -70,5 +85,11 @@
         /// Удаляет элемент в указанной позиции из коллекции.
         /// </summary>
         public void RemoveAt(int Index);
+        /// <summary>
+        /// Задать значение по индексу
+        /// </summary>
+        /// <param name="Item">Новое значение</param>
+        /// <param name="Index">Индекс значения</param>
+        public void SetValue(object? Item, int Index);
     }
 }

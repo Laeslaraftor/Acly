@@ -123,18 +123,63 @@ namespace Acly
 			}
 		}
 
-		/// <summary>
-		/// a + (b - a) * t;
-		/// </summary>
-		public static float Lerp(float A, float B, float T)
+        /// <summary>
+        /// <inheritdoc cref="LerpUnclamped(float, float, float)"/>
+        /// </summary>
+        public static float Lerp(float A, float B, float T)
 		{
 			T = Math.Clamp(T, 0, 1);
 			return LerpUnclamped(A, B, T);
 		}
         /// <summary>
-        /// a + (b - a) * t;
+        /// <inheritdoc cref="LerpUnclamped(float, float, float)"/>
+        /// </summary>
+        public static double Lerp(double A, double B, float T)
+        {
+            T = Math.Clamp(T, 0, 1);
+            return LerpUnclamped(A, B, T);
+        }
+        /// <summary>
+        /// <inheritdoc cref="LerpUnclamped(float, float, float)"/>
+        /// </summary>
+        public static double Lerp(float A, float B, double T)
+        {
+            T = Math.Clamp(T, 0, 1);
+            return LerpUnclamped(A, B, T);
+        }
+        /// <summary>
+        /// <inheritdoc cref="LerpUnclamped(float, float, float)"/>
+        /// </summary>
+        public static double Lerp(double A, double B, double T)
+        {
+            T = Math.Clamp(T, 0, 1);
+            return LerpUnclamped(A, B, T);
+        }
+        /// <summary>
+        /// a + (b - a) * t
         /// </summary>
         public static float LerpUnclamped(float A, float B, float T)
+        {
+            return A + (B - A) * T;
+        }
+        /// <summary>
+        /// <inheritdoc cref="LerpUnclamped(float, float, float)"/>
+        /// </summary>
+        public static double LerpUnclamped(double A, double B, float T)
+        {
+            return A + (B - A) * T;
+        }
+        /// <summary>
+        /// <inheritdoc cref="LerpUnclamped(float, float, float)"/>
+        /// </summary>
+        public static double LerpUnclamped(double A, double B, double T)
+        {
+            return A + (B - A) * T;
+        }
+        /// <summary>
+        /// <inheritdoc cref="LerpUnclamped(float, float, float)"/>
+        /// </summary>
+        public static double LerpUnclamped(float A, float B, double T)
         {
             return A + (B - A) * T;
         }
