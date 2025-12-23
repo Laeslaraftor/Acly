@@ -158,7 +158,7 @@ namespace Acly
         /// <inheritdoc/>
         /// </summary>
         /// <returns><inheritdoc/></returns>
-        public IEnumerator<T> GetEnumerator() => _List.GetEnumerator();
+        public virtual IEnumerator<T> GetEnumerator() => _List.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => _List.GetEnumerator();
 
         #endregion

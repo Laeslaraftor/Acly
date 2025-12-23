@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System;
+using System.ComponentModel;
 
 namespace Acly
 {
@@ -9,14 +10,14 @@ namespace Acly
     /// Класс списка-ссылки только для чтения оригинального списка
     /// </summary>
     /// <typeparam name="T">Тип данных списка</typeparam>
-    public class ReferenceReadOnlyList<T> : IReadOnlyList<T>, INotifyCollectionChanged
+    public class ReferenceReadOnlyList<T> : IReadOnlyList<T>, INotifyPropertyChanged, INotifyCollectionChanged, IDisposable
     {
         /// <summary>
         /// Создать экземпляр класса списка-ссылки только для чтения оригинального списка
         /// </summary>
         /// <param name="Reference">Основная коллекция</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public ReferenceReadOnlyList(IObservableList<T> Reference)
+        public ReferenceReadOnlyList(IList<T> Reference)
         {
             if (Reference == null)
             {
@@ -24,13 +25,32 @@ namespace Acly
             }
 
             _Reference = Reference;
-            Reference.CollectionChanged += OnReferenceCollectionChanged;
+
+            if (Reference is INotifyCollectionChanged NotifyCollection)
+            {
+                NotifyCollection.CollectionChanged += OnReferenceCollectionChanged;
+            }
+            if (Reference is INotifyPropertyChanged NotifyProperty)
+            {
+                NotifyProperty.PropertyChanged += OnNotifyPropertyPropertyChanged;
+            }
+        }
+        /// <summary>
+        /// Очистить объект
+        /// </summary>
+        ~ReferenceReadOnlyList()
+        {
+            Dispose(false);
         }
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
         [field: NonSerialized] public event NotifyCollectionChangedEventHandler? CollectionChanged;
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        [field: NonSerialized] public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// <inheritdoc/>
@@ -41,7 +61,36 @@ namespace Acly
         /// </summary>
         public int Count => _Reference.Count;
 
-        private readonly IObservableList<T> _Reference;
+        private readonly IList<T> _Reference;
+
+        #region Управление
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Очистить объект
+        /// </summary>
+        /// <param name="IsDisposing">Ручная очистка</param>
+        protected virtual void Dispose(bool IsDisposing)
+        {
+            if (_Reference is INotifyCollectionChanged NotifyCollection)
+            {
+                NotifyCollection.CollectionChanged -= OnReferenceCollectionChanged;
+            }
+            if (_Reference is INotifyPropertyChanged NotifyProperty)
+            {
+                NotifyProperty.PropertyChanged -= OnNotifyPropertyPropertyChanged;
+            }
+        }
+
+        #endregion
 
         #region Перечисление
 
@@ -69,6 +118,10 @@ namespace Acly
         private void OnReferenceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             CollectionChanged?.Invoke(this, e);
+        }
+        private void OnNotifyPropertyPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            PropertyChanged?.Invoke(this, e);
         }
 
         #endregion

@@ -86,6 +86,10 @@ namespace Acly
         /// </summary>
         public void RemoveAt(int Index);
         /// <summary>
+        /// Очистить список
+        /// </summary>
+        public void Clear();
+        /// <summary>
         /// Задать значение по индексу
         /// </summary>
         /// <param name="Item">Новое значение</param>

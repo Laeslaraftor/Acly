@@ -113,7 +113,14 @@ namespace Acly
 
                 base[Index] = value;
 
-                InvokeItemChanged(CollectionItemAction.Remove, Item);
+                if (Item != null)
+                {
+                    InvokeItemChanged(CollectionItemAction.Remove, Item);
+                }
+                if (value != null)
+                {
+                    InvokeItemChanged(CollectionItemAction.Add, value);
+                }
             }
         }
 
