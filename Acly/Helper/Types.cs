@@ -3,90 +3,104 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Acly
 {
-	public static partial class Helper
-	{
-		/// <summary>
-		/// Получить типы имеющие указанный атрибут
-		/// </summary>
-		/// <typeparam name="T">Атрибут</typeparam>
-		/// <returns>Типы с указанным атрибутом</returns>
-		public static async Task<IEnumerable<Type>> GetTypesWithAttribute<T>() where T : Attribute
-		{
-			List<Type> Result = new();
+    public static partial class Helper
+    {
+        /// <summary>
+        /// Получить типы имеющие указанный атрибут
+        /// </summary>
+        /// <typeparam name="T">Атрибут</typeparam>
+        /// <returns>Типы с указанным атрибутом</returns>
+        public static async Task<IEnumerable<Type>> GetTypesWithAttribute<T>() where T : Attribute
+        {
+            List<Type> result = [];
 
-			await Task.Run(() =>
-			{
-				Assembly[] Assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            await Task.Run(() =>
+            {
+                Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-				foreach (var Assembly in Assemblies)
-				{
-					foreach (Type Type in Assembly.GetTypes())
-					{
-						if (Type.GetCustomAttributes(typeof(T), true).Length > 0)
-						{
-							Result.Add(Type);
-						}
-					}
-				}
-			});
+                foreach (var assembly in assemblies)
+                {
+                    foreach (Type type in assembly.GetTypes())
+                    {
+                        if (type.GetCustomAttributes(typeof(T), true).Length > 0)
+                        {
+                            result.Add(type);
+                        }
+                    }
+                }
+            });
 
-			return Result;
-		}
-		/// <summary>
-		/// Определить реализует ли тип указанный интерфейс
-		/// </summary>
-		/// <typeparam name="T">Интерфейс</typeparam>
-		/// <returns>Реализует ли тип указанный интерфейс</returns>
-		/// <exception cref="ArgumentNullException">Ссылка на тип не указывает на экземпляр объекта</exception>
-		public static bool IsImplementsInterface<T>(this Type Type)
-		{
-			if (Type == null)
-			{
-				throw new ArgumentNullException(nameof(Type) + " не указан");
-			}
+            return result;
+        }
+        /// <summary>
+        /// Определить реализует ли тип указанный интерфейс
+        /// </summary>
+        /// <typeparam name="T">Интерфейс</typeparam>
+        /// <returns>Реализует ли тип указанный интерфейс</returns>
+        /// <exception cref="ArgumentNullException">Ссылка на тип не указывает на экземпляр объекта</exception>
+        public static bool IsImplementsInterface<T>(this Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type) + " не указан");
+            }
 
-			Type[] Interfaces = Type.GetInterfaces();
-			Type RequestInterface = typeof(T);
+            Type[] interfaces = type.GetInterfaces();
+            Type requestInterface = typeof(T);
 
-			foreach (var Interface in Interfaces)
-			{
-				if (Interface == RequestInterface)
-				{
-					return true;
-				}
-			}
+            foreach (var @interface in interfaces)
+            {
+                if (@interface == requestInterface)
+                {
+                    return true;
+                }
+            }
 
-			return false;
-		}
+            return false;
+        }
+        /// <summary>
+        /// Проверить может ли тип принимать null значения
+        /// </summary>
+        /// <param name="type">Тип, который надо проверить</param>
+        /// <returns>Может ли тип принимать null значения</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static bool IsNullable(this Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            return !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
+        }
 
         /// <summary>
         /// Найти поле в типе
         /// </summary>
-        /// <param name="Type">Тип в котором надо найти поле</param>
-        /// <param name="Condition">Условие отбора</param>
+        /// <param name="type">Тип в котором надо найти поле</param>
+        /// <param name="predicate">Условие отбора</param>
         /// <returns>Поле (если найдено)</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static PropertyInfo? FindProperty(this Type Type, Predicate<PropertyInfo> Condition)
+        public static PropertyInfo? FindProperty(this Type type, Predicate<PropertyInfo> predicate)
         {
-            if (Type == null)
+            if (type == null)
             {
-                throw new ArgumentNullException(nameof(Type), "Тип не указан");
+                throw new ArgumentNullException(nameof(type), "Тип не указан");
             }
-            if (Condition == null)
+            if (predicate == null)
             {
-                throw new ArgumentNullException(nameof(Condition), "Условие не указано");
+                throw new ArgumentNullException(nameof(predicate), "Условие не указано");
             }
 
-            foreach (var Property in Type.GetProperties())
+            foreach (var property in type.GetProperties())
             {
-                if (Condition(Property))
+                if (predicate(property))
                 {
-                    return Property;
+                    return property;
                 }
             }
 
@@ -95,60 +109,60 @@ namespace Acly
         /// <summary>
         /// Найти поле в типе
         /// </summary>
-        /// <param name="Type">Тип в котором надо найти поле</param>
-        /// <param name="PropertyName">Название поля</param>
+        /// <param name="type">Тип в котором надо найти поле</param>
+        /// <param name="propertyName">Название поля</param>
         /// <returns>Поле (если найдено)</returns>
-        public static PropertyInfo? FindProperty(this Type Type, string PropertyName)
+        public static PropertyInfo? FindProperty(this Type type, string propertyName)
         {
-            return Type.FindProperty(P => P.Name == PropertyName);
+            return type.FindProperty(P => P.Name == propertyName);
         }
         /// <summary>
         /// Попытаться найти поле в типе
         /// </summary>
-        /// <param name="Type">Тип в котором надо попытаться найти поле</param>
-        /// <param name="Condition">Условие отбора</param>
-        /// <param name="Result">Поле (если найдено)</param>
+        /// <param name="type">Тип в котором надо попытаться найти поле</param>
+        /// <param name="predicate">Условие отбора</param>
+        /// <param name="result">Поле (если найдено)</param>
         /// <returns>Найдено ли поле</returns>
-        public static bool TryFindProperty(this Type Type, Predicate<PropertyInfo> Condition, [NotNullWhen(true)] out PropertyInfo? Result)
+        public static bool TryFindProperty(this Type type, Predicate<PropertyInfo> predicate, [NotNullWhen(true)] out PropertyInfo? result)
         {
-            Result = Type.FindProperty(Condition);
-            return Result != null;
+            result = type.FindProperty(predicate);
+            return result != null;
         }
         /// <summary>
         /// Попытаться найти поле в типе
         /// </summary>
-        /// <param name="Type">Тип в котором надо попытаться найти поле</param>
-        /// <param name="PropertyName">Название поля</param>
-        /// <param name="Result">Поле (если найдено)</param>
+        /// <param name="type">Тип в котором надо попытаться найти поле</param>
+        /// <param name="propertyName">Название поля</param>
+        /// <param name="result">Поле (если найдено)</param>
         /// <returns>Найдено ли поле</returns>
-        public static bool TryFindProperty(this Type Type, string PropertyName, [NotNullWhen(true)] out PropertyInfo? Result)
+        public static bool TryFindProperty(this Type type, string propertyName, [NotNullWhen(true)] out PropertyInfo? result)
         {
-            Result = Type.FindProperty(PropertyName);
-            return Result != null;
+            result = type.FindProperty(propertyName);
+            return result != null;
         }
 
         /// <summary>
         /// Найти метод в типе
         /// </summary>
-        /// <param name="Type">Тип для поиска метода</param>
-        /// <param name="Condition">Условие отбора</param>
+        /// <param name="type">Тип для поиска метода</param>
+        /// <param name="predicate">Условие отбора</param>
         /// <returns>Информация о методе (если найден)</returns>
-        public static MethodInfo? FindMethod(this Type Type, Predicate<MethodInfo> Condition)
+        public static MethodInfo? FindMethod(this Type type, Predicate<MethodInfo> predicate)
         {
-            if (Type == null)
+            if (type == null)
             {
-                throw new ArgumentNullException(nameof(Type), "Тип не указан");
+                throw new ArgumentNullException(nameof(type), "Тип не указан");
             }
-            if (Condition == null)
+            if (predicate == null)
             {
-                throw new ArgumentNullException(nameof(Condition), "Условие не указано");
+                throw new ArgumentNullException(nameof(predicate), "Условие не указано");
             }
 
-            foreach (var Method in Type.GetMethods())
+            foreach (var method in type.GetMethods())
             {
-                if (Condition(Method))
+                if (predicate(method))
                 {
-                    return Method;
+                    return method;
                 }
             }
 
@@ -157,291 +171,269 @@ namespace Acly
         /// <summary>
         /// Найти метод в типе
         /// </summary>
-        /// <param name="Type">Тип для поиска метода</param>
-        /// <param name="MethodName">Название искомого метода</param>
+        /// <param name="type">Тип для поиска метода</param>
+        /// <param name="methodName">Название искомого метода</param>
         /// <returns>Информация о методе (если найден)</returns>
-        public static MethodInfo? FindMethod(this Type Type, string MethodName)
+        public static MethodInfo? FindMethod(this Type type, string methodName)
         {
-            return Type.FindMethod(M => M.Name == MethodName);
+            return type.FindMethod(M => M.Name == methodName);
         }
         /// <summary>
         /// Попытаться найти метод в типе
         /// </summary>
-        /// <param name="Type">Тип в котором будет осуществлён поиск</param>
-        /// <param name="Condition">Условие отбора</param>
-        /// <param name="Result">Информация о методе (если найден)</param>
+        /// <param name="type">Тип в котором будет осуществлён поиск</param>
+        /// <param name="predicate">Условие отбора</param>
+        /// <param name="result">Информация о методе (если найден)</param>
         /// <returns>Найден ли метод</returns>
-        public static bool TryFindMethod(this Type Type, Predicate<MethodInfo> Condition, [NotNullWhen(true)] out MethodInfo? Result)
+        public static bool TryFindMethod(this Type type, Predicate<MethodInfo> predicate, [NotNullWhen(true)] out MethodInfo? result)
         {
-            Result = Type.FindMethod(Condition);
-            return Result != null;
+            result = type.FindMethod(predicate);
+            return result != null;
         }
         /// <summary>
         /// Попытаться найти метод в типе
         /// </summary>
-        /// <param name="Type">Тип в котором будет осуществлён поиск</param>
-        /// <param name="MethodName">Название метода</param>
-        /// <param name="Result">Информация о методе (если найден)</param>
+        /// <param name="type">Тип в котором будет осуществлён поиск</param>
+        /// <param name="methodName">Название метода</param>
+        /// <param name="result">Информация о методе (если найден)</param>
         /// <returns>Найден ли метод</returns>
-        public static bool TryFindMethod(this Type Type, string MethodName, [NotNullWhen(true)] out MethodInfo? Result)
+        public static bool TryFindMethod(this Type type, string methodName, [NotNullWhen(true)] out MethodInfo? result)
         {
-            Result = Type.FindMethod(MethodName);
-            return Result != null;
+            result = type.FindMethod(methodName);
+            return result != null;
         }
 
         /// <summary>
         /// Вызвать метод
         /// </summary>
         /// <typeparam name="T">Тип выводимых данных</typeparam>
-        /// <param name="Method">Вызываемый метод</param>
-        /// <param name="Instance">Экземпляр объекта (для не статичных методов)</param>
-        /// <param name="Parameters">Параметры метода</param>
+        /// <param name="method">Вызываемый метод</param>
+        /// <param name="instance">Экземпляр объекта (для не статичных методов)</param>
+        /// <param name="parameters">Параметры метода</param>
         /// <returns>Вывод метода</returns>
         /// <exception cref="ArgumentNullException">Метод не указан</exception>
-        public static T Invoke<T>(this MethodInfo Method, object? Instance, params object[] Parameters)
+        public static T Invoke<T>(this MethodInfo method, object? instance, params object[] parameters)
         {
-            if (Method == null)
+            if (method == null)
             {
-                throw new ArgumentNullException(nameof(Method), "Метод не указан");
+                throw new ArgumentNullException(nameof(method), "Метод не указан");
             }
 
-            return (T)Method.Invoke(Instance, Parameters);
+            return (T)method.Invoke(instance, parameters);
         }
         /// <summary>
         /// Вызвать метод
         /// </summary>
-        /// <param name="Method">Вызываемый метод</param>
+        /// <param name="method">Вызываемый метод</param>
         /// <param name="Instance">Экземпляр объекта (для не статичных методов)</param>
-        /// <param name="Parameters">Параметры метода</param>
+        /// <param name="parameters">Параметры метода</param>
         /// <exception cref="ArgumentNullException">Метод не указан</exception>
-        public static void Invoke(this MethodInfo Method, object? Instance, params object[] Parameters)
+        public static void Invoke(this MethodInfo method, object? Instance, params object[] parameters)
         {
-            if (Method == null)
+            if (method == null)
             {
-                throw new ArgumentNullException(nameof(Method), "Метод не указан");
+                throw new ArgumentNullException(nameof(method), "Метод не указан");
             }
 
-            Method.Invoke(Instance, Parameters);
+            method.Invoke(Instance, parameters);
         }
 
         /// <summary>
         /// Вызвать статичный метод
         /// </summary>
         /// <typeparam name="T">Тип возвращаемых данных</typeparam>
-        /// <param name="Type">Тип в котором будет осуществлён поиск метода</param>
-        /// <param name="MethodName">Название вызываемого метода</param>
-        /// <param name="Parameters">Параметры метода</param>
+        /// <param name="type">Тип в котором будет осуществлён поиск метода</param>
+        /// <param name="methodName">Название вызываемого метода</param>
+        /// <param name="parameters">Параметры метода</param>
         /// <returns>Вывод метода</returns>
         /// <exception cref="ArgumentNullException">Тип не указан</exception>
         /// <exception cref="UndefinedMethodException">Метод не найден</exception>
-        public static T CallStatic<T>(this Type Type, string MethodName, params object[] Parameters)
-		{
-            if (Type == null)
+        public static T CallStatic<T>(this Type type, string methodName, params object[] parameters)
+        {
+            if (type == null)
             {
-                throw new ArgumentNullException(nameof(Type), "Тип не указан");
+                throw new ArgumentNullException(nameof(type), "Тип не указан");
             }
 
-            MethodInfo? Method = Type.FindMethod(MethodName);
+            MethodInfo? method = type.FindMethod(methodName);
 
-            if (Method == null)
-			{
-				throw new UndefinedMethodException(MethodName, Type);
-			}
-
-			return (T)Method.Invoke(null, Parameters);
+            return method == null ? throw new UndefinedMethodException(methodName, type) : (T)method.Invoke(null, parameters);
         }
         /// <summary>
         /// Вызвать статичный метод
         /// </summary>
-        /// <param name="Type">Тип в котором будет осуществлён поиск метода</param>
-        /// <param name="MethodName">Название вызываемого метода</param>
-        /// <param name="Parameters">Параметры метода</param>
+        /// <param name="type">Тип в котором будет осуществлён поиск метода</param>
+        /// <param name="methodName">Название вызываемого метода</param>
+        /// <param name="parameters">Параметры метода</param>
         /// <exception cref="ArgumentNullException">Тип не указан</exception>
         /// <exception cref="UndefinedMethodException">Метод не найден</exception>
-        public static void CallStatic(this Type Type, string MethodName, params object[] Parameters)
+        public static void CallStatic(this Type type, string methodName, params object[] parameters)
         {
-            if (Type == null)
+            if (type == null)
             {
-                throw new ArgumentNullException(nameof(Type), "Тип не указан");
+                throw new ArgumentNullException(nameof(type), "Тип не указан");
             }
 
-            MethodInfo? Method = Type.FindMethod(MethodName);
-
-            if (Method == null)
-            {
-                throw new UndefinedMethodException(MethodName, Type);
-            }
-
-            Method.Invoke(null, Parameters);
+            MethodInfo? method = type.FindMethod(methodName) ?? throw new UndefinedMethodException(methodName, type);
+            method.Invoke(null, parameters);
         }
         /// <summary>
         /// Вызвать метод
         /// </summary>
         /// <typeparam name="T">Тип возвращаемых данных</typeparam>
-		/// <param name="Instance">Экземпляр объекта в котором будет вызван метод</param>
-        /// <param name="Type">Тип в котором будет осуществлён поиск метода</param>
-        /// <param name="MethodName">Название вызываемого метода</param>
-        /// <param name="Parameters">Параметры метода</param>
+		/// <param name="instance">Экземпляр объекта в котором будет вызван метод</param>
+        /// <param name="type">Тип в котором будет осуществлён поиск метода</param>
+        /// <param name="methodName">Название вызываемого метода</param>
+        /// <param name="parameters">Параметры метода</param>
         /// <returns>Вывод метода</returns>
         /// <exception cref="ArgumentNullException">Тип не указан</exception>
         /// <exception cref="UndefinedMethodException">Метод не найден</exception>
-        public static T Call<T>(this Type Type, object Instance, string MethodName, params object[] Parameters)
+        public static T Call<T>(this Type type, object instance, string methodName, params object[] parameters)
         {
-            if (Type == null)
+            if (type == null)
             {
-                throw new ArgumentNullException(nameof(Type), "Тип не указан");
+                throw new ArgumentNullException(nameof(type), "Тип не указан");
             }
 
-            MethodInfo? Method = Type.FindMethod(MethodName);
+            MethodInfo? method = type.FindMethod(methodName);
 
-            if (Method == null)
-            {
-                throw new UndefinedMethodException(MethodName, Type);
-            }
-
-            return (T)Method.Invoke(Instance, Parameters);
+            return method == null ? throw new UndefinedMethodException(methodName, type) : (T)method.Invoke(instance, parameters);
         }
         /// <summary>
         /// Вызвать метод
         /// </summary>
-        /// <param name="Instance">Экземпляр объекта в котором будет вызван метод</param>
-        /// <param name="Type">Тип в котором будет осуществлён поиск метода</param>
-        /// <param name="MethodName">Название вызываемого метода</param>
-        /// <param name="Parameters">Параметры метода</param>
+        /// <param name="instance">Экземпляр объекта в котором будет вызван метод</param>
+        /// <param name="type">Тип в котором будет осуществлён поиск метода</param>
+        /// <param name="methodName">Название вызываемого метода</param>
+        /// <param name="parameters">Параметры метода</param>
         /// <exception cref="ArgumentNullException">Тип не указан</exception>
         /// <exception cref="UndefinedMethodException">Метод не найден</exception>
-        public static void Call(this Type Type, object Instance, string MethodName, params object[] Parameters)
+        public static void Call(this Type type, object instance, string methodName, params object[] parameters)
         {
-            if (Type == null)
+            if (type == null)
             {
-                throw new ArgumentNullException(nameof(Type), "Тип не указан");
+                throw new ArgumentNullException(nameof(type), "Тип не указан");
             }
 
-            MethodInfo? Method = Type.FindMethod(MethodName);
-
-            if (Method == null)
-            {
-                throw new UndefinedMethodException(MethodName, Type);
-            }
-
-            Method.Invoke(Instance, Parameters);
+            MethodInfo? method = type.FindMethod(methodName) ?? throw new UndefinedMethodException(methodName, type);
+            method.Invoke(instance, parameters);
         }
 
         /// <summary>
         /// Проверить является ли тип стандартной структурой
         /// </summary>
-        /// <param name="ObjType">Проверяемый тип</param>
+        /// <param name="obj">Проверяемый тип</param>
         /// <returns>Является ли тип стандартной структурой</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static bool IsStandardStruct(this Type ObjType)
+        public static bool IsStandardStruct(this Type obj)
         {
-            if (ObjType == null)
+            if (obj == null)
             {
-                throw new ArgumentNullException("Тип не указан", nameof(ObjType));
+                throw new ArgumentNullException("Тип не указан", nameof(obj));
             }
-            if (!ObjType.IsValueType || !ObjType.IsPrimitive)
+            if (!obj.IsValueType || !obj.IsPrimitive)
             {
                 return false;
             }
 
-            return ObjType.Namespace == "System" || ObjType.Namespace.StartsWith("System.");
+            return obj.Namespace == "System" || obj.Namespace.StartsWith("System.");
         }
 
         /// <summary>
         /// Получить копию объекта (копируются только публичные доступные для чтения/записи поля)
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="Object">Копируемый объект</param>
-        /// <param name="DeepCopy">Делать ли копию значений</param>
-        /// <param name="CtorArgument">Аргументы конструктора</param>
+        /// <param name="obj">Копируемый объект</param>
+        /// <param name="deepCopy">Делать ли копию значений</param>
+        /// <param name="ctorArgument">Аргументы конструктора</param>
         /// <returns>Копия объекта</returns>
-        public static T SoftCopy<T>(this T Object, bool DeepCopy = true, params object[]? CtorArgument)
+        public static T SoftCopy<T>(this T obj, bool deepCopy = true, params object[]? ctorArgument)
         {
-            return Object.SoftCopy(DeepCopy, ObjectCopyMaker.Instance, null);
+            return obj.SoftCopy(deepCopy, ObjectCopyMaker.Instance, null);
         }
         /// <summary>
         /// Получить копию объекта (копируются только публичные доступные для чтения/записи поля)
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="Object">Копируемый объект</param>
-        /// <param name="DeepCopy">Делать ли копию значений</param>
-        /// <param name="CtorArgument">Аргументы конструктора</param>
-        /// <param name="CopyMaker">Создатель копий</param>
+        /// <param name="obj">Копируемый объект</param>
+        /// <param name="deepCopy">Делать ли копию значений</param>
+        /// <param name="ctorArgument">Аргументы конструктора</param>
+        /// <param name="copyMaker">Создатель копий</param>
         /// <returns>Копия объекта</returns>
-        public static T SoftCopy<T>(this T Object, bool DeepCopy, ObjectCopyMaker CopyMaker, params object[]? CtorArgument)
+        public static T SoftCopy<T>(this T obj, bool deepCopy, ObjectCopyMaker copyMaker, params object[]? ctorArgument)
         {
-            if (Object == null)
+            if (obj == null)
             {
-                throw new ArgumentNullException(nameof(Object));
+                throw new ArgumentNullException(nameof(obj));
             }
-            if (CopyMaker == null)
+            if (copyMaker == null)
             {
-                throw new ArgumentNullException(nameof(CopyMaker));
+                throw new ArgumentNullException(nameof(copyMaker));
             }
 
-            return (T)CopyMaker.CreateCopy(Object, DeepCopy, CtorArgument);
+            return (T)copyMaker.CreateCopy(obj, deepCopy, ctorArgument);
         }
         /// <summary>
         /// Скопировать значения из одного объекта в другой
         /// </summary>
-        /// <param name="Object">Копируемый объект</param>
-        /// <param name="Destination">Объект в который будут вставлены значения</param>
-        /// <param name="DeepCopy">Делать ли копию значений</param>
+        /// <param name="obj">Копируемый объект</param>
+        /// <param name="destination">Объект в который будут вставлены значения</param>
+        /// <param name="deepCopy">Делать ли копию значений</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void SoftCopyTo(this object Object, ref object Destination, bool DeepCopy = true)
+        public static void SoftCopyTo(this object obj, ref object destination, bool deepCopy = true)
         {
-            Object.SoftCopyTo(ref Destination, ObjectCopyMaker.Instance, DeepCopy);
+            obj.SoftCopyTo(ref destination, ObjectCopyMaker.Instance, deepCopy);
         }
         /// <summary>
         /// Скопировать значения из одного объекта в другой
         /// </summary>
-        /// <param name="Object">Копируемый объект</param>
-        /// <param name="Destination">Объект в который будут вставлены значения</param>
-        /// <param name="DeepCopy">Делать ли копию значений</param>
-        /// <param name="CopyMaker">Создатель копий</param>
+        /// <param name="obj">Копируемый объект</param>
+        /// <param name="destination">Объект в который будут вставлены значения</param>
+        /// <param name="deepCopy">Делать ли копию значений</param>
+        /// <param name="copyMaker">Создатель копий</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void SoftCopyTo(this object Object, ref object Destination, ObjectCopyMaker CopyMaker, bool DeepCopy = true)
+        public static void SoftCopyTo(this object obj, ref object destination, ObjectCopyMaker copyMaker, bool deepCopy = true)
         {
-            if (CopyMaker == null)
+            if (copyMaker == null)
             {
-                throw new ArgumentNullException(nameof(CopyMaker));
+                throw new ArgumentNullException(nameof(copyMaker));
             }
 
-            CopyMaker.CopyTo(Object, ref Destination, DeepCopy);
+            copyMaker.CopyTo(obj, ref destination, deepCopy);
         }
 
         /// <summary>
         /// Получить Enum из массива байтов
         /// </summary>
         /// <typeparam name="T">Enum тип</typeparam>
-        /// <param name="Bytes">Массив байтов, представляющий Enum значение</param>
+        /// <param name="bytes">Массив байтов, представляющий Enum значение</param>
         /// <returns>Enum значение</returns>
         /// <exception cref="NotSupportedException"></exception>
-        public static T BytesToEnum<T>(byte[] Bytes) where T : Enum
+        public static T BytesToEnum<T>(byte[] bytes) where T : Enum
         {
-            if (Bytes == null)
+            if (bytes == null)
             {
-                throw new ArgumentNullException(nameof(Bytes));
+                throw new ArgumentNullException(nameof(bytes));
             }
 
             Type underlyingType = Enum.GetUnderlyingType(typeof(T));
 
             if (underlyingType == typeof(int))
-                return (T)(object)BitConverter.ToInt32(Bytes, 0);
+                return (T)(object)BitConverter.ToInt32(bytes, 0);
             else if (underlyingType == typeof(long))
-                return (T)(object)BitConverter.ToInt64(Bytes, 0);
+                return (T)(object)BitConverter.ToInt64(bytes, 0);
             else if (underlyingType == typeof(short))
-                return (T)(object)BitConverter.ToInt16(Bytes, 0);
+                return (T)(object)BitConverter.ToInt16(bytes, 0);
             else if (underlyingType == typeof(byte))
-                return (T)(object)Bytes[0];
+                return (T)(object)bytes[0];
             else if (underlyingType == typeof(uint))
-                return (T)(object)BitConverter.ToUInt32(Bytes, 0);
+                return (T)(object)BitConverter.ToUInt32(bytes, 0);
             else if (underlyingType == typeof(ulong))
-                return (T)(object)BitConverter.ToUInt64(Bytes, 0);
+                return (T)(object)BitConverter.ToUInt64(bytes, 0);
             else if (underlyingType == typeof(ushort))
-                return (T)(object)BitConverter.ToUInt16(Bytes, 0);
+                return (T)(object)BitConverter.ToUInt16(bytes, 0);
             else if (underlyingType == typeof(sbyte))
-                return (T)(object)(sbyte)Bytes[0];
+                return (T)(object)(sbyte)bytes[0];
 
             throw new NotSupportedException($"Тип {underlyingType} не поддерживается");
         }

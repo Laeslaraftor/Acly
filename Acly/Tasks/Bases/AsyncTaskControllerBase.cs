@@ -23,8 +23,8 @@ namespace Acly.Tasks
         /// </summary>
         public event AsyncTaskFail? Failed;
 
-        private bool _IsFailed;
-        private Thread? _TaskThread;
+        private bool _isFailed;
+        private Thread? _taskThread;
 
         #region Управление
 
@@ -33,28 +33,28 @@ namespace Acly.Tasks
         /// </summary>
         public async void Start()
         {
-            bool IsCompleted = false;
-            _TaskThread = new(async () =>
+            bool isCompleted = false;
+            _taskThread = new(async () =>
             {
                 try
                 {
                     await StartTask();
-                    IsCompleted = true;
+                    isCompleted = true;
                 }
-                catch (Exception Error)
+                catch (Exception error)
                 {
-                    IsCompleted = true;
-                    Interrupt(Error);
+                    isCompleted = true;
+                    Interrupt(error);
                 }
             });
-            _TaskThread.Start();
+            _taskThread.Start();
 
-            while (_TaskThread.IsAlive || !IsCompleted)
+            while (_taskThread.IsAlive || !isCompleted)
             {
                 await Task.Delay(50);
             }
 
-            if (_IsFailed)
+            if (_isFailed)
             {
                 return;
             }
@@ -72,55 +72,56 @@ namespace Acly.Tasks
         /// <summary>
         /// Отправить прогресс выполнения задачи
         /// </summary>
-        /// <param name="Progress">Прогресс выполнения задачи</param>
-        protected void SendProgress(float Progress)
+        /// <param name="progress">Прогресс выполнения задачи</param>
+        protected void SendProgress(float progress)
         {
-            ProgressUpdated?.Invoke(Progress);
+            ProgressUpdated?.Invoke(progress);
         }
         /// <summary>
         /// Прервать с ошибкой
         /// </summary>
-        /// <param name="Error">Ошибка</param>
-        protected void Interrupt(Exception Error)
+        /// <param name="error">Ошибка</param>
+        protected void Interrupt(Exception error)
         {
-            if (_IsFailed)
+            if (_isFailed)
             {
                 return;
             }
 
-            _IsFailed = true;
+            _isFailed = true;
             Stop();
-            Failed?.Invoke(new AclyAsyncTaskError(Error));
+            Failed?.Invoke(new AclyAsyncTaskError(error));
         }
         /// <summary>
         /// Прервать с сообщением
         /// </summary>
-        /// <param name="Message">Сообщение</param>
-        protected void Interrupt(Response Message)
+        /// <param name="message">Сообщение</param>
+        protected void Interrupt(Response message)
         {
-            if (_IsFailed)
+            if (_isFailed)
             {
                 return;
             }
 
-            _IsFailed = true;
+            _isFailed = true;
             Stop();
-            Failed?.Invoke(new AclyAsyncTaskError(Message));
+            Failed?.Invoke(new AclyAsyncTaskError(message));
         }
 
         private void Stop()
         {
-            if (_TaskThread == null)
+            if (_taskThread == null)
             {
                 return;
             }
 
             try
             {
-                _TaskThread.Abort();
+                _taskThread.Abort();
             }
-            catch
+            catch (Exception error)
             {
+                Log.Error(error);
             }
         }
 

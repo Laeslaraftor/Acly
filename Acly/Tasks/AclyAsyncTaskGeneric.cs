@@ -3,94 +3,90 @@ using System.Threading.Tasks;
 
 namespace Acly.Tasks
 {
-	/// <summary>
-	/// Асинхронная задача
-	/// </summary>
-	/// <typeparam name="TOutput">Тип выводимых данных</typeparam>
-	public sealed class AclyAsyncTask<TOutput> : AclyAsyncTask, IAsyncTask<TOutput>
-	{
-		/// <summary>
-		/// Создать экземпляр асинхронной задачи
-		/// </summary>
-		/// <param name="Controller">Контроллер асинхронной задачи</param>
-		/// <exception cref="ArgumentNullException">Контролер не установлен</exception>
+    /// <summary>
+    /// Асинхронная задача
+    /// </summary>
+    /// <typeparam name="TOutput">Тип выводимых данных</typeparam>
+    public sealed class AclyAsyncTask<TOutput> : AclyAsyncTask, IAsyncTask<TOutput>
+    {
+        /// <summary>
+        /// Создать экземпляр асинхронной задачи
+        /// </summary>
+        /// <param name="controller">Контроллер асинхронной задачи</param>
+        /// <exception cref="ArgumentNullException">Контролер не установлен</exception>
 #pragma warning disable CS8618
-		public AclyAsyncTask(IAsyncTaskController<TOutput> Controller)
+        public AclyAsyncTask(IAsyncTaskController<TOutput> controller)
 #pragma warning restore CS8618
-		{
-			if (Controller == null)
-			{
-				throw new ArgumentNullException(nameof(Controller), "Контроллер асинхронной задачи не указан");
-			}
-
-			_Controller = Controller;
-			UpdateController(Controller);
-		}
-		/// <summary>
-		/// Создать экземпляр асинхронной задачи c <see cref="AclyAsyncTaskController{TOutput}"/>
-		/// </summary>
-		/// <param name="TaskFunction">Асинхронная задача для выполнения</param>
+        {
+            _controller = controller
+                ?? throw new ArgumentNullException(nameof(controller), "Контроллер асинхронной задачи не указан");
+            UpdateController(controller);
+        }
+        /// <summary>
+        /// Создать экземпляр асинхронной задачи c <see cref="AclyAsyncTaskController{TOutput}"/>
+        /// </summary>
+        /// <param name="taskFunction">Асинхронная задача для выполнения</param>
 #pragma warning disable CS8618
-		public AclyAsyncTask(Func<Task<TOutput>> TaskFunction)
+        public AclyAsyncTask(Func<Task<TOutput>> taskFunction)
 #pragma warning restore CS8618
-		{
-			if (TaskFunction == null)
-			{
-				throw new ArgumentNullException(nameof(TaskFunction), "Задача для выполнения не указана");
-			}
+        {
+            if (taskFunction == null)
+            {
+                throw new ArgumentNullException(nameof(taskFunction), "Задача для выполнения не указана");
+            }
 
-			_Controller = new AclyAsyncTaskController<TOutput>(TaskFunction);
-			UpdateController(_Controller);
-		}
+            _controller = new AclyAsyncTaskController<TOutput>(taskFunction);
+            UpdateController(_controller);
+        }
 
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public new event AsyncTaskComplete<TOutput>? Completed
-		{
-			add
-			{
-				LocalCompleted += value;
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public new event AsyncTaskComplete<TOutput>? Completed
+        {
+            add
+            {
+                LocalCompleted += value;
 
-				if (IsCompleted && Error == null)
-				{
-					value?.Invoke(Result);
-				}
-			}
-			remove => LocalCompleted -= value;
-		}
+                if (IsCompleted && Error == null)
+                {
+                    value?.Invoke(Result);
+                }
+            }
+            remove => LocalCompleted -= value;
+        }
 
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public TOutput Result
-		{
-			get
-			{
-				if (!IsCompleted)
-				{
-					throw new InvalidOperationException("Невозможно получить результат до окончания выполнения асинхронной задачи");
-				}
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public TOutput Result
+        {
+            get
+            {
+                if (!IsCompleted)
+                {
+                    throw new InvalidOperationException("Невозможно получить результат до окончания выполнения асинхронной задачи");
+                }
 
-				return _Result;
-			}
-			private set => _Result = value;
-		}
+                return _result;
+            }
+            private set => _result = value;
+        }
 
-		private event AsyncTaskComplete<TOutput>? LocalCompleted;
+        private event AsyncTaskComplete<TOutput>? LocalCompleted;
 
-		private IAsyncTaskController<TOutput> _Controller;
-		private TOutput _Result;
+        private IAsyncTaskController<TOutput> _controller;
+        private TOutput _result;
 
-		#region Установка
+        #region Установка
 
-		private void UpdateController(IAsyncTaskController<TOutput> Controller)
-		{
-			Controller.Completed += OnTaskCompleted;
-			Controller.ProgressUpdated += OnProgressUpdated;
+        private void UpdateController(IAsyncTaskController<TOutput> сontroller)
+        {
+            сontroller.Completed += OnTaskCompleted;
+            сontroller.ProgressUpdated += OnProgressUpdated;
 
-			Controller.Start();
-		}
+            сontroller.Start();
+        }
 
         #endregion
 
@@ -99,15 +95,15 @@ namespace Acly.Tasks
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="All"><inheritdoc/></param>
+        /// <param name="isDisposing"><inheritdoc/></param>
 #pragma warning disable CS8625
 #pragma warning disable CS8601
-        protected override void Dispose(bool All)
+        protected override void Dispose(bool isDisposing)
         {
-            base.Dispose(All);
+            base.Dispose(isDisposing);
 
-            _Result = default;
-            _Controller = null;
+            _result = default;
+            _controller = null;
             LocalCompleted = null;
         }
 #pragma warning restore CS8601
@@ -117,28 +113,28 @@ namespace Acly.Tasks
 
         #region События
 
-        private void OnTaskCompleted(TOutput Value)
-		{
-			OnTaskCompleted();
-			RemoveEvents();
+        private void OnTaskCompleted(TOutput value)
+        {
+            OnTaskCompleted();
+            RemoveEvents();
 
-			Result = Value;
+            Result = value;
 
 #pragma warning disable CS8604
-			if (!LocalCompleted.TryInvoke(Value, out Exception? Error))
-			{
-				Log.Error(Error);
-			}
+            if (!LocalCompleted.TryInvoke(value, out Exception? error))
+            {
+                Log.Error(error);
+            }
 #pragma warning restore CS8604
-		}
+        }
 
-		private void RemoveEvents()
-		{
-			_Controller.Completed -= OnTaskCompleted;
-			_Controller.ProgressUpdated -= OnProgressUpdated;
-			_Controller.Failed -= OnTaskFailed;
-		}
+        private void RemoveEvents()
+        {
+            _controller.Completed -= OnTaskCompleted;
+            _controller.ProgressUpdated -= OnProgressUpdated;
+            _controller.Failed -= OnTaskFailed;
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 }

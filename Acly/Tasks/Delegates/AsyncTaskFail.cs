@@ -3,6 +3,6 @@
     /// <summary>
     /// Возникновение ошибки во время выполнения асинхронной задачи
     /// </summary>
-    /// <param name="Error">Информация о возникшей ошибке</param>
-    public delegate void AsyncTaskFail(IAsyncTaskError Error);
+    /// <param name="error">Информация о возникшей ошибке</param>
+    public delegate void AsyncTaskFail(IAsyncTaskError error);
 }

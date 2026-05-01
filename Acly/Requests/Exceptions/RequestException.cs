@@ -6,29 +6,25 @@ namespace Acly.Requests
     /// <summary>
     /// Исключение, вызывающееся при возникновении какой-либо ошибки запроса
     /// </summary>
+    /// <remarks>
+    /// Вызвать ошибку запроса
+    /// </remarks>
+    /// <param name="url">Адрес запроса</param>
+    /// <param name="code">Код ошибки</param>
     [Serializable]
-    public sealed class RequestException : Exception
-	{
-		/// <summary>
-		/// Вызвать ошибку запроса
-		/// </summary>
-		/// <param name="Url">Адрес запроса</param>
-		/// <param name="Code">Код ошибки</param>
-		public RequestException(string Url, HttpStatusCode Code) : base(string.Format(_Message, Url, (int)Code, Code))
-		{
-			this.Url = Url;
-			this.Code = Code;
-		}
+    public sealed class RequestException(string url, HttpStatusCode code)
+        : Exception(string.Format(_message, url, (int)code, code))
+    {
 
-		/// <summary>
-		/// Адрес запроса
-		/// </summary>
-		public string Url { get; private set; }
-		/// <summary>
-		/// HTTP код
-		/// </summary>
-		public HttpStatusCode Code { get; private set; }
+        /// <summary>
+        /// Адрес запроса
+        /// </summary>
+        public string Url { get; private set; } = url;
+        /// <summary>
+        /// HTTP код
+        /// </summary>
+        public HttpStatusCode Code { get; private set; } = code;
 
-		private const string _Message = "Запрос по адресу '{0}' вернул код ошибки {1} {2}";
-	}
+        private const string _message = "Запрос по адресу '{0}' вернул код ошибки {1} {2}";
+    }
 }

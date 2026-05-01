@@ -1,22 +1,22 @@
 ﻿namespace Acly.Requests
 {
-	/// <summary>
-	/// Возможность отправки данных
-	/// </summary>
-	public interface ISendable
-	{
-		/// <summary>
-		/// Отправить данные
-		/// </summary>
-		/// <param name="Data">Данные для отправки</param>
-		/// <param name="Offset">Смещение</param>
-		/// <param name="Length">Длина записи</param>
-		public void Send(byte[] Data, int Offset, int Length);
+    /// <summary>
+    /// Возможность отправки данных
+    /// </summary>
+    public interface ISendable
+    {
+        /// <summary>
+        /// Отправить данные
+        /// </summary>
+        /// <param name="data">Данные для отправки</param>
+        /// <param name="offset">Смещение</param>
+        /// <param name="length">Длина записи</param>
+        public void Send(byte[] data, int offset, int length);
 
         /// <summary>
         /// Отправить объект
         /// </summary>
-        /// <param name="Object">Объект для отправки</param>
-        public void Send(object Object);
+        /// <param name="obj">Объект для отправки</param>
+        public void Send(object obj);
     }
 }

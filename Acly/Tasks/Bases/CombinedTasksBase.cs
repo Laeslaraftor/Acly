@@ -5,7 +5,7 @@ namespace Acly.Tasks
     /// <summary>
     /// Базовый класс асинхронной задачи, объединяющей задачи
     /// </summary>
-    public abstract class CombinedTasksBase : IAsyncTask
+    public abstract class CombinedTasksBase : Disposable, IAsyncTask
     {
         /// <summary>
         /// <inheritdoc/>
@@ -38,18 +38,10 @@ namespace Acly.Tasks
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void Dispose()
+        /// <param name="isDisposing"><inheritdoc/></param>
+        protected override void Dispose(bool isDisposing)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Очистить ресурсы
-        /// </summary>
-        /// <param name="All">true - очистка всех ресурсов, false - только ресурсы базового класса</param>
-        protected virtual void Dispose(bool All)
-        {
+            base.Dispose(isDisposing);
             Error = null;
         }
 
@@ -64,13 +56,13 @@ namespace Acly.Tasks
         /// <summary>
         /// Вызвать событие изменения прогресса задачи
         /// </summary>
-        /// <param name="Progress">Прогресс от 0 до 1</param>
-        protected void InvokeProgressUpdatedEvent(float Progress) => ProgressUpdated?.Invoke(Progress);
+        /// <param name="progress">Прогресс от 0 до 1</param>
+        protected void InvokeProgressUpdatedEvent(float progress) => ProgressUpdated?.Invoke(progress);
         /// <summary>
         /// Вызвать событие провала задачи
         /// </summary>
-        /// <param name="Error">Информация о провале</param>
-        protected void InvokeFailedEvent(IAsyncTaskError Error) => Failed?.Invoke(Error);
+        /// <param name="error">Информация о провале</param>
+        protected void InvokeFailedEvent(IAsyncTaskError error) => Failed?.Invoke(error);
 
         #endregion
     }

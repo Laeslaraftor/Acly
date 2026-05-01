@@ -3,7 +3,7 @@
     /// <summary>
     /// Базовый класс, реализующий <see cref="IListener"/>
     /// </summary>
-    public abstract class ListenerBase : IListener
+    public abstract class ListenerBase : Disposable, IListener
     {
         /// <summary>
         /// <inheritdoc/>
@@ -13,7 +13,19 @@
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public virtual bool IsStarted { get; private set; }
+        public virtual bool IsStarted
+        {
+            get => field;
+            private set
+            {
+                if (field != value)
+                {
+                    OnPropertyChanging(nameof(IsStarted));
+                    field = value;
+                    OnPropertyChanged(nameof(IsStarted));
+                }
+            }
+        }
 
         #region Управление
 
@@ -57,7 +69,7 @@
         /// </summary>
         protected virtual void InvokeStartedStateChanged()
         {
-            StartedStateChanged?.Invoke(this);
+            Dispatch(StartedStateChanged, this);
         }
 
         #endregion

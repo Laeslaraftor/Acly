@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
 
 namespace Acly
 {
@@ -11,28 +10,25 @@ namespace Acly
     /// </summary>
     /// <typeparam name="T">Тип данных списка</typeparam>
     [Serializable]
-    public class ObservableList<T> : IObservableList<T>, IReadOnlyCollection<T>, IReadOnlyList<T>
+    public class ObservableList<T> : ObservableObject, IObservableList<T>, IReadOnlyCollection<T>, IReadOnlyList<T>
     {
         /// <summary>
         /// Создать новый экземпляр отслеживаемого списка
         /// </summary>
         public ObservableList()
         {
-            _List = new();
+            _list = [];
         }
         /// <summary>
         /// Создать новый экземпляр отслеживаемого списка
         /// </summary>
-        /// <param name="Items">Список объектов</param>
-        public ObservableList(IEnumerable<T> Items)
+        /// <param name="items">Список объектов</param>
+        public ObservableList(IEnumerable<T> items)
         {
-            _List = new(Items);
+            _list = [.. items];
+            Count = _list.Count;
         }
 
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        [field: NonSerialized] public event PropertyChangedEventHandler? PropertyChanged;
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
@@ -41,70 +37,83 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Index"><inheritdoc/></param>
+        /// <param name="index"><inheritdoc/></param>
         /// <returns><inheritdoc/></returns>
-        public virtual T this[int Index]
+        public virtual T this[int index]
         {
-            get => _List[Index];
+            get => _list[index];
             set
             {
-                var Item = _List[Index];
+                var item = _list[index];
 
-                if (Item?.Equals(value) == true)
+                if (item?.Equals(value) == true)
                 {
                     return;
                 }
 
-                _List[Index] = value;
-                InvokeReplace(value, Item, Index);
+                _list[index] = value;
+                InvokeReplace(value, item, index);
             }
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public int Count => _List.Count;
+        public int Count
+        {
+            get => field;
+            private set
+            {
+                if (field != value)
+                {
+                    OnPropertyChanging(nameof(Count));
+                    var oldValue = field;
+                    field = value;
+                    OnCountChanged(oldValue, value);
+                    OnPropertyChanged(nameof(Count));
+                }
+            }
+        }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
         public virtual bool IsReadOnly { get; }
 
-        private readonly List<T> _List;
+        private readonly List<T> _list;
 
         #region Управление
-        
+
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Item"><inheritdoc/></param>
-        public virtual void Add(T Item)
+        /// <param name="item"><inheritdoc/></param>
+        public virtual void Add(T item)
         {
-            _List.Add(Item);
-            InvokeAdd(Item);
+            _list.Add(item);
+            InvokeAdd(item);
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Index"><inheritdoc/></param>
-        /// <param name="Item"><inheritdoc/></param>
-        public virtual void Insert(int Index, T Item)
+        /// <param name="index"><inheritdoc/></param>
+        /// <param name="item"><inheritdoc/></param>
+        public virtual void Insert(int index, T item)
         {
-            _List.Insert(Index, Item);
-            InvokeInsert(Item, Index);
+            _list.Insert(index, item);
+            InvokeInsert(item, index);
         }
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Item"><inheritdoc/></param>
+        /// <param name="item"><inheritdoc/></param>
         /// <returns><inheritdoc/></returns>
-        public virtual bool Remove(T Item)
+        public virtual bool Remove(T item)
         {
-            int Index = IndexOf(Item);
+            int index = IndexOf(item);
 
-            if (Index >= 0)
+            if (index >= 0 && _list.Remove(item))
             {
-                _List.Remove(Item);
-                InvokeRemove(Item, Index);
+                InvokeRemove(item, index);
                 return true;
             }
 
@@ -113,42 +122,47 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Index"><inheritdoc/></param>
-        public virtual void RemoveAt(int Index)
+        /// <param name="index"><inheritdoc/></param>
+        public virtual void RemoveAt(int index)
         {
-            T Item = _List[Index];
+            T item = _list[index];
 
-            _List.RemoveAt(Index);
-            InvokeRemove(Item, Index);
+            _list.RemoveAt(index);
+            InvokeRemove(item, index);
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
         public virtual void Clear()
         {
-            _List.Clear();
+            _list.Clear();
             InvokeClear();
         }
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Item"><inheritdoc/></param>
+        /// <param name="item"><inheritdoc/></param>
         /// <returns><inheritdoc/></returns>
-        public int IndexOf(T Item) => _List.IndexOf(Item);
+        public int IndexOf(T item) => _list.IndexOf(item);
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Item"><inheritdoc/></param>
+        /// <param name="item"><inheritdoc/></param>
         /// <returns><inheritdoc/></returns>
-        public bool Contains(T Item) => _List.Contains(Item);
+        public bool Contains(T item) => _list.Contains(item);
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Array"><inheritdoc/></param>
-        /// <param name="ArrayIndex"><inheritdoc/></param>
-        public void CopyTo(T[] Array, int ArrayIndex) => _List.CopyTo(Array, ArrayIndex);
+        /// <param name="array"><inheritdoc/></param>
+        /// <param name="arrayIndex"><inheritdoc/></param>
+        public void CopyTo(T[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
+
+        private void UpdateCount()
+        {
+            Count = _list.Count;
+        }
 
         #endregion
 
@@ -158,53 +172,55 @@ namespace Acly
         /// <inheritdoc/>
         /// </summary>
         /// <returns><inheritdoc/></returns>
-        public virtual IEnumerator<T> GetEnumerator() => _List.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => _List.GetEnumerator();
+        public virtual IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => _list.GetEnumerator();
 
         #endregion
 
         #region События
 
         /// <summary>
-        /// Вызывать событие изменения поля
-        /// </summary>
-        /// <param name="PropertyName">Изменённое поле</param>
-        protected void InvokePropertyChanged(string PropertyName)
-        {
-            PropertyChanged?.Invoke(this, new(PropertyName));
-        }
-        /// <summary>
         /// Вызвать событие изменения коллекции
         /// </summary>
-        /// <param name="Args">Данные события</param>
-        protected void InvokeCollectionChanged(NotifyCollectionChangedEventArgs Args)
+        /// <param name="args">Данные события</param>
+        protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs args)
         {
-            CollectionChanged?.Invoke(this, Args);
-            InvokePropertyChanged(nameof(Count));
+            Dispatch(CollectionChanged, this, args);
+        }
+        /// <summary>
+        /// Событие изменения количества элементов в коллекции
+        /// </summary>
+        /// <param name="oldValue">Прошлое количество элементов</param>
+        /// <param name="newValue">Текущее количество элементов</param>
+        protected virtual void OnCountChanged(int oldValue, int newValue)
+        {
         }
 
-        private void InvokeReplace(T? NewItem, T? OldItem, int Index)
+        private void InvokeReplace(T? newItem, T? oldItem, int index)
         {
-            InvokeCollectionChanged( 
-                new(NotifyCollectionChangedAction.Replace, NewItem, OldItem, Index));
+            OnCollectionChanged(
+                new(NotifyCollectionChangedAction.Replace, newItem, oldItem, index));
         }
-        private void InvokeAdd(T? NewItem)
+        private void InvokeAdd(T? newItem)
         {
-            InvokeInsert(NewItem, Count - 1);
+            InvokeInsert(newItem, Count - 1);
         }
-        private void InvokeRemove(T? NewItem, int Index)
+        private void InvokeRemove(T? newItem, int index)
         {
-            InvokeCollectionChanged(
-                new(NotifyCollectionChangedAction.Remove, NewItem, Index));
+            OnCollectionChanged(
+                new(NotifyCollectionChangedAction.Remove, newItem, index));
+            UpdateCount();
         }
-        private void InvokeInsert(T? NewItem, int Index)
+        private void InvokeInsert(T? newItem, int index)
         {
-            InvokeCollectionChanged(
-                new(NotifyCollectionChangedAction.Add, NewItem, Index));
+            OnCollectionChanged(
+                new(NotifyCollectionChangedAction.Add, newItem, index));
+            UpdateCount();
         }
         private void InvokeClear()
         {
-            InvokeCollectionChanged(new(NotifyCollectionChangedAction.Reset));
+            OnCollectionChanged(new(NotifyCollectionChangedAction.Reset));
+            UpdateCount();
         }
 
         #endregion

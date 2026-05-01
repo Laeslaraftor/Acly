@@ -3,92 +3,81 @@ using System.Collections.ObjectModel;
 
 namespace Acly.Commands
 {
-	/// <summary>
-	/// Шаблон команды
-	/// </summary>
-	[Serializable]
-	public class CommandTemplate : IEquatable<Command>
-	{
-		/// <summary>
-		/// Создать шаблон команды без параметров
-		/// </summary>
-		/// <param name="Name">Название команды</param>
-		public CommandTemplate(string Name)
-		{
-			if (Name == null)
-			{
-				throw new ArgumentNullException(nameof(Name), "Название команды не указано");
-			}
+    /// <summary>
+    /// Шаблон команды
+    /// </summary>
+    [Serializable]
+    public class CommandTemplate : IEquatable<Command>
+    {
+        /// <summary>
+        /// Создать шаблон команды без параметров
+        /// </summary>
+        /// <param name="name">Название команды</param>
+        public CommandTemplate(string name)
+        {
+            Name = name ?? throw new ArgumentNullException(nameof(name), "Название команды не указано");
+            Parameters = new(Array.Empty<string>());
+        }
+        /// <summary>
+        /// Создать шаблон команды
+        /// </summary>
+        /// <param name="name">Название команды</param>
+        /// <param name="parameters">Параметры команды</param>
+        public CommandTemplate(string name, params string[] parameters)
+        {
+            if (parameters == null)
+            {
+                throw new ArgumentNullException(nameof(parameters), "Параметры команды не указаны");
+            }
 
-			this.Name = Name;
-			Parameters = new(Array.Empty<string>());
-		}
-		/// <summary>
-		/// Создать шаблон команды
-		/// </summary>
-		/// <param name="Name">Название команды</param>
-		/// <param name="Parameters">Параметры команды</param>
-		public CommandTemplate(string Name, params string[] Parameters)
-		{
-			if (Name == null)
-			{
-				throw new ArgumentNullException(nameof(Name), "Название команды не указано");
-			}
-			if (Parameters == null)
-			{
-				throw new ArgumentNullException(nameof(Parameters), "Параметры команды не указаны");
-			}
+            Name = name ?? throw new ArgumentNullException(nameof(name), "Название команды не указано");
+            Parameters = new(parameters);
+        }
 
-			this.Name = Name;
-			this.Parameters = new(Parameters);
-		}
+        /// <summary>
+        /// Название команды
+        /// </summary>
+        public string Name { get; private set; }
+        /// <summary>
+        /// Параметры команды
+        /// </summary>
+        public ReadOnlyCollection<string> Parameters { get; private set; }
 
-		/// <summary>
-		/// Название команды
-		/// </summary>
-		public string Name { get; private set; }
-		/// <summary>
-		/// Параметры команды
-		/// </summary>
-		public ReadOnlyCollection<string> Parameters { get; private set; }
+        #region Управление
 
-		
+        /// <summary>
+        /// Получить шаблон команды
+        /// </summary>
+        /// <returns>Шаблон команды</returns>
+        public override string ToString()
+        {
+            string result = "/" + Name;
 
-		#region Управление
+            if (Parameters.Count > 0)
+            {
+                foreach (var parameter in Parameters)
+                {
+                    result += " [" + parameter + "]";
+                }
+            }
 
-		/// <summary>
-		/// Получить шаблон команды
-		/// </summary>
-		/// <returns>Шаблон команды</returns>
-		public override string ToString()
-		{
-			string Result = "/" + Name;
+            return result;
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="other"><inheritdoc/></param>
+        /// <returns><inheritdoc/></returns>
+        public bool Equals(Command other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
 
-			if (Parameters.Count > 0)
-			{
-				foreach (var Param in Parameters)
-				{
-					Result += " [" + Param + "]";
-				}
-			}
+            return Name == other.Name;
+        }
 
-			return Result;
-		}
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		/// <param name="other"><inheritdoc/></param>
-		/// <returns><inheritdoc/></returns>
-		public bool Equals(Command other)
-		{
-			if (other == null)
-			{
-				return false;
-			}
-
-			return Name == other.Name;
-		}
-
-		#endregion
-	}
+        #endregion
+    }
 }

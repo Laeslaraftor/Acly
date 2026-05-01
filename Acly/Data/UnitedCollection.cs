@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Linq;
 
 namespace Acly
 {
@@ -13,67 +11,54 @@ namespace Acly
     /// </summary>
     /// <typeparam name="TList">Тип списков</typeparam>
     /// <typeparam name="T">Тип элемента списка</typeparam>
-    public class UnitedCollection<TList, T> : IReadOnlyList<T>, INotifyPropertyChanged, INotifyCollectionChanged, IDisposable
-        where TList : IList<T>, INotifyCollectionChanged
+    public class UnitedCollection<TList, T> : Disposable, IReadOnlyList<T>, INotifyCollectionChanged
+        where TList : IReadOnlyList<T>, INotifyCollectionChanged
     {
         /// <summary>
         /// Создать новый экземпляр объединяющего списка
         /// </summary>
-        /// <param name="Collections">Список списков для объединения</param>
-        /// <param name="Filter">Фильтр элементов</param>
-        public UnitedCollection(IEnumerable<TList> Collections, ICollectionItemsFilter? Filter = null)
-            : this(Collections.ToList(), Filter)
+        /// <param name="collections">Список списков для объединения</param>
+        /// <param name="filter">Фильтр элементов</param>
+        public UnitedCollection(IEnumerable<TList> collections, ICollectionItemsFilter? filter = null)
+            : this([.. collections], filter)
         {
 
         }
         /// <summary>
         /// Создать новый экземпляр объединяющего списка
         /// </summary>
-        /// <param name="Collections">Список списков для объединения</param>
-        public UnitedCollection(params TList[] Collections)
-            : this(Collections.ToList(), null)
+        /// <param name="collections">Список списков для объединения</param>
+        public UnitedCollection(params TList[] collections)
+            : this([.. collections], null)
         {
 
         }
         /// <summary>
         /// Создать новый экземпляр объединяющего списка
         /// </summary>
-        /// <param name="Collections">Список списков для объединения</param>
-        /// <param name="Filter">Фильтр элементов</param>
-        public UnitedCollection(ICollectionItemsFilter? Filter, params TList[] Collections)
-            : this(Collections.ToList(), Filter)
+        /// <param name="collections">Список списков для объединения</param>
+        /// <param name="filter">Фильтр элементов</param>
+        public UnitedCollection(ICollectionItemsFilter? filter, params TList[] collections)
+            : this([.. collections], filter)
         {
 
         }
         /// <summary>
         /// Создать новый экземпляр объединяющего списка
         /// </summary>
-        /// <param name="Collections">Список списков для объединения</param>
-        /// <param name="Filter">Фильтр элементов</param>
-        public UnitedCollection(IList<TList> Collections, ICollectionItemsFilter? Filter = null)
+        /// <param name="collections">Список списков для объединения</param>
+        /// <param name="filter">Фильтр элементов</param>
+        public UnitedCollection(IList<TList> collections, ICollectionItemsFilter? filter = null)
         {
-            this.Filter = Filter;
-            this.Collections = new ReadOnlyCollection<TList>(Collections);
+            Filter = filter;
+            Collections = new(collections);
 
             InitializeCollections();
 
-            if (Filter != null)
-            {
-                Filter.FilterChanged += OnFilterChanged;
-            }
-        }
-        /// <summary>
-        /// Очистить объект
-        /// </summary>
-        ~UnitedCollection()
-        {
-            Dispose(false);
+            filter?.FilterChanged += OnFilterChanged;
+            Count = _combinedItems.Count;
         }
 
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public event PropertyChangedEventHandler? PropertyChanged;
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
@@ -82,13 +67,25 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        public T this[int index] => _CombinedItems[index];
+        /// <param name="index"><inheritdoc/></param>
+        /// <returns><inheritdoc/></returns>
+        public T this[int index] => _combinedItems[index];
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public int Count => _CombinedItems.Count;
+        public int Count
+        {
+            get => field;
+            private set
+            {
+                if (field != value)
+                {
+                    OnPropertyChanging(nameof(Count));
+                    field = value;
+                    OnPropertyChanged(nameof(Count));
+                }
+            }
+        }
         /// <summary>
         /// Список коллекций элементов
         /// </summary>
@@ -98,95 +95,82 @@ namespace Acly
         /// </summary>
         public ICollectionItemsFilter? Filter { get; }
 
-        private readonly List<T> _CombinedItems = new();
-        private readonly Dictionary<TList, List<T>> _FilteredItems = new();
+        private readonly List<T> _combinedItems = [];
+        private readonly Dictionary<TList, List<T>> _filteredItems = [];
 
         #region Управление
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void Dispose()
+        /// <param name="isDisposing"><inheritdoc/></param>
+        protected override void Dispose(bool isDisposing)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+            base.Dispose(isDisposing);
 
-        /// <summary>
-        /// Очистить объект
-        /// </summary>
-        /// <param name="IsDisposing">Ручная очистка</param>
-        protected virtual void Dispose(bool IsDisposing)
-        {
-            if (Filter != null)
+            Filter?.FilterChanged -= OnFilterChanged;
+
+            foreach (var collection in Collections)
             {
-                Filter.FilterChanged -= OnFilterChanged;
+                collection.CollectionChanged -= OnSourceCollectionChanged;
             }
 
-            foreach (var Collection in Collections)
-            {
-                Collection.CollectionChanged -= OnSourceCollectionChanged;
-            }
-
-            _FilteredItems.Clear();
-            _CombinedItems.Clear();
+            _filteredItems.Clear();
+            _combinedItems.Clear();
         }
 
         private void InitializeCollections()
         {
-            foreach (var Collection in Collections)
+            foreach (var collection in Collections)
             {
-                Collection.CollectionChanged -= OnSourceCollectionChanged;
-                Collection.CollectionChanged += OnSourceCollectionChanged;
-                ProcessCollectionItems(Collection);
+                collection.CollectionChanged -= OnSourceCollectionChanged;
+                collection.CollectionChanged += OnSourceCollectionChanged;
+                ProcessCollectionItems(collection);
             }
 
             UpdateCombinedItems();
         }
-        private void ProcessCollectionItems(TList Collection)
+        private void ProcessCollectionItems(TList collection)
         {
-            if (!_FilteredItems.TryGetValue(Collection, out var Filtered))
+            if (!_filteredItems.TryGetValue(collection, out var filtered))
             {
-                Filtered = new();
-                _FilteredItems.Add(Collection, Filtered);
+                filtered = [];
+                _filteredItems.Add(collection, filtered);
             }
 
-            Filtered.Clear();
+            filtered.Clear();
 
-            foreach (var Item in Collection)
+            foreach (var item in collection)
             {
-                if (Filter == null || Filter.Check(Collection, Item!))
+                if (Filter == null || Filter.Check(collection, item!))
                 {
-                    Filtered.Add(Item);
+                    filtered.Add(item);
                 }
             }
         }
         private void UpdateCombinedItems()
         {
-            _CombinedItems.Clear();
+            _combinedItems.Clear();
 
-            foreach (var collection in Collections)
+            foreach (var filtered in _filteredItems.Values)
             {
-                if (_FilteredItems.TryGetValue(collection, out var filtered))
-                {
-                    _CombinedItems.AddRange(filtered);
-                }
+                _combinedItems.AddRange(filtered);
             }
         }
-        private int GetCombinedIndexForCollectionItem(TList Collection, int CollectionIndex)
+        private int GetCombinedIndexForCollectionItem(TList collection, int collectionIndex)
         {
-            int CombinedIndex = 0;
+            int combinedIndex = 0;
 
-            foreach (var List in Collections)
+            foreach (var list in Collections)
             {
-                if (List.Equals(Collection))
+                if (list.Equals(collection))
                 {
-                    return CombinedIndex + CollectionIndex;
+                    return combinedIndex + collectionIndex;
                 }
 
-                if (_FilteredItems.TryGetValue(List, out var Filtered))
+                if (_filteredItems.TryGetValue(list, out var filtered))
                 {
-                    CombinedIndex += Filtered.Count;
+                    combinedIndex += filtered.Count;
                 }
             }
 
@@ -201,7 +185,7 @@ namespace Acly
         /// <inheritdoc/>
         /// </summary>
         /// <returns><inheritdoc/></returns>
-        public IEnumerator<T> GetEnumerator() => _CombinedItems.GetEnumerator();
+        public IEnumerator<T> GetEnumerator() => _combinedItems.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         #endregion
@@ -210,8 +194,8 @@ namespace Acly
 
         private void OnSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            if (sender is not TList Collection ||
-                _FilteredItems.TryGetValue(Collection, out var FilteredItems))
+            if (sender is not TList collection ||
+                !_filteredItems.TryGetValue(collection, out var filteredItems))
             {
                 return;
             }
@@ -221,38 +205,38 @@ namespace Acly
                 case NotifyCollectionChangedAction.Add:
                     if (e.NewItems != null)
                     {
-                        List<T> NewFilteredItems = new();
+                        List<T> newFilteredItems = [];
 
-                        foreach (T NewItem in e.NewItems)
+                        foreach (T newItem in e.NewItems)
                         {
-                            if (Filter == null || Filter.Check(Collection, NewItem!))
+                            if (Filter == null || Filter.Check(collection, newItem!))
                             {
-                                NewFilteredItems.Add(NewItem);
+                                newFilteredItems.Add(newItem);
                             }
                         }
 
-                        if (NewFilteredItems.Count > 0)
+                        if (newFilteredItems.Count > 0)
                         {
-                            int InsertIndex;
+                            int insertIndex;
 
-                            if (e.NewStartingIndex < FilteredItems.Count)
+                            if (e.NewStartingIndex < filteredItems.Count)
                             {
-                                InsertIndex = e.NewStartingIndex;
+                                insertIndex = e.NewStartingIndex;
                             }
                             else
                             {
-                                InsertIndex = FilteredItems.Count;
+                                insertIndex = filteredItems.Count;
                             }
 
-                            FilteredItems.InsertRange(InsertIndex, NewFilteredItems);
+                            filteredItems.InsertRange(insertIndex, newFilteredItems);
                             UpdateCombinedItems();
 
-                            var CombinedIndex = GetCombinedIndexForCollectionItem(Collection, InsertIndex);
+                            var combinedIndex = GetCombinedIndexForCollectionItem(collection, insertIndex);
 
-                            if (CombinedIndex >= 0)
+                            if (combinedIndex >= 0)
                             {
-                                InvokeCollectionChanged(NotifyCollectionChangedAction.Add,
-                                    NewFilteredItems, CombinedIndex);
+                                OnCollectionChanged(NotifyCollectionChangedAction.Add,
+                                    newFilteredItems, combinedIndex);
                             }
                         }
                     }
@@ -261,23 +245,25 @@ namespace Acly
                 case NotifyCollectionChangedAction.Remove:
                     if (e.OldItems != null)
                     {
-                        List<T> RemovedItems = new();
+                        List<T> removedItems = [];
+                        int firstItemIndex = -1;
 
                         foreach (T oldItem in e.OldItems)
                         {
-                            var Index = FilteredItems.IndexOf(oldItem);
+                            var index = filteredItems.IndexOf(oldItem);
 
-                            if (Index >= 0)
+                            if (index >= 0)
                             {
-                                RemovedItems.Add(FilteredItems[Index]);
-                                FilteredItems.RemoveAt(Index);
+                                firstItemIndex = index;
+                                removedItems.Add(filteredItems[index]);
+                                filteredItems.RemoveAt(index);
                             }
                         }
 
-                        if (RemovedItems.Count > 0)
+                        if (removedItems.Count > 0)
                         {
                             UpdateCombinedItems();
-                            InvokeCollectionChanged(NotifyCollectionChangedAction.Remove, RemovedItems);
+                            OnCollectionChanged(NotifyCollectionChangedAction.Remove, removedItems, firstItemIndex);
                         }
                     }
                     break;
@@ -285,54 +271,53 @@ namespace Acly
                 case NotifyCollectionChangedAction.Replace:
                     if (e.NewItems != null && e.OldItems != null)
                     {
-                        var oldIndex = FilteredItems.IndexOf((T)e.OldItems[0]!);
+                        var oldIndex = filteredItems.IndexOf((T)e.OldItems[0]);
 
                         if (oldIndex >= 0)
                         {
-                            var OldItem = FilteredItems[oldIndex];
-                            FilteredItems.RemoveAt(oldIndex);
+                            var oldItem = filteredItems[oldIndex];
+                            filteredItems.RemoveAt(oldIndex);
+                            var newItem = (T)e.NewItems[0];
 
-                            var NewItem = (T)e.NewItems[0]!;
-
-                            if (Filter == null || Filter.Check(Collection, NewItem!))
+                            if (Filter == null || Filter.Check(collection, newItem))
                             {
-                                FilteredItems.Insert(oldIndex, NewItem);
+                                filteredItems.Insert(oldIndex, newItem);
                                 UpdateCombinedItems();
 
-                                var combinedIndex = GetCombinedIndexForCollectionItem(Collection, oldIndex);
+                                var combinedIndex = GetCombinedIndexForCollectionItem(collection, oldIndex);
 
                                 if (combinedIndex >= 0)
                                 {
-                                    InvokeCollectionChanged(NotifyCollectionChangedAction.Replace,
-                                        NewItem: NewItem, OldItem: OldItem, Index: combinedIndex);
+                                    OnCollectionChanged(NotifyCollectionChangedAction.Replace,
+                                        newItem: newItem, oldItem: oldItem, index: combinedIndex);
                                 }
                             }
                             else
                             {
                                 UpdateCombinedItems();
-                                InvokeCollectionChanged(NotifyCollectionChangedAction.Remove,
-                                    new[] { OldItem });
+                                OnCollectionChanged(NotifyCollectionChangedAction.Remove,
+                                    new[] { oldItem });
                             }
                         }
                         else
                         {
-                            var NewItem = (T)e.NewItems[0]!;
+                            var newItem = (T)e.NewItems[0];
 
-                            if (Filter == null || Filter.Check(Collection, NewItem!))
+                            if (Filter == null || Filter.Check(collection, newItem!))
                             {
-                                var insertIndex = e.NewStartingIndex < FilteredItems.Count
+                                var insertIndex = e.NewStartingIndex < filteredItems.Count
                                     ? e.NewStartingIndex
-                                    : FilteredItems.Count;
+                                    : filteredItems.Count;
 
-                                FilteredItems.Insert(insertIndex, NewItem);
+                                filteredItems.Insert(insertIndex, newItem);
                                 UpdateCombinedItems();
 
-                                var combinedIndex = GetCombinedIndexForCollectionItem(Collection, insertIndex);
+                                var combinedIndex = GetCombinedIndexForCollectionItem(collection, insertIndex);
 
                                 if (combinedIndex >= 0)
                                 {
-                                    InvokeCollectionChanged(NotifyCollectionChangedAction.Add,
-                                        new[] { NewItem }, combinedIndex);
+                                    OnCollectionChanged(NotifyCollectionChangedAction.Add,
+                                        new[] { newItem }, combinedIndex);
                                 }
                             }
                         }
@@ -343,13 +328,13 @@ namespace Acly
                     // Note: This is a simplified implementation
                     // A full implementation would need to handle filtering in move operations
                     UpdateCombinedItems();
-                    InvokeCollectionChanged(NotifyCollectionChangedAction.Reset);
+                    OnCollectionChanged(NotifyCollectionChangedAction.Reset);
                     break;
 
                 case NotifyCollectionChangedAction.Reset:
-                    ProcessCollectionItems(Collection);
+                    ProcessCollectionItems(collection);
                     UpdateCombinedItems();
-                    InvokeCollectionChanged(NotifyCollectionChangedAction.Reset);
+                    OnCollectionChanged(NotifyCollectionChangedAction.Reset);
                     break;
             }
         }
@@ -362,54 +347,46 @@ namespace Acly
             }
 
             UpdateCombinedItems();
-            InvokeCollectionChanged(NotifyCollectionChangedAction.Reset);
+            OnCollectionChanged(NotifyCollectionChangedAction.Reset);
         }
 
         /// <summary>
         /// Вызвать событие изменения коллекции
         /// </summary>
-        /// <param name="Action">Действие, изменившее коллекцию</param>
-        /// <param name="ChangedItems">Список изменённых элементов коллекции</param>
-        /// <param name="Index">Индекс изменённого элемента</param>
-        /// <param name="OldItem">Старый элемент коллекции</param>
-        /// <param name="NewItem">Новый элемент коллекции</param>
-        protected virtual void InvokeCollectionChanged(NotifyCollectionChangedAction Action, IList? ChangedItems = null, 
-            int Index = -1, object? OldItem = null, object? NewItem = null)
+        /// <param name="action">Действие, изменившее коллекцию</param>
+        /// <param name="changedItems">Список изменённых элементов коллекции</param>
+        /// <param name="index">Индекс изменённого элемента</param>
+        /// <param name="oldItem">Старый элемент коллекции</param>
+        /// <param name="newItem">Новый элемент коллекции</param>
+        protected virtual void OnCollectionChanged(NotifyCollectionChangedAction action, IList? changedItems = null,
+            int index = -1, object? oldItem = null, object? newItem = null)
         {
-            if (ChangedItems != null)
+            if (changedItems != null)
             {
-                NotifyCollectionChangedEventArgs Args;
+                NotifyCollectionChangedEventArgs args;
 
-                if (Action == NotifyCollectionChangedAction.Add)
+                if (action == NotifyCollectionChangedAction.Add ||
+                    action == NotifyCollectionChangedAction.Remove)
                 {
-                    Args = new(Action, ChangedItems, Index);
+                    args = new(action, changedItems, index);
                 }
                 else
                 {
-                    Args = new(Action, ChangedItems);
+                    args = new(action, changedItems);
                 }
 
-                CollectionChanged?.Invoke(this, Args);
+                Dispatch(CollectionChanged, this, args);
             }
-            else if (OldItem != null && NewItem != null && Index >= 0)
+            else if (oldItem != null && newItem != null && index >= 0)
             {
-                CollectionChanged?.Invoke(this, new(Action, NewItem, OldItem, Index));
+                Dispatch(CollectionChanged, this, new NotifyCollectionChangedEventArgs(action, newItem, oldItem, index));
             }
             else
             {
-                CollectionChanged?.Invoke(this, new(NotifyCollectionChangedAction.Reset));
+                Dispatch(CollectionChanged, this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
             }
 
-            InvokePropertyChanged(nameof(Count));
-        }
-
-        /// <summary>
-        /// Вызвать событие изменения поля
-        /// </summary>
-        /// <param name="propertyName">Название изменённого поля</param>
-        protected virtual void InvokePropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new(propertyName));
+            Count = _combinedItems.Count;
         }
 
         #endregion

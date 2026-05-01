@@ -4,6 +4,6 @@
     /// Успешное завершение асинхронной задачи с результатом
     /// </summary>
     /// <typeparam name="T">Тип данных результата</typeparam>
-    /// <param name="Result">Результат выполнения асинхронной задачи</param>
-    public delegate void AsyncTaskComplete<T>(T Result);
+    /// <param name="result">Результат выполнения асинхронной задачи</param>
+    public delegate void AsyncTaskComplete<T>(T result);
 }

@@ -5,43 +5,41 @@ using System;
 
 namespace Acly.Performing
 {
-	/// <summary>
-	/// Базовый класс загрузки. Для создания своей загрузки необходимо унаследовать этот класс и перезаписать свойство <see cref="TasksForPerform"/>
-	/// </summary>
-	public abstract class LoadingBase : ILoading
-	{
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
+    /// <summary>
+    /// Базовый класс загрузки. Для создания своей загрузки необходимо унаследовать этот класс и перезаписать свойство <see cref="TasksForPerform"/>
+    /// </summary>
+    public abstract class LoadingBase : ILoading
+    {
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public event LoadingEvent? DescriptionChanged;
         /// <summary>
         /// Вызывается сразу после окончания выполнения задач
         /// </summary>
         public event LoadingEvent? Completed;
-		/// <summary>
-		/// Вызывается при обновлении прогресса выполнения
-		/// </summary>
-		public event LoadingProgressEvent? ProgressUpdated;
-		/// <summary>
-		/// Вызывается если при выполнении задач произошла какая-то ошибка
-		/// </summary>
-		public event LoadingFailEvent? Failed;
+        /// <summary>
+        /// Вызывается при обновлении прогресса выполнения
+        /// </summary>
+        public event LoadingProgressEvent? ProgressUpdated;
+        /// <summary>
+        /// Вызывается если при выполнении задач произошла какая-то ошибка
+        /// </summary>
+        public event LoadingFailEvent? Failed;
 
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public virtual string? Description
-		{
-			get => _Description;
-			set
-			{
-				if (value == _Description)
-				{
-					return;
-				}
-
-                _Description = value;
-				DescriptionChanged?.Invoke(this);
+        {
+            get => field;
+            set
+            {
+                if (value != field)
+                {
+                    field = value;
+                    DescriptionChanged?.Invoke(this);
+                }
             }
         }
 
@@ -50,82 +48,81 @@ namespace Acly.Performing
         /// </summary>
         protected abstract LoadingTasksList TasksForPerform { get; }
 
-        private LoadingAsyncTasksController? _Controller;
-		private bool _Started;
-		private string? _Description;
+        private LoadingAsyncTasksController? _controller;
+        private bool _started;
 
-		#region Управление
+        #region Управление
 
-		/// <summary>
-		/// Начать загрузку
-		/// </summary>
-		/// <returns>Задача загрузки</returns>
-		public IAsyncTask Start()
-		{
-			if (_Started)
-			{
-				throw new InvalidOperationException("Загрузка уже была начата");
-			}
+        /// <summary>
+        /// Начать загрузку
+        /// </summary>
+        /// <returns>Задача загрузки</returns>
+        public IAsyncTask Start()
+        {
+            if (_started)
+            {
+                throw new InvalidOperationException("Загрузка уже была начата");
+            }
 
-			_Started = true;
-			_Controller = new(TasksForPerform);
+            _started = true;
+            _controller = new(TasksForPerform);
 
-			_Controller.Completed += OnLoadingCompleted;
-			_Controller.ProgressUpdated += OnLoadingProgressUpdated;
-			_Controller.Failed += OnLoadingProgressFailed;
-            _Controller.DescriptionChanged += OnLoadingDescriptionChanged;
+            _controller.Completed += OnLoadingCompleted;
+            _controller.ProgressUpdated += OnLoadingProgressUpdated;
+            _controller.Failed += OnLoadingProgressFailed;
+            _controller.DescriptionChanged += OnLoadingDescriptionChanged;
 
-			return new AclyAsyncTask(_Controller);
-		}
+            return new AclyAsyncTask(_controller);
+        }
 
         /// <summary>
         /// Получить какое-либо значение
         /// </summary>
         /// <typeparam name="T">Тип получаемого значения</typeparam>
-        /// <param name="Name">Название значения</param>
+        /// <param name="name">Название значения</param>
         /// <returns>Значение</returns>
-        public virtual T? GetValue<T>(string Name)
-		{
-			return default;
-		}
+        public virtual T? GetValue<T>(string name)
+        {
+            return default;
+        }
 
-		#endregion
+        #endregion
 
-		#region Загрузка
+        #region Загрузка
 
-		/// <summary>
-		/// Прервать загрузку с ошибкой
-		/// </summary>
-		/// <param name="Response">Сообщение</param>
-		protected void BreakWithError(Response Response)
-		{
-			_Controller?.BreakWithError(Response);
-		}
-		/// <summary>
-		/// Прервать загрузку с ошибкой
-		/// </summary>
-		/// <param name="Error">Возникшее исключение</param>
-		protected void BreakWithError(Exception Error)
-		{
-			BreakWithError(new Response(Error));
-		}
-		/// <summary>
-		/// Прервать загрузку с ошибкой
-		/// </summary>
-		/// <param name="Code">Код ошибки</param>
-		/// <param name="Text">Сообщение ошибки</param>
-		protected void BreakWithError(string Code, string Text)
-		{
-			BreakWithError(new Response(Code, Text));
-		}
         /// <summary>
         /// Прервать загрузку с ошибкой
         /// </summary>
-        /// <param name="Error">Возникшее исключение</param>
-		/// <param name="Format">Формат сообщения об ошибке. {0} - сообщение ошибки, {1} - стек вызовов</param>
-        protected void BreakWithError(Exception Error, string Format)
+        /// <param name="response">Сообщение</param>
+        protected void BreakWithError(Response response)
         {
-            BreakWithError(new Response(Error, Format));
+            _controller?.BreakWithError(response);
+        }
+        /// <summary>
+        /// Прервать загрузку с ошибкой
+        /// </summary>
+        /// <param name="error">Возникшее исключение</param>
+        protected void BreakWithError(Exception error)
+        {
+            BreakWithError(new Response(error));
+        }
+        /// <summary>
+        /// Прервать загрузку с ошибкой
+        /// </summary>
+        /// <param name="code">Код ошибки</param>
+        /// <param name="text">Сообщение ошибки</param>
+        protected void BreakWithError(string code, string text)
+        {
+            BreakWithError(new Response(code, text));
+        }
+        /// <summary>
+        /// Прервать загрузку с ошибкой
+        /// </summary>
+        /// <param name="error">Возникшее исключение</param>
+		/// <param name="format">Формат сообщения об ошибке. {0} - сообщение ошибки, {1} - стек вызовов</param>
+        protected void BreakWithError(Exception error, string format)
+        {
+            BreakWithError(new Response(error, format));
         }
 
         #endregion
@@ -133,38 +130,38 @@ namespace Acly.Performing
         #region События
 
         private void OnLoadingCompleted()
-		{
-			RemoveEvents();
-			Description = null;
-			Completed?.Invoke(this);
-		}
-		private void OnLoadingProgressUpdated(float Percent)
-		{
-			ProgressUpdated?.Invoke(this, Percent);
-		}
-		private void OnLoadingProgressFailed(IAsyncTaskError Response)
-		{
-			RemoveEvents();
-			Failed?.Invoke(this, Response);
-		}
+        {
+            RemoveEvents();
+            Description = null;
+            Completed?.Invoke(this);
+        }
+        private void OnLoadingProgressUpdated(float percent)
+        {
+            ProgressUpdated?.Invoke(this, percent);
+        }
+        private void OnLoadingProgressFailed(IAsyncTaskError response)
+        {
+            RemoveEvents();
+            Failed?.Invoke(this, response);
+        }
         private void OnLoadingDescriptionChanged()
         {
-			Description = _Controller?.Description;
+            Description = _controller?.Description;
         }
 
         private void RemoveEvents()
-		{
-			if (_Controller == null)
-			{
-				return;
-			}
+        {
+            if (_controller == null)
+            {
+                return;
+            }
 
-			_Controller.Completed -= OnLoadingCompleted;
-			_Controller.ProgressUpdated -= OnLoadingProgressUpdated;
-			_Controller.Failed -= OnLoadingProgressFailed;
-            _Controller.DescriptionChanged -= OnLoadingDescriptionChanged;
+            _controller.Completed -= OnLoadingCompleted;
+            _controller.ProgressUpdated -= OnLoadingProgressUpdated;
+            _controller.Failed -= OnLoadingProgressFailed;
+            _controller.DescriptionChanged -= OnLoadingDescriptionChanged;
         }
 
-		#endregion
-	}
+        #endregion
+    }
 }

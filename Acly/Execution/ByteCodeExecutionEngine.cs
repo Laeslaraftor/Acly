@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -11,7 +10,7 @@ namespace Acly.Execution
     /// Базовый класс исполнителя байт-кода
     /// </summary>
     /// <typeparam name="T">Тип байт-кода</typeparam>
-    public abstract class ByteCodeExecutionEngine<T> : IDisposable, INotifyPropertyChanged
+    public abstract class ByteCodeExecutionEngine<T> : Disposable
         where T : Enum
     {
         /// <summary>
@@ -20,33 +19,22 @@ namespace Acly.Execution
         protected ByteCodeExecutionEngine()
         {
             OpCodeSize = Marshal.SizeOf<T>();
-            _OpcodeBuffer = new byte[OpCodeSize];
+            _opcodeBuffer = new byte[OpCodeSize];
         }
-        /// <summary>
-        /// Очистка
-        /// </summary>
-        ~ByteCodeExecutionEngine()
-        {
-            Dispose(false);
-        }
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Исполняется ли код
         /// </summary>
         public bool IsStarted
         {
-            get => _IsStarted;
+            get => field;
             private set
             {
-                if (_IsStarted != value)
+                if (field != value)
                 {
-                    _IsStarted = value;
-                    InvokePropertyChanged(nameof(IsStarted));
+                    OnPropertyChanging(nameof(IsStarted));
+                    field = value;
+                    OnPropertyChanged(nameof(IsStarted));
                 }
             }
         }
@@ -60,8 +48,7 @@ namespace Acly.Execution
         /// </summary>
         protected abstract Stream CodeStream { get; }
 
-        private readonly byte[] _OpcodeBuffer;
-        private bool _IsStarted;
+        private readonly byte[] _opcodeBuffer;
 
         #region Управление
 
@@ -81,7 +68,7 @@ namespace Acly.Execution
 
             try
             {
-                foreach (var OpCode in ReadOpCodes())
+                foreach (var opCode in ReadOpCodes())
                 {
                     if (!IsStarted)
                     {
@@ -90,20 +77,20 @@ namespace Acly.Execution
 
                     try
                     {
-                        await Execute(OpCode);
+                        await Execute(opCode);
                     }
-                    catch (Exception Error)
+                    catch (Exception error)
                     {
-                        if (!HandleExecutionException(Error, true))
+                        if (!HandleExecutionException(error, true))
                         {
                             break;
                         }
                     }
                 }
             }
-            catch (Exception Error)
+            catch (Exception error)
             {
-                HandleExecutionException(Error, false);
+                HandleExecutionException(error, false);
             }
 
             Stop();
@@ -121,27 +108,21 @@ namespace Acly.Execution
 
             IsStarted = false;
         }
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
 
         /// <summary>
         /// Выполнить оператор
         /// </summary>
-        /// <param name="OpCode">Оператор, который необходимо выполнить</param>
-        protected abstract Task Execute(T OpCode);
+        /// <param name="opCode">Оператор, который необходимо выполнить</param>
+        protected abstract Task Execute(T opCode);
 
         /// <summary>
-        /// Очистить объект
+        /// <inheritdoc/>
         /// </summary>
-        /// <param name="IsDisposing">Очистка вручную</param>
-        protected virtual void Dispose(bool IsDisposing)
+        /// <param name="isDisposing"><inheritdoc/></param>
+        protected override void Dispose(bool isDisposing)
         {
+            base.Dispose(isDisposing);
+
             if (IsStarted)
             {
                 Stop();
@@ -150,10 +131,10 @@ namespace Acly.Execution
         /// <summary>
         /// Обработать исключение выполнения кода
         /// </summary>
-        /// <param name="Error">Исключение, которое выданное во время выполнения кода</param>
-        /// <param name="IsOpCodeExecution">Исключение выдано при выполнении оператора</param>
+        /// <param name="error">Исключение, которое выданное во время выполнения кода</param>
+        /// <param name="isOpCodeExecution">Исключение выдано при выполнении оператора</param>
         /// <returns>Продолжить ли исполнение кода</returns>
-        protected virtual bool HandleExecutionException(Exception Error, bool IsOpCodeExecution)
+        protected virtual bool HandleExecutionException(Exception error, bool isOpCodeExecution)
         {
             return false;
         }
@@ -164,37 +145,24 @@ namespace Acly.Execution
         /// <returns>Оператор</returns>
         protected T ReadOpCode()
         {
-            Array.Clear(_OpcodeBuffer, 0, _OpcodeBuffer.Length);
+            Array.Clear(_opcodeBuffer, 0, _opcodeBuffer.Length);
 
             for (int i = 0; i < OpCodeSize; i++)
             {
-                _OpcodeBuffer[i] = (byte)CodeStream.ReadByte();
+                _opcodeBuffer[i] = (byte)CodeStream.ReadByte();
             }
 
-            return Helper.BytesToEnum<T>(_OpcodeBuffer);
+            return Helper.BytesToEnum<T>(_opcodeBuffer);
         }
 
         private IEnumerable<T> ReadOpCodes()
         {
-            var Stream = CodeStream;
+            var stream = CodeStream;
 
-            while (Stream.Length > Stream.Position)
+            while (stream.Length > stream.Position)
             {
                 yield return ReadOpCode();
             }
-        }
-
-        #endregion
-
-        #region События
-
-        /// <summary>
-        /// Вызвать событие изменения поля
-        /// </summary>
-        /// <param name="PropertyName">Название изменённое поля</param>
-        protected virtual void InvokePropertyChanged(string PropertyName)
-        {
-            PropertyChanged?.Invoke(this, new(PropertyName));
         }
 
         #endregion

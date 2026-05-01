@@ -1,7 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System;
 using System.ComponentModel;
 
 namespace Acly
@@ -10,84 +10,97 @@ namespace Acly
     /// Класс списка-ссылки только для чтения оригинального списка
     /// </summary>
     /// <typeparam name="T">Тип данных списка</typeparam>
-    public class ReferenceReadOnlyList<T> : IReadOnlyList<T>, INotifyPropertyChanged, INotifyCollectionChanged, IDisposable
+    public class ReferenceReadOnlyList<T> : Disposable, ICollection<T>, IReadOnlyList<T>, INotifyCollectionChanged
     {
         /// <summary>
         /// Создать экземпляр класса списка-ссылки только для чтения оригинального списка
         /// </summary>
-        /// <param name="Reference">Основная коллекция</param>
+        /// <param name="reference">Основная коллекция</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public ReferenceReadOnlyList(IList<T> Reference)
+        public ReferenceReadOnlyList(IList<T> reference)
         {
-            if (Reference == null)
-            {
-                throw new ArgumentNullException(nameof(Reference));
-            }
+            _reference = reference ?? throw new ArgumentNullException(nameof(reference));
 
-            _Reference = Reference;
-
-            if (Reference is INotifyCollectionChanged NotifyCollection)
+            if (reference is INotifyCollectionChanged notifyCollection)
             {
-                NotifyCollection.CollectionChanged += OnReferenceCollectionChanged;
+                notifyCollection.CollectionChanged += OnReferenceCollectionChanged;
             }
-            if (Reference is INotifyPropertyChanged NotifyProperty)
+            if (reference is INotifyPropertyChanged notifyProperty)
             {
-                NotifyProperty.PropertyChanged += OnNotifyPropertyPropertyChanged;
+                notifyProperty.PropertyChanged += OnNotifyPropertyPropertyChanged;
             }
-        }
-        /// <summary>
-        /// Очистить объект
-        /// </summary>
-        ~ReferenceReadOnlyList()
-        {
-            Dispose(false);
         }
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
         [field: NonSerialized] public event NotifyCollectionChangedEventHandler? CollectionChanged;
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        [field: NonSerialized] public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public T this[int index] => _Reference[index];
+        public T this[int index] => _reference[index];
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public int Count => _Reference.Count;
+        public int Count => _reference.Count;
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public bool IsReadOnly => true;
 
-        private readonly IList<T> _Reference;
+        private readonly IList<T> _reference;
 
         #region Управление
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void Dispose()
+        /// <param name="item"><inheritdoc/></param>
+        /// <returns><inheritdoc/></returns>
+        public bool Contains(T item)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            return _reference.Contains(item);
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="array"><inheritdoc/></param>
+        /// <param name="arrayIndex"><inheritdoc/></param>
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            _reference.CopyTo(array, arrayIndex);
         }
 
         /// <summary>
-        /// Очистить объект
+        /// <inheritdoc/>
         /// </summary>
-        /// <param name="IsDisposing">Ручная очистка</param>
-        protected virtual void Dispose(bool IsDisposing)
+        /// <param name="isDisposing"><inheritdoc/></param>
+        protected override void Dispose(bool isDisposing)
         {
-            if (_Reference is INotifyCollectionChanged NotifyCollection)
+            base.Dispose(isDisposing);
+
+            if (_reference is INotifyCollectionChanged notifyCollection)
             {
-                NotifyCollection.CollectionChanged -= OnReferenceCollectionChanged;
+                notifyCollection.CollectionChanged -= OnReferenceCollectionChanged;
             }
-            if (_Reference is INotifyPropertyChanged NotifyProperty)
+            if (_reference is INotifyPropertyChanged notifyProperty)
             {
-                NotifyProperty.PropertyChanged -= OnNotifyPropertyPropertyChanged;
+                notifyProperty.PropertyChanged -= OnNotifyPropertyPropertyChanged;
             }
+        }
+
+        void ICollection<T>.Add(T item)
+        {
+            throw new InvalidOperationException(ReadOnlyCollectionInvalidExceptionMessage);
+        }
+        void ICollection<T>.Clear()
+        {
+            throw new InvalidOperationException(ReadOnlyCollectionInvalidExceptionMessage);
+        }
+        bool ICollection<T>.Remove(T item)
+        {
+            throw new InvalidOperationException(ReadOnlyCollectionInvalidExceptionMessage);
         }
 
         #endregion
@@ -100,7 +113,7 @@ namespace Acly
         /// <returns><inheritdoc/></returns>
         public IEnumerator<T> GetEnumerator()
         {
-            return _Reference.GetEnumerator();
+            return _reference.GetEnumerator();
         }
         /// <summary>
         /// <inheritdoc/>
@@ -121,8 +134,14 @@ namespace Acly
         }
         private void OnNotifyPropertyPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            PropertyChanged?.Invoke(this, e);
+            OnPropertyChanged(e);
         }
+
+        #endregion
+
+        #region Константы
+
+        private const string ReadOnlyCollectionInvalidExceptionMessage = "Невозможно изменить коллекцию, так как она доступна только для чтения!";
 
         #endregion
     }

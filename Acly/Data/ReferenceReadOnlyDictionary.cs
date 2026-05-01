@@ -16,17 +16,12 @@ namespace Acly
         /// <summary>
         /// Создать новый экземпляр класса книжки-ссылки только для чтения оригинальной книжки
         /// </summary>
-        /// <param name="Reference">Основная книжка</param>
+        /// <param name="reference">Основная книжка</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public ReferenceReadOnlyDictionary(ObservableDictionary<TKey, TValue> Reference)
+        public ReferenceReadOnlyDictionary(ObservableDictionary<TKey, TValue> reference)
         {
-            if (Reference == null)
-            {
-                throw new ArgumentNullException(nameof(Reference));
-            }
-
-            _Reference = Reference;
-            Reference.CollectionChanged += OnReferenceCollectionChanged;
+            _reference = reference ?? throw new ArgumentNullException(nameof(reference));
+            reference.CollectionChanged += OnReferenceCollectionChanged;
         }
 
         /// <summary>
@@ -37,21 +32,24 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public TValue this[TKey key] => _Reference[key];
+        public TValue this[TKey key] => _reference[key];
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public IEnumerable<TKey> Keys => new List<TKey>(_Reference.Keys);
+        public ICollection<TKey> Keys => _reference.Keys;
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public IEnumerable<TValue> Values => new List<TValue>(_Reference.Values);
+        public ICollection<TValue> Values => _reference.Values;
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public int Count => _Reference.Count;
+        public int Count => _reference.Count;
 
-        private readonly ObservableDictionary<TKey, TValue> _Reference;
+        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => Keys;
+        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Values;
+
+        private readonly ObservableDictionary<TKey, TValue> _reference;
 
         #region Управление
 
@@ -60,14 +58,14 @@ namespace Acly
         /// </summary>
         /// <param name="key"><inheritdoc/></param>
         /// <returns><inheritdoc/></returns>
-        public bool ContainsKey(TKey key) => _Reference.ContainsKey(key);
+        public bool ContainsKey(TKey key) => _reference.ContainsKey(key);
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
         /// <param name="key"><inheritdoc/></param>
         /// <param name="value"><inheritdoc/></param>
         /// <returns><inheritdoc/></returns>
-        public bool TryGetValue(TKey key, out TValue value) => _Reference.TryGetValue(key, out value);
+        public bool TryGetValue(TKey key, out TValue value) => _reference.TryGetValue(key, out value);
 
         #endregion
 
@@ -79,7 +77,7 @@ namespace Acly
         /// <returns><inheritdoc/></returns>
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            return _Reference.GetEnumerator();
+            return _reference.GetEnumerator();
         }
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -99,7 +97,7 @@ namespace Acly
         /// <inheritdoc/>
         /// </summary>
         /// <param name="sender"><inheritdoc/></param>
-        public virtual void OnDeserialization(object sender) => _Reference.OnDeserialization(sender);
+        public virtual void OnDeserialization(object sender) => _reference.OnDeserialization(sender);
 
         #endregion
     }

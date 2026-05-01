@@ -1,77 +1,100 @@
 ﻿using System;
-using System.Net.Sockets;
-using System.Net;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace Acly.Requests
 {
-	/// <summary>
-	/// Класс, для создания сервера
-	/// </summary>
-	public sealed class Server : IServer
-	{
-		private Server(string Address, int Port) : this(Dns.GetHostEntry(Address).AddressList[0], Port)
-		{
-		}
-        private Server(IPAddress Address, int Port)
+    /// <summary>
+    /// Класс, для создания сервера
+    /// </summary>
+    public sealed class Server : Disposable, IServer
+    {
+        private Server(string address, int port)
+            : this(Dns.GetHostEntry(address).AddressList[0], port)
+        {
+        }
+        private Server(IPAddress address, int port)
         {
             Connected += OnClientConnected;
             Disconnected += OnClientDisconnected;
 
-            _Address = Address;
-            _EndPoint = new(_Address, Port);
-            _Socket = new(_Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _address = address;
+            _endPoint = new(_address, port);
+            _socket = new(_address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-            _Socket.Bind(_EndPoint);
-            _Socket.Listen(10);
+            _socket.Bind(_endPoint);
+            _socket.Listen(10);
         }
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
         public event IServer.GetConnectedSocket? Connected;
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public event IServer.ReceiveData? Received;
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public event IServer.GetDisconnectedInfo? Disconnected;
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public event IServer.ReceiveData? Received;
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public event IServer.GetDisconnectedInfo? Disconnected;
 
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public int ReceiveInterval { get; set; } = 50;
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public int MaximumConnections
-		{
-			get => _MaximumConnections;
-			set
-			{
-				if (value < 0)
-				{
-					_MaximumConnections = -1;
-					return;
-				}
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public int ReceiveInterval
+        {
+            get => field;
+            set
+            {
+                if (field != value)
+                {
+                    OnPropertyChanging(nameof(ReceiveInterval));
+                    field = value;
+                    OnPropertyChanged(nameof(ReceiveInterval));
+                }
+            }
+        } = 50;
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public int MaximumConnections
+        {
+            get => field;
+            set
+            {
+                if (field != value)
+                {
+                    OnPropertyChanging(nameof(MaximumConnections));
+                    field = Math.Max(-1, value);
+                    OnPropertyChanged(nameof(MaximumConnections));
+                }
+            }
+        } = -1;
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public int TotalConnections
+        {
+            get => field;
+            private set
+            {
+                if (field != value)
+                {
+                    OnPropertyChanging(nameof(TotalConnections));
+                    field = Math.Max(0, value);
+                    OnPropertyChanged(nameof(TotalConnections));
+                }
+            }
+        }
 
-				_MaximumConnections = value;
-			}
-		}
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public int TotalConnections => _Connections.Count;
-
-		private readonly List<Socket> _Connections = new();
-		private readonly IPAddress _Address;
-		private readonly IPEndPoint _EndPoint;
-		private readonly Socket _Socket;
-		private bool _Disabled;
-		private int _MaximumConnections = -1;
+        private readonly List<Socket> _connections = [];
+        private readonly IPAddress _address;
+        private readonly IPEndPoint _endPoint;
+        private readonly Socket _socket;
+        private bool _disabled;
 
         #region Управление
 
@@ -80,200 +103,212 @@ namespace Acly.Requests
         /// </summary>
         /// <inheritdoc/>
         /// <exception cref="InvalidOperationException"></exception>
-        public void Send(byte[] Data, int Offset, int Length)
-		{
-			if (_Disabled)
-			{
-				throw new InvalidOperationException("Сервер был отключен");
-			}
+        public void Send(byte[] data, int offset, int length)
+        {
+            if (_disabled)
+            {
+                throw new InvalidOperationException("Сервер был отключен");
+            }
 
-			foreach (var Connection in _Connections)
-			{
-				Connection.SendAsync(Data, Offset, Length);
-			}
-		}
+            foreach (var connection in _connections)
+            {
+                connection.SendAsync(data, offset, length);
+            }
+        }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Object"><inheritdoc/></param>
-        public void Send(object Object)
-		{
-			byte[] Data = MessageData.Create(Object);
-			Send(Data, 0, Data.Length);
-		}
+        /// <param name="obj"><inheritdoc/></param>
+        public void Send(object obj)
+        {
+            byte[] data = MessageData.Create(obj);
+            Send(data, 0, data.Length);
+        }
 
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		/// <exception cref="NotImplementedException"></exception>
-		public void Shutdown()
-		{
-			if (_Disabled)
-			{
-				throw new InvalidOperationException("Сервер уже отключен");
-			}
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <exception cref="NotImplementedException"></exception>
+        public void Shutdown()
+        {
+            if (_disabled)
+            {
+                throw new InvalidOperationException("Сервер уже отключен");
+            }
 
-			Dispose();
-		}
+            Dispose();
+        }
 
-		#endregion
+        #endregion
 
-		#region Подключение
+        #region Подключение
 
-		private async void WaitForConnection()
-		{
-			await Task.Delay(50);
+        private async void WaitForConnection()
+        {
+            await Task.Delay(50);
 
-			Socket? Connection = null;
+            Socket? connection = null;
 
-			try
-			{
-				while (true)
-				{
-					if (Connection == null)
-					{
-						Connection = _Socket.Accept();
-						InvokeConnectedEvent(Connection);
-					}
-					if (MaximumConnections != -1 && _Connections.Count > MaximumConnections && _Connections[^1] == Connection)
-					{
-						ShutdownSocket(Connection);
-						InvokeDisconnectEvent(Connection, "Превышен лимит подключений");
-						break;
-					}
-					if (!Connection.IsConnected())
-					{
-						InvokeDisconnectEvent(Connection, "Клиент отключился");
-						break;
-					}
-					if (Connection.Available == 0)
-					{
-						await Task.Delay(ReceiveInterval);
-						continue;
-					}
+            try
+            {
+                while (true)
+                {
+                    if (connection == null)
+                    {
+                        connection = _socket.Accept();
+                        InvokeConnectedEvent(connection);
+                    }
+                    if (MaximumConnections != -1 && _connections.Count > MaximumConnections && _connections[^1] == connection)
+                    {
+                        ShutdownSocket(connection);
+                        InvokeDisconnectEvent(connection, "Превышен лимит подключений");
+                        break;
+                    }
+                    if (!connection.IsConnected())
+                    {
+                        InvokeDisconnectEvent(connection, "Клиент отключился");
+                        break;
+                    }
+                    if (connection.Available == 0)
+                    {
+                        await Task.Delay(ReceiveInterval);
+                        continue;
+                    }
 
-					byte[] Data = new byte[Connection.Available];
-					Connection.Receive(Data);
+                    byte[] data = new byte[connection.Available];
+                    connection.Receive(data);
 
-					InvokeReceiveEvent(Connection, Data);
+                    InvokeReceiveEvent(connection, data);
 
-					await Task.Delay(ReceiveInterval);
-				}
-			}
-			catch (SocketException Error)
-			{
-#pragma warning disable CS8604
-				InvokeDisconnectEvent(Connection, Error.Message);
-#pragma warning restore CS8604
-			}
-		}
-		private static void ShutdownSocket(Socket Connection)
-		{
-			try
-			{
-				Connection.Shutdown(SocketShutdown.Both);
-				Connection.Close();
-			}
-			catch
-			{
-			}
-		}
+                    await Task.Delay(ReceiveInterval);
+                }
+            }
+            catch (SocketException error)
+            {
+                if (connection != null)
+                {
+                    InvokeDisconnectEvent(connection, error.Message);
+                }
 
-		#endregion
+                Log.Error(error);
+            }
+        }
+        private static void ShutdownSocket(Socket connection)
+        {
+            try
+            {
+                connection.Shutdown(SocketShutdown.Both);
+                connection.Close();
+            }
+            catch (Exception error)
+            {
+                Log.Error(error);
+            }
+        }
 
-		#region Очистка
+        #endregion
 
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public void Dispose()
-		{
-			_Disabled = true;
+        #region Очистка
 
-			try
-			{
-				_Socket.Shutdown(SocketShutdown.Both);
-				_Socket.Close();
-			}
-			catch (Exception Error)
-			{
-				Log.Error(Error);
-			}
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="isDisposing"><inheritdoc/></param>
+        protected override void Dispose(bool isDisposing)
+        {
+            base.Dispose(isDisposing);
 
-			Connected -= OnClientConnected;
-			Disconnected -= OnClientDisconnected;
-		}
+            _disabled = true;
 
-		#endregion
+            try
+            {
+                _socket.Shutdown(SocketShutdown.Both);
+                _socket.Close();
+            }
+            catch (Exception error)
+            {
+                Log.Error(error);
+            }
 
-		#region События
+            Connected -= OnClientConnected;
+            Disconnected -= OnClientDisconnected;
+        }
 
-#pragma warning disable CS8604
-		private void InvokeConnectedEvent(Socket Socket)
-		{
-			if (!Connected.TryInvoke(out Exception? Error, Socket))
-			{
-				Log.Error(Error);
-			}
-		}
-		private void InvokeReceiveEvent(Socket Socket, byte[] Data)
-		{
-			if (!Received.TryInvoke(out Exception? Error, Socket, Data))
-			{
-				Log.Error(Error);
-			}
-		}
-		private void InvokeDisconnectEvent(Socket Socket, string Reason)
-		{
-			if (!Disconnected.TryInvoke(out Exception? Error, Socket, Reason))
-			{
-				Log.Error(Error);
-			}
-		}
-#pragma warning restore CS8604
+        #endregion
 
-		private void OnClientConnected(Socket Socket)
-		{
-			_Connections.Add(Socket);
-			WaitForConnection();
-		}
-		private void OnClientDisconnected(Socket Socket, string Reason)
-		{
-			_Connections.Remove(Socket);
-			Socket.Dispose();
-		}
+        #region События
 
-		#endregion
+        private void InvokeConnectedEvent(Socket socket)
+        {
+            Dispatch(() =>
+            {
+                if (!Connected.TryInvoke(out Exception? error, socket))
+                {
+                    Log.Error(error);
+                }
+            });
+        }
+        private void InvokeReceiveEvent(Socket socket, byte[] data)
+        {
+            Dispatch(() =>
+            {
+                if (!Received.TryInvoke(out Exception? error, socket, data))
+                {
+                    Log.Error(error);
+                }
+            });
+        }
+        private void InvokeDisconnectEvent(Socket socket, string reason)
+        {
+            Dispatch(() =>
+            {
+                if (!Disconnected.TryInvoke(out Exception? error, socket, reason))
+                {
+                    Log.Error(error);
+                }
+            });
+        }
 
-		#region Статика
+        private void OnClientConnected(Socket socket)
+        {
+            _connections.Add(socket);
+            WaitForConnection();
+        }
+        private void OnClientDisconnected(Socket socket, string reason)
+        {
+            _connections.Remove(socket);
+            socket.Dispose();
+        }
 
-		/// <summary>
-		/// Создать сервер
-		/// </summary>
-		/// <param name="Address">Адрес сервера</param>
-		/// <param name="Port">Порт сервера</param>
-		/// <returns>Сервер</returns>
-		public static IServer Create(string Address, int Port)
-		{
-			Server Srv = new(Address, Port);
+        #endregion
 
-			Srv.WaitForConnection();
+        #region Статика
 
-			return Srv;
-		}
         /// <summary>
         /// Создать сервер
         /// </summary>
-        /// <param name="Address">Адрес сервера</param>
-        /// <param name="Port">Порт сервера</param>
+        /// <param name="address">Адрес сервера</param>
+        /// <param name="port">Порт сервера</param>
         /// <returns>Сервер</returns>
-        public static IServer Create(IPAddress Address, int Port)
+        public static IServer Create(string address, int port)
         {
-            Server Srv = new(Address, Port);
+            Server server = new(address, port);
+            server.WaitForConnection();
 
-            Srv.WaitForConnection();
+            return server;
+        }
+        /// <summary>
+        /// Создать сервер
+        /// </summary>
+        /// <param name="address">Адрес сервера</param>
+        /// <param name="port">Порт сервера</param>
+        /// <returns>Сервер</returns>
+        public static IServer Create(IPAddress address, int port)
+        {
+            Server server = new(address, port);
+            server.WaitForConnection();
 
-            return Srv;
+            return server;
         }
 
         #endregion

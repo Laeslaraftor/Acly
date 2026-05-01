@@ -5,50 +5,59 @@ using System.Text.RegularExpressions;
 
 namespace Acly.Platforms
 {
-	/// <summary>
-	/// Класс для работы с текущей платформой
-	/// </summary>
-	public static class Platform
-	{
-		/// <summary>
-		/// Текущая платформа, на которой выполняется приложение
-		/// </summary>
-		public static RuntimePlatform Current => DetectPlatform();
+    /// <summary>
+    /// Класс для работы с текущей платформой
+    /// </summary>
+    public static class Platform
+    {
+        /// <summary>
+        /// Текущая платформа, на которой выполняется приложение
+        /// </summary>
+        public static RuntimePlatform Current
+        {
+            get
+            {
+                _current ??= DetectPlatform();
+                return _current.Value;
+            }
+        }
 
-		private static RuntimePlatform DetectPlatform()
-		{
-			string OS = Environment.OSVersion.ToString();
-			IEnumerable<string> Platforms = Enum.GetNames(typeof(RuntimePlatform));
-			bool IsArmProcessor = RuntimeInformation.ProcessArchitecture == Architecture.Arm || RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
+        private static RuntimePlatform? _current;
 
-			foreach (var Platform in Platforms)
-			{
-				Match Search = Regex.Match(OS, Platform.ToString());
+        private static RuntimePlatform DetectPlatform()
+        {
+            string os = Environment.OSVersion.ToString();
+            IEnumerable<string> platforms = Enum.GetNames(typeof(RuntimePlatform));
+            bool isArmProcessor = RuntimeInformation.ProcessArchitecture == Architecture.Arm || RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
 
-				if (Search.Success)
-				{
-					return Enum.Parse<RuntimePlatform>(Platform);
-				}
-			}
+            foreach (var platform in platforms)
+            {
+                Match search = Regex.Match(os, platform.ToString());
 
-			if (Environment.OSVersion.Platform == PlatformID.Unix && IsArmProcessor)
-			{
-				return RuntimePlatform.Android;
-			}
-			else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-			{
-				return RuntimePlatform.Linux;
-			}
-			else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-			{
-				return RuntimePlatform.MacOS;
-			}
-			else if (Environment.OSVersion.Platform == PlatformID.Unix)
-			{
-				return RuntimePlatform.IOS;
-			}
+                if (search.Success)
+                {
+                    return Enum.Parse<RuntimePlatform>(platform);
+                }
+            }
 
-			return RuntimePlatform.Unknown;
-		}
-	}
+            if (Environment.OSVersion.Platform == PlatformID.Unix && isArmProcessor)
+            {
+                return RuntimePlatform.Android;
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return RuntimePlatform.Linux;
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return RuntimePlatform.MacOS;
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                return RuntimePlatform.IOS;
+            }
+
+            return RuntimePlatform.Unknown;
+        }
+    }
 }

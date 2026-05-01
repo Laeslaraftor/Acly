@@ -6,61 +6,61 @@ using System.Threading.Tasks;
 
 namespace Acly.Player.Implementations
 {
-	/// <summary>
-	/// Класс для поиска реализаций <see cref="ISimplePlayer"/>
-	/// </summary>
-	public static class SimplePlayerImplementations
-	{
-		private static IEnumerable<Type>? _Implementations;
+    /// <summary>
+    /// Класс для поиска реализаций <see cref="ISimplePlayer"/>
+    /// </summary>
+    public static class SimplePlayerImplementations
+    {
+        private static IEnumerable<Type>? _implementations;
 
-		/// <summary>
-		/// Получить реализацию SimplePlayer для указанной платформы
-		/// </summary>
-		/// <param name="Platform">Платформа</param>
-		/// <returns>Тип с реализацией SimplePlayer</returns>
-		public static async Task<Type?> GetPlatformImplementation(RuntimePlatform Platform)
-		{
-			IEnumerable<Type> Implementations = await GetImplementations();
-			Type? Result = null;
+        /// <summary>
+        /// Получить реализацию SimplePlayer для указанной платформы
+        /// </summary>
+        /// <param name="platform">Платформа</param>
+        /// <returns>Тип с реализацией SimplePlayer</returns>
+        public static async Task<Type?> GetPlatformImplementation(RuntimePlatform platform)
+        {
+            IEnumerable<Type> implementations = await GetImplementations();
+            Type? result = null;
 
-			foreach (var Type in Implementations)
-			{
-				foreach (var Attribute in Type.GetCustomAttributes<SimplePlayerImplementationAttribute>())
-				{
-					if (Attribute.Platform.HasFlag(Platform))
-					{
-						Result = Type;
-						break;
-					}
-				}
-			}
+            foreach (var type in implementations)
+            {
+                foreach (var attribute in type.GetCustomAttributes<SimplePlayerImplementationAttribute>())
+                {
+                    if (attribute.Platform.HasFlag(platform))
+                    {
+                        result = type;
+                        break;
+                    }
+                }
+            }
 
-			if (Result?.IsImplementsInterface<ISimplePlayer>() == false)
-			{
-				throw new SimplePlayerImplementationException(Result);
-			}
+            if (result?.IsImplementsInterface<ISimplePlayer>() == false)
+            {
+                throw new SimplePlayerImplementationException(result);
+            }
 
-			return Result;
-		}
-		/// <summary>
-		/// Получить реализацию SimplePlayer для текущей платформы
-		/// </summary>
-		/// <returns>Реализация SimplePlayer для текущей платформы</returns>
-		public static async Task<Type?> GetCurrentPlatformImplementation()
-		{
-			return await GetPlatformImplementation(Platform.Current);
-		}
+            return result;
+        }
+        /// <summary>
+        /// Получить реализацию SimplePlayer для текущей платформы
+        /// </summary>
+        /// <returns>Реализация SimplePlayer для текущей платформы</returns>
+        public static async Task<Type?> GetCurrentPlatformImplementation()
+        {
+            return await GetPlatformImplementation(Platform.Current);
+        }
 
-		private static async Task<IEnumerable<Type>> GetImplementations()
-		{
-			if (_Implementations != null)
-			{
-				return _Implementations;
-			}
+        private static async Task<IEnumerable<Type>> GetImplementations()
+        {
+            if (_implementations != null)
+            {
+                return _implementations;
+            }
 
-			_Implementations = await Helper.GetTypesWithAttribute<SimplePlayerImplementationAttribute>();
+            _implementations = await Helper.GetTypesWithAttribute<SimplePlayerImplementationAttribute>();
 
-			return _Implementations;
-		}
-	}
+            return _implementations;
+        }
+    }
 }

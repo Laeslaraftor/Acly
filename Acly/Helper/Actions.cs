@@ -3,974 +3,971 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Acly
 {
-	public static partial class Helper
-	{
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T>(this Action<T>? Action, T Arg, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2>(this Action<T1, T2>? Action, T1 Arg1, T2 Arg2, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <typeparam name="T3">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="Arg3">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2, T3>(this Action<T1, T2, T3>? Action, T1 Arg1, T2 Arg2, T3 Arg3, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2, Arg3);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <typeparam name="T3">Тип аргумента</typeparam>
-		/// <typeparam name="T4">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="Arg3">Аргумент, принимаемый действием</param>
-		/// <param name="Arg4">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2, T3, T4>(this Action<T1, T2, T3, T4>? Action, T1 Arg1, T2 Arg2, T3 Arg3, T4 Arg4, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2, Arg3, Arg4);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <typeparam name="T3">Тип аргумента</typeparam>
-		/// <typeparam name="T4">Тип аргумента</typeparam>
-		/// <typeparam name="T5">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="Arg3">Аргумент, принимаемый действием</param>
-		/// <param name="Arg4">Аргумент, принимаемый действием</param>
-		/// <param name="Arg5">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2, T3, T4, T5>(this Action<T1, T2, T3, T4, T5>? Action, T1 Arg1, T2 Arg2, T3 Arg3, T4 Arg4, T5 Arg5, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2, Arg3, Arg4, Arg5);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <typeparam name="T3">Тип аргумента</typeparam>
-		/// <typeparam name="T4">Тип аргумента</typeparam>
-		/// <typeparam name="T5">Тип аргумента</typeparam>
-		/// <typeparam name="T6">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="Arg3">Аргумент, принимаемый действием</param>
-		/// <param name="Arg4">Аргумент, принимаемый действием</param>
-		/// <param name="Arg5">Аргумент, принимаемый действием</param>
-		/// <param name="Arg6">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2, T3, T4, T5, T6>(this Action<T1, T2, T3, T4, T5, T6>? Action, T1 Arg1, T2 Arg2, T3 Arg3, T4 Arg4, T5 Arg5, T6 Arg6, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <typeparam name="T3">Тип аргумента</typeparam>
-		/// <typeparam name="T4">Тип аргумента</typeparam>
-		/// <typeparam name="T5">Тип аргумента</typeparam>
-		/// <typeparam name="T6">Тип аргумента</typeparam>
-		/// <typeparam name="T7">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="Arg3">Аргумент, принимаемый действием</param>
-		/// <param name="Arg4">Аргумент, принимаемый действием</param>
-		/// <param name="Arg5">Аргумент, принимаемый действием</param>
-		/// <param name="Arg6">Аргумент, принимаемый действием</param>
-		/// <param name="Arg7">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7>(this Action<T1, T2, T3, T4, T5, T6, T7>? Action, T1 Arg1, T2 Arg2, T3 Arg3, T4 Arg4, T5 Arg5, T6 Arg6, T7 Arg7, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <typeparam name="T3">Тип аргумента</typeparam>
-		/// <typeparam name="T4">Тип аргумента</typeparam>
-		/// <typeparam name="T5">Тип аргумента</typeparam>
-		/// <typeparam name="T6">Тип аргумента</typeparam>
-		/// <typeparam name="T7">Тип аргумента</typeparam>
-		/// <typeparam name="T8">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="Arg3">Аргумент, принимаемый действием</param>
-		/// <param name="Arg4">Аргумент, принимаемый действием</param>
-		/// <param name="Arg5">Аргумент, принимаемый действием</param>
-		/// <param name="Arg6">Аргумент, принимаемый действием</param>
-		/// <param name="Arg7">Аргумент, принимаемый действием</param>
-		/// <param name="Arg8">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8>(this Action<T1, T2, T3, T4, T5, T6, T7, T8>? Action, T1 Arg1, T2 Arg2, T3 Arg3, T4 Arg4, T5 Arg5, T6 Arg6, T7 Arg7, T8 Arg8, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <typeparam name="T3">Тип аргумента</typeparam>
-		/// <typeparam name="T4">Тип аргумента</typeparam>
-		/// <typeparam name="T5">Тип аргумента</typeparam>
-		/// <typeparam name="T6">Тип аргумента</typeparam>
-		/// <typeparam name="T7">Тип аргумента</typeparam>
-		/// <typeparam name="T8">Тип аргумента</typeparam>
-		/// <typeparam name="T9">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="Arg3">Аргумент, принимаемый действием</param>
-		/// <param name="Arg4">Аргумент, принимаемый действием</param>
-		/// <param name="Arg5">Аргумент, принимаемый действием</param>
-		/// <param name="Arg6">Аргумент, принимаемый действием</param>
-		/// <param name="Arg7">Аргумент, принимаемый действием</param>
-		/// <param name="Arg8">Аргумент, принимаемый действием</param>
-		/// <param name="Arg9">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9>? Action, T1 Arg1, T2 Arg2, T3 Arg3, T4 Arg4, T5 Arg5, T6 Arg6, T7 Arg7, T8 Arg8, T9 Arg9, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <typeparam name="T3">Тип аргумента</typeparam>
-		/// <typeparam name="T4">Тип аргумента</typeparam>
-		/// <typeparam name="T5">Тип аргумента</typeparam>
-		/// <typeparam name="T6">Тип аргумента</typeparam>
-		/// <typeparam name="T7">Тип аргумента</typeparam>
-		/// <typeparam name="T8">Тип аргумента</typeparam>
-		/// <typeparam name="T9">Тип аргумента</typeparam>
-		/// <typeparam name="T10">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="Arg3">Аргумент, принимаемый действием</param>
-		/// <param name="Arg4">Аргумент, принимаемый действием</param>
-		/// <param name="Arg5">Аргумент, принимаемый действием</param>
-		/// <param name="Arg6">Аргумент, принимаемый действием</param>
-		/// <param name="Arg7">Аргумент, принимаемый действием</param>
-		/// <param name="Arg8">Аргумент, принимаемый действием</param>
-		/// <param name="Arg9">Аргумент, принимаемый действием</param>
-		/// <param name="Arg10">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>? Action, T1 Arg1, T2 Arg2, T3 Arg3, T4 Arg4, T5 Arg5, T6 Arg6, T7 Arg7, T8 Arg8, T9 Arg9, T10 Arg10, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <typeparam name="T3">Тип аргумента</typeparam>
-		/// <typeparam name="T4">Тип аргумента</typeparam>
-		/// <typeparam name="T5">Тип аргумента</typeparam>
-		/// <typeparam name="T6">Тип аргумента</typeparam>
-		/// <typeparam name="T7">Тип аргумента</typeparam>
-		/// <typeparam name="T8">Тип аргумента</typeparam>
-		/// <typeparam name="T9">Тип аргумента</typeparam>
-		/// <typeparam name="T10">Тип аргумента</typeparam>
-		/// <typeparam name="T11">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="Arg3">Аргумент, принимаемый действием</param>
-		/// <param name="Arg4">Аргумент, принимаемый действием</param>
-		/// <param name="Arg5">Аргумент, принимаемый действием</param>
-		/// <param name="Arg6">Аргумент, принимаемый действием</param>
-		/// <param name="Arg7">Аргумент, принимаемый действием</param>
-		/// <param name="Arg8">Аргумент, принимаемый действием</param>
-		/// <param name="Arg9">Аргумент, принимаемый действием</param>
-		/// <param name="Arg10">Аргумент, принимаемый действием</param>
-		/// <param name="Arg11">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>? Action, T1 Arg1, T2 Arg2, T3 Arg3, T4 Arg4, T5 Arg5, T6 Arg6, T7 Arg7, T8 Arg8, T9 Arg9, T10 Arg10, T11 Arg11, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <typeparam name="T3">Тип аргумента</typeparam>
-		/// <typeparam name="T4">Тип аргумента</typeparam>
-		/// <typeparam name="T5">Тип аргумента</typeparam>
-		/// <typeparam name="T6">Тип аргумента</typeparam>
-		/// <typeparam name="T7">Тип аргумента</typeparam>
-		/// <typeparam name="T8">Тип аргумента</typeparam>
-		/// <typeparam name="T9">Тип аргумента</typeparam>
-		/// <typeparam name="T10">Тип аргумента</typeparam>
-		/// <typeparam name="T11">Тип аргумента</typeparam>
-		/// <typeparam name="T12">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="Arg3">Аргумент, принимаемый действием</param>
-		/// <param name="Arg4">Аргумент, принимаемый действием</param>
-		/// <param name="Arg5">Аргумент, принимаемый действием</param>
-		/// <param name="Arg6">Аргумент, принимаемый действием</param>
-		/// <param name="Arg7">Аргумент, принимаемый действием</param>
-		/// <param name="Arg8">Аргумент, принимаемый действием</param>
-		/// <param name="Arg9">Аргумент, принимаемый действием</param>
-		/// <param name="Arg10">Аргумент, принимаемый действием</param>
-		/// <param name="Arg11">Аргумент, принимаемый действием</param>
-		/// <param name="Arg12">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>? Action, T1 Arg1, T2 Arg2, T3 Arg3, T4 Arg4, T5 Arg5, T6 Arg6, T7 Arg7, T8 Arg8, T9 Arg9, T10 Arg10, T11 Arg11, T12 Arg12, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <typeparam name="T3">Тип аргумента</typeparam>
-		/// <typeparam name="T4">Тип аргумента</typeparam>
-		/// <typeparam name="T5">Тип аргумента</typeparam>
-		/// <typeparam name="T6">Тип аргумента</typeparam>
-		/// <typeparam name="T7">Тип аргумента</typeparam>
-		/// <typeparam name="T8">Тип аргумента</typeparam>
-		/// <typeparam name="T9">Тип аргумента</typeparam>
-		/// <typeparam name="T10">Тип аргумента</typeparam>
-		/// <typeparam name="T11">Тип аргумента</typeparam>
-		/// <typeparam name="T12">Тип аргумента</typeparam>
-		/// <typeparam name="T13">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="Arg3">Аргумент, принимаемый действием</param>
-		/// <param name="Arg4">Аргумент, принимаемый действием</param>
-		/// <param name="Arg5">Аргумент, принимаемый действием</param>
-		/// <param name="Arg6">Аргумент, принимаемый действием</param>
-		/// <param name="Arg7">Аргумент, принимаемый действием</param>
-		/// <param name="Arg8">Аргумент, принимаемый действием</param>
-		/// <param name="Arg9">Аргумент, принимаемый действием</param>
-		/// <param name="Arg10">Аргумент, принимаемый действием</param>
-		/// <param name="Arg11">Аргумент, принимаемый действием</param>
-		/// <param name="Arg12">Аргумент, принимаемый действием</param>
-		/// <param name="Arg13">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>? Action, T1 Arg1, T2 Arg2, T3 Arg3, T4 Arg4, T5 Arg5, T6 Arg6, T7 Arg7, T8 Arg8, T9 Arg9, T10 Arg10, T11 Arg11, T12 Arg12, T13 Arg13, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <typeparam name="T3">Тип аргумента</typeparam>
-		/// <typeparam name="T4">Тип аргумента</typeparam>
-		/// <typeparam name="T5">Тип аргумента</typeparam>
-		/// <typeparam name="T6">Тип аргумента</typeparam>
-		/// <typeparam name="T7">Тип аргумента</typeparam>
-		/// <typeparam name="T8">Тип аргумента</typeparam>
-		/// <typeparam name="T9">Тип аргумента</typeparam>
-		/// <typeparam name="T10">Тип аргумента</typeparam>
-		/// <typeparam name="T11">Тип аргумента</typeparam>
-		/// <typeparam name="T12">Тип аргумента</typeparam>
-		/// <typeparam name="T13">Тип аргумента</typeparam>
-		/// <typeparam name="T14">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="Arg3">Аргумент, принимаемый действием</param>
-		/// <param name="Arg4">Аргумент, принимаемый действием</param>
-		/// <param name="Arg5">Аргумент, принимаемый действием</param>
-		/// <param name="Arg6">Аргумент, принимаемый действием</param>
-		/// <param name="Arg7">Аргумент, принимаемый действием</param>
-		/// <param name="Arg8">Аргумент, принимаемый действием</param>
-		/// <param name="Arg9">Аргумент, принимаемый действием</param>
-		/// <param name="Arg10">Аргумент, принимаемый действием</param>
-		/// <param name="Arg11">Аргумент, принимаемый действием</param>
-		/// <param name="Arg12">Аргумент, принимаемый действием</param>
-		/// <param name="Arg13">Аргумент, принимаемый действием</param>
-		/// <param name="Arg14">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>? Action, T1 Arg1, T2 Arg2, T3 Arg3, T4 Arg4, T5 Arg5, T6 Arg6, T7 Arg7, T8 Arg8, T9 Arg9, T10 Arg10, T11 Arg11, T12 Arg12, T13 Arg13, T14 Arg14, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <typeparam name="T3">Тип аргумента</typeparam>
-		/// <typeparam name="T4">Тип аргумента</typeparam>
-		/// <typeparam name="T5">Тип аргумента</typeparam>
-		/// <typeparam name="T6">Тип аргумента</typeparam>
-		/// <typeparam name="T7">Тип аргумента</typeparam>
-		/// <typeparam name="T8">Тип аргумента</typeparam>
-		/// <typeparam name="T9">Тип аргумента</typeparam>
-		/// <typeparam name="T10">Тип аргумента</typeparam>
-		/// <typeparam name="T11">Тип аргумента</typeparam>
-		/// <typeparam name="T12">Тип аргумента</typeparam>
-		/// <typeparam name="T13">Тип аргумента</typeparam>
-		/// <typeparam name="T14">Тип аргумента</typeparam>
-		/// <typeparam name="T15">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="Arg3">Аргумент, принимаемый действием</param>
-		/// <param name="Arg4">Аргумент, принимаемый действием</param>
-		/// <param name="Arg5">Аргумент, принимаемый действием</param>
-		/// <param name="Arg6">Аргумент, принимаемый действием</param>
-		/// <param name="Arg7">Аргумент, принимаемый действием</param>
-		/// <param name="Arg8">Аргумент, принимаемый действием</param>
-		/// <param name="Arg9">Аргумент, принимаемый действием</param>
-		/// <param name="Arg10">Аргумент, принимаемый действием</param>
-		/// <param name="Arg11">Аргумент, принимаемый действием</param>
-		/// <param name="Arg12">Аргумент, принимаемый действием</param>
-		/// <param name="Arg13">Аргумент, принимаемый действием</param>
-		/// <param name="Arg14">Аргумент, принимаемый действием</param>
-		/// <param name="Arg15">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>? Action, T1 Arg1, T2 Arg2, T3 Arg3, T4 Arg4, T5 Arg5, T6 Arg6, T7 Arg7, T8 Arg8, T9 Arg9, T10 Arg10, T11 Arg11, T12 Arg12, T13 Arg13, T14 Arg14, T15 Arg15, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-		/// <summary>
-		/// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-		/// </summary>
-		/// <typeparam name="T1">Тип аргумента</typeparam>
-		/// <typeparam name="T2">Тип аргумента</typeparam>
-		/// <typeparam name="T3">Тип аргумента</typeparam>
-		/// <typeparam name="T4">Тип аргумента</typeparam>
-		/// <typeparam name="T5">Тип аргумента</typeparam>
-		/// <typeparam name="T6">Тип аргумента</typeparam>
-		/// <typeparam name="T7">Тип аргумента</typeparam>
-		/// <typeparam name="T8">Тип аргумента</typeparam>
-		/// <typeparam name="T9">Тип аргумента</typeparam>
-		/// <typeparam name="T10">Тип аргумента</typeparam>
-		/// <typeparam name="T11">Тип аргумента</typeparam>
-		/// <typeparam name="T12">Тип аргумента</typeparam>
-		/// <typeparam name="T13">Тип аргумента</typeparam>
-		/// <typeparam name="T14">Тип аргумента</typeparam>
-		/// <typeparam name="T15">Тип аргумента</typeparam>
-		/// <typeparam name="T16">Тип аргумента</typeparam>
-		/// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-		/// <param name="Arg1">Аргумент, принимаемый действием</param>
-		/// <param name="Arg2">Аргумент, принимаемый действием</param>
-		/// <param name="Arg3">Аргумент, принимаемый действием</param>
-		/// <param name="Arg4">Аргумент, принимаемый действием</param>
-		/// <param name="Arg5">Аргумент, принимаемый действием</param>
-		/// <param name="Arg6">Аргумент, принимаемый действием</param>
-		/// <param name="Arg7">Аргумент, принимаемый действием</param>
-		/// <param name="Arg8">Аргумент, принимаемый действием</param>
-		/// <param name="Arg9">Аргумент, принимаемый действием</param>
-		/// <param name="Arg10">Аргумент, принимаемый действием</param>
-		/// <param name="Arg11">Аргумент, принимаемый действием</param>
-		/// <param name="Arg12">Аргумент, принимаемый действием</param>
-		/// <param name="Arg13">Аргумент, принимаемый действием</param>
-		/// <param name="Arg14">Аргумент, принимаемый действием</param>
-		/// <param name="Arg15">Аргумент, принимаемый действием</param>
-		/// <param name="Arg16">Аргумент, принимаемый действием</param>
-		/// <param name="InvokeException"></param>
-		/// <returns>Успешно ли выполнено действие</returns>
-		public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>? Action, T1 Arg1, T2 Arg2, T3 Arg3, T4 Arg4, T5 Arg5, T6 Arg6, T7 Arg7, T8 Arg8, T9 Arg9, T10 Arg10, T11 Arg11, T12 Arg12, T13 Arg13, T14 Arg14, T15 Arg15, T16 Arg16, [NotNullWhen(false)] out Exception? InvokeException)
-		{
-			try
-			{
-				Action?.Invoke(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16);
-			}
-			catch (Exception Error)
-			{
-				InvokeException = Error;
-				return false;
-			}
-
-			InvokeException = null;
-			return true;
-		}
-
+    public static partial class Helper
+    {
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="InvokeException">Исключение, которое вызванное выполняемым действием. Если исключения не возникало - NULL</param>
-        /// <param name="Arguments">Аргументы делегата</param>
+        /// <typeparam name="T">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, [NotNullWhen(false)] out Exception? InvokeException, params object[] Arguments) where TAction : Delegate?
+        public static bool TryInvoke<T>(this Action<T>? action, T arg, [NotNullWhen(false)] out Exception? invokeException)
         {
             try
             {
-                Action?.DynamicInvoke(Arguments);
+                action?.Invoke(arg);
             }
-            catch (Exception Error)
+            catch (Exception error)
             {
-                InvokeException = Error;
+                invokeException = error;
                 return false;
             }
 
-            InvokeException = null;
+            invokeException = null;
             return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="InvokeException">Исключение, которое вызванное выполняемым действием. Если исключения не возникало - NULL</param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2>(this Action<T1, T2>? action, T1 arg1, T2 arg2, [NotNullWhen(false)] out Exception? invokeException)
         {
             try
             {
-                Action?.DynamicInvoke();
+                action?.Invoke(arg1, arg2);
             }
-            catch (Exception Error)
+            catch (Exception error)
             {
-                InvokeException = Error;
+                invokeException = error;
                 return false;
             }
 
-            InvokeException = null;
+            invokeException = null;
             return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <typeparam name="T3">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2, T3>(this Action<T1, T2, T3>? action, T1 arg1, T2 arg2, T3 arg3, [NotNullWhen(false)] out Exception? invokeException)
         {
-            return Action.TryInvoke(out InvokeException, Arg1);
+            try
+            {
+                action?.Invoke(arg1, arg2, arg3);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
+
+            invokeException = null;
+            return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <typeparam name="T3">Тип аргумента</typeparam>
+        /// <typeparam name="T4">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2, T3, T4>(this Action<T1, T2, T3, T4>? action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, [NotNullWhen(false)] out Exception? invokeException)
         {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2);
+            try
+            {
+                action?.Invoke(arg1, arg2, arg3, arg4);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
+
+            invokeException = null;
+            return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="Arg3">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <typeparam name="T3">Тип аргумента</typeparam>
+        /// <typeparam name="T4">Тип аргумента</typeparam>
+        /// <typeparam name="T5">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, object Arg3, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2, T3, T4, T5>(this Action<T1, T2, T3, T4, T5>? action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, [NotNullWhen(false)] out Exception? invokeException)
         {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2, Arg3);
+            try
+            {
+                action?.Invoke(arg1, arg2, arg3, arg4, arg5);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
+
+            invokeException = null;
+            return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="Arg3">Аргумент, принимаемый действием</param>
-        /// <param name="Arg4">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <typeparam name="T3">Тип аргумента</typeparam>
+        /// <typeparam name="T4">Тип аргумента</typeparam>
+        /// <typeparam name="T5">Тип аргумента</typeparam>
+        /// <typeparam name="T6">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, object Arg3, object Arg4, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2, T3, T4, T5, T6>(this Action<T1, T2, T3, T4, T5, T6>? action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, [NotNullWhen(false)] out Exception? invokeException)
         {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2, Arg3, Arg4);
+            try
+            {
+                action?.Invoke(arg1, arg2, arg3, arg4, arg5, arg6);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
+
+            invokeException = null;
+            return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="Arg3">Аргумент, принимаемый действием</param>
-        /// <param name="Arg4">Аргумент, принимаемый действием</param>
-        /// <param name="Arg5">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <typeparam name="T3">Тип аргумента</typeparam>
+        /// <typeparam name="T4">Тип аргумента</typeparam>
+        /// <typeparam name="T5">Тип аргумента</typeparam>
+        /// <typeparam name="T6">Тип аргумента</typeparam>
+        /// <typeparam name="T7">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, object Arg3, object Arg4, object Arg5, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7>(this Action<T1, T2, T3, T4, T5, T6, T7>? action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, [NotNullWhen(false)] out Exception? invokeException)
         {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2, Arg3, Arg4, Arg5);
+            try
+            {
+                action?.Invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
+
+            invokeException = null;
+            return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="Arg3">Аргумент, принимаемый действием</param>
-        /// <param name="Arg4">Аргумент, принимаемый действием</param>
-        /// <param name="Arg5">Аргумент, принимаемый действием</param>
-        /// <param name="Arg6">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <typeparam name="T3">Тип аргумента</typeparam>
+        /// <typeparam name="T4">Тип аргумента</typeparam>
+        /// <typeparam name="T5">Тип аргумента</typeparam>
+        /// <typeparam name="T6">Тип аргумента</typeparam>
+        /// <typeparam name="T7">Тип аргумента</typeparam>
+        /// <typeparam name="T8">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, object Arg3, object Arg4, object Arg5, object Arg6, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8>(this Action<T1, T2, T3, T4, T5, T6, T7, T8>? action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, [NotNullWhen(false)] out Exception? invokeException)
         {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6);
+            try
+            {
+                action?.Invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
+
+            invokeException = null;
+            return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="Arg3">Аргумент, принимаемый действием</param>
-        /// <param name="Arg4">Аргумент, принимаемый действием</param>
-        /// <param name="Arg5">Аргумент, принимаемый действием</param>
-        /// <param name="Arg6">Аргумент, принимаемый действием</param>
-        /// <param name="Arg7">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <typeparam name="T3">Тип аргумента</typeparam>
+        /// <typeparam name="T4">Тип аргумента</typeparam>
+        /// <typeparam name="T5">Тип аргумента</typeparam>
+        /// <typeparam name="T6">Тип аргумента</typeparam>
+        /// <typeparam name="T7">Тип аргумента</typeparam>
+        /// <typeparam name="T8">Тип аргумента</typeparam>
+        /// <typeparam name="T9">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, object Arg3, object Arg4, object Arg5, object Arg6, object Arg7, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9>? action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, [NotNullWhen(false)] out Exception? invokeException)
         {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7);
+            try
+            {
+                action?.Invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
+
+            invokeException = null;
+            return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="Arg3">Аргумент, принимаемый действием</param>
-        /// <param name="Arg4">Аргумент, принимаемый действием</param>
-        /// <param name="Arg5">Аргумент, принимаемый действием</param>
-        /// <param name="Arg6">Аргумент, принимаемый действием</param>
-        /// <param name="Arg7">Аргумент, принимаемый действием</param>
-        /// <param name="Arg8">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <typeparam name="T3">Тип аргумента</typeparam>
+        /// <typeparam name="T4">Тип аргумента</typeparam>
+        /// <typeparam name="T5">Тип аргумента</typeparam>
+        /// <typeparam name="T6">Тип аргумента</typeparam>
+        /// <typeparam name="T7">Тип аргумента</typeparam>
+        /// <typeparam name="T8">Тип аргумента</typeparam>
+        /// <typeparam name="T9">Тип аргумента</typeparam>
+        /// <typeparam name="T10">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="arg10">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, object Arg3, object Arg4, object Arg5, object Arg6, object Arg7, object Arg8, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>? action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, [NotNullWhen(false)] out Exception? invokeException)
         {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8);
+            try
+            {
+                action?.Invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
+
+            invokeException = null;
+            return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="Arg3">Аргумент, принимаемый действием</param>
-        /// <param name="Arg4">Аргумент, принимаемый действием</param>
-        /// <param name="Arg5">Аргумент, принимаемый действием</param>
-        /// <param name="Arg6">Аргумент, принимаемый действием</param>
-        /// <param name="Arg7">Аргумент, принимаемый действием</param>
-        /// <param name="Arg8">Аргумент, принимаемый действием</param>
-        /// <param name="Arg9">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <typeparam name="T3">Тип аргумента</typeparam>
+        /// <typeparam name="T4">Тип аргумента</typeparam>
+        /// <typeparam name="T5">Тип аргумента</typeparam>
+        /// <typeparam name="T6">Тип аргумента</typeparam>
+        /// <typeparam name="T7">Тип аргумента</typeparam>
+        /// <typeparam name="T8">Тип аргумента</typeparam>
+        /// <typeparam name="T9">Тип аргумента</typeparam>
+        /// <typeparam name="T10">Тип аргумента</typeparam>
+        /// <typeparam name="T11">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="arg10">Аргумент, принимаемый действием</param>
+        /// <param name="arg11">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, object Arg3, object Arg4, object Arg5, object Arg6, object Arg7, object Arg8, object Arg9, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>? action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, [NotNullWhen(false)] out Exception? invokeException)
         {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9);
+            try
+            {
+                action?.Invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
+
+            invokeException = null;
+            return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="Arg3">Аргумент, принимаемый действием</param>
-        /// <param name="Arg4">Аргумент, принимаемый действием</param>
-        /// <param name="Arg5">Аргумент, принимаемый действием</param>
-        /// <param name="Arg6">Аргумент, принимаемый действием</param>
-        /// <param name="Arg7">Аргумент, принимаемый действием</param>
-        /// <param name="Arg8">Аргумент, принимаемый действием</param>
-        /// <param name="Arg9">Аргумент, принимаемый действием</param>
-        /// <param name="Arg10">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <typeparam name="T3">Тип аргумента</typeparam>
+        /// <typeparam name="T4">Тип аргумента</typeparam>
+        /// <typeparam name="T5">Тип аргумента</typeparam>
+        /// <typeparam name="T6">Тип аргумента</typeparam>
+        /// <typeparam name="T7">Тип аргумента</typeparam>
+        /// <typeparam name="T8">Тип аргумента</typeparam>
+        /// <typeparam name="T9">Тип аргумента</typeparam>
+        /// <typeparam name="T10">Тип аргумента</typeparam>
+        /// <typeparam name="T11">Тип аргумента</typeparam>
+        /// <typeparam name="T12">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="arg10">Аргумент, принимаемый действием</param>
+        /// <param name="arg11">Аргумент, принимаемый действием</param>
+        /// <param name="arg12">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, object Arg3, object Arg4, object Arg5, object Arg6, object Arg7, object Arg8, object Arg9, object Arg10, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>? action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, [NotNullWhen(false)] out Exception? invokeException)
         {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10);
+            try
+            {
+                action?.Invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
+
+            invokeException = null;
+            return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="Arg3">Аргумент, принимаемый действием</param>
-        /// <param name="Arg4">Аргумент, принимаемый действием</param>
-        /// <param name="Arg5">Аргумент, принимаемый действием</param>
-        /// <param name="Arg6">Аргумент, принимаемый действием</param>
-        /// <param name="Arg7">Аргумент, принимаемый действием</param>
-        /// <param name="Arg8">Аргумент, принимаемый действием</param>
-        /// <param name="Arg9">Аргумент, принимаемый действием</param>
-        /// <param name="Arg10">Аргумент, принимаемый действием</param>
-        /// <param name="Arg11">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <typeparam name="T3">Тип аргумента</typeparam>
+        /// <typeparam name="T4">Тип аргумента</typeparam>
+        /// <typeparam name="T5">Тип аргумента</typeparam>
+        /// <typeparam name="T6">Тип аргумента</typeparam>
+        /// <typeparam name="T7">Тип аргумента</typeparam>
+        /// <typeparam name="T8">Тип аргумента</typeparam>
+        /// <typeparam name="T9">Тип аргумента</typeparam>
+        /// <typeparam name="T10">Тип аргумента</typeparam>
+        /// <typeparam name="T11">Тип аргумента</typeparam>
+        /// <typeparam name="T12">Тип аргумента</typeparam>
+        /// <typeparam name="T13">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="arg10">Аргумент, принимаемый действием</param>
+        /// <param name="arg11">Аргумент, принимаемый действием</param>
+        /// <param name="arg12">Аргумент, принимаемый действием</param>
+        /// <param name="arg13">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, object Arg3, object Arg4, object Arg5, object Arg6, object Arg7, object Arg8, object Arg9, object Arg10, object Arg11, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>? action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, [NotNullWhen(false)] out Exception? invokeException)
         {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11);
+            try
+            {
+                action?.Invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
+
+            invokeException = null;
+            return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="Arg3">Аргумент, принимаемый действием</param>
-        /// <param name="Arg4">Аргумент, принимаемый действием</param>
-        /// <param name="Arg5">Аргумент, принимаемый действием</param>
-        /// <param name="Arg6">Аргумент, принимаемый действием</param>
-        /// <param name="Arg7">Аргумент, принимаемый действием</param>
-        /// <param name="Arg8">Аргумент, принимаемый действием</param>
-        /// <param name="Arg9">Аргумент, принимаемый действием</param>
-        /// <param name="Arg10">Аргумент, принимаемый действием</param>
-        /// <param name="Arg11">Аргумент, принимаемый действием</param>
-        /// <param name="Arg12">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <typeparam name="T3">Тип аргумента</typeparam>
+        /// <typeparam name="T4">Тип аргумента</typeparam>
+        /// <typeparam name="T5">Тип аргумента</typeparam>
+        /// <typeparam name="T6">Тип аргумента</typeparam>
+        /// <typeparam name="T7">Тип аргумента</typeparam>
+        /// <typeparam name="T8">Тип аргумента</typeparam>
+        /// <typeparam name="T9">Тип аргумента</typeparam>
+        /// <typeparam name="T10">Тип аргумента</typeparam>
+        /// <typeparam name="T11">Тип аргумента</typeparam>
+        /// <typeparam name="T12">Тип аргумента</typeparam>
+        /// <typeparam name="T13">Тип аргумента</typeparam>
+        /// <typeparam name="T14">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="arg10">Аргумент, принимаемый действием</param>
+        /// <param name="arg11">Аргумент, принимаемый действием</param>
+        /// <param name="arg12">Аргумент, принимаемый действием</param>
+        /// <param name="arg13">Аргумент, принимаемый действием</param>
+        /// <param name="arg14">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, object Arg3, object Arg4, object Arg5, object Arg6, object Arg7, object Arg8, object Arg9, object Arg10, object Arg11, object Arg12, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>? action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, [NotNullWhen(false)] out Exception? invokeException)
         {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12);
+            try
+            {
+                action?.Invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
+
+            invokeException = null;
+            return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="Arg3">Аргумент, принимаемый действием</param>
-        /// <param name="Arg4">Аргумент, принимаемый действием</param>
-        /// <param name="Arg5">Аргумент, принимаемый действием</param>
-        /// <param name="Arg6">Аргумент, принимаемый действием</param>
-        /// <param name="Arg7">Аргумент, принимаемый действием</param>
-        /// <param name="Arg8">Аргумент, принимаемый действием</param>
-        /// <param name="Arg9">Аргумент, принимаемый действием</param>
-        /// <param name="Arg10">Аргумент, принимаемый действием</param>
-        /// <param name="Arg11">Аргумент, принимаемый действием</param>
-        /// <param name="Arg12">Аргумент, принимаемый действием</param>
-        /// <param name="Arg13">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <typeparam name="T3">Тип аргумента</typeparam>
+        /// <typeparam name="T4">Тип аргумента</typeparam>
+        /// <typeparam name="T5">Тип аргумента</typeparam>
+        /// <typeparam name="T6">Тип аргумента</typeparam>
+        /// <typeparam name="T7">Тип аргумента</typeparam>
+        /// <typeparam name="T8">Тип аргумента</typeparam>
+        /// <typeparam name="T9">Тип аргумента</typeparam>
+        /// <typeparam name="T10">Тип аргумента</typeparam>
+        /// <typeparam name="T11">Тип аргумента</typeparam>
+        /// <typeparam name="T12">Тип аргумента</typeparam>
+        /// <typeparam name="T13">Тип аргумента</typeparam>
+        /// <typeparam name="T14">Тип аргумента</typeparam>
+        /// <typeparam name="T15">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="arg10">Аргумент, принимаемый действием</param>
+        /// <param name="arg11">Аргумент, принимаемый действием</param>
+        /// <param name="arg12">Аргумент, принимаемый действием</param>
+        /// <param name="arg13">Аргумент, принимаемый действием</param>
+        /// <param name="arg14">Аргумент, принимаемый действием</param>
+        /// <param name="arg15">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, object Arg3, object Arg4, object Arg5, object Arg6, object Arg7, object Arg8, object Arg9, object Arg10, object Arg11, object Arg12, object Arg13, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>? action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, [NotNullWhen(false)] out Exception? invokeException)
         {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13);
+            try
+            {
+                action?.Invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
+
+            invokeException = null;
+            return true;
         }
         /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
         /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="Arg3">Аргумент, принимаемый действием</param>
-        /// <param name="Arg4">Аргумент, принимаемый действием</param>
-        /// <param name="Arg5">Аргумент, принимаемый действием</param>
-        /// <param name="Arg6">Аргумент, принимаемый действием</param>
-        /// <param name="Arg7">Аргумент, принимаемый действием</param>
-        /// <param name="Arg8">Аргумент, принимаемый действием</param>
-        /// <param name="Arg9">Аргумент, принимаемый действием</param>
-        /// <param name="Arg10">Аргумент, принимаемый действием</param>
-        /// <param name="Arg11">Аргумент, принимаемый действием</param>
-        /// <param name="Arg12">Аргумент, принимаемый действием</param>
-        /// <param name="Arg13">Аргумент, принимаемый действием</param>
-        /// <param name="Arg14">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
+        /// <typeparam name="T1">Тип аргумента</typeparam>
+        /// <typeparam name="T2">Тип аргумента</typeparam>
+        /// <typeparam name="T3">Тип аргумента</typeparam>
+        /// <typeparam name="T4">Тип аргумента</typeparam>
+        /// <typeparam name="T5">Тип аргумента</typeparam>
+        /// <typeparam name="T6">Тип аргумента</typeparam>
+        /// <typeparam name="T7">Тип аргумента</typeparam>
+        /// <typeparam name="T8">Тип аргумента</typeparam>
+        /// <typeparam name="T9">Тип аргумента</typeparam>
+        /// <typeparam name="T10">Тип аргумента</typeparam>
+        /// <typeparam name="T11">Тип аргумента</typeparam>
+        /// <typeparam name="T12">Тип аргумента</typeparam>
+        /// <typeparam name="T13">Тип аргумента</typeparam>
+        /// <typeparam name="T14">Тип аргумента</typeparam>
+        /// <typeparam name="T15">Тип аргумента</typeparam>
+        /// <typeparam name="T16">Тип аргумента</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="arg10">Аргумент, принимаемый действием</param>
+        /// <param name="arg11">Аргумент, принимаемый действием</param>
+        /// <param name="arg12">Аргумент, принимаемый действием</param>
+        /// <param name="arg13">Аргумент, принимаемый действием</param>
+        /// <param name="arg14">Аргумент, принимаемый действием</param>
+        /// <param name="arg15">Аргумент, принимаемый действием</param>
+        /// <param name="arg16">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
         /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, object Arg3, object Arg4, object Arg5, object Arg6, object Arg7, object Arg8, object Arg9, object Arg10, object Arg11, object Arg12, object Arg13, object Arg14, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
+        public static bool TryInvoke<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>? action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, [NotNullWhen(false)] out Exception? invokeException)
         {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14);
-        }
-        /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-        /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="Arg3">Аргумент, принимаемый действием</param>
-        /// <param name="Arg4">Аргумент, принимаемый действием</param>
-        /// <param name="Arg5">Аргумент, принимаемый действием</param>
-        /// <param name="Arg6">Аргумент, принимаемый действием</param>
-        /// <param name="Arg7">Аргумент, принимаемый действием</param>
-        /// <param name="Arg8">Аргумент, принимаемый действием</param>
-        /// <param name="Arg9">Аргумент, принимаемый действием</param>
-        /// <param name="Arg10">Аргумент, принимаемый действием</param>
-        /// <param name="Arg11">Аргумент, принимаемый действием</param>
-        /// <param name="Arg12">Аргумент, принимаемый действием</param>
-        /// <param name="Arg13">Аргумент, принимаемый действием</param>
-        /// <param name="Arg14">Аргумент, принимаемый действием</param>
-        /// <param name="Arg15">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
-        /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, object Arg3, object Arg4, object Arg5, object Arg6, object Arg7, object Arg8, object Arg9, object Arg10, object Arg11, object Arg12, object Arg13, object Arg14, object Arg15, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
-        {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15);
-        }
-        /// <summary>
-        /// Попытаться выполнить <see cref="Action"/>. <paramref name="Action"/> может принимать NULL
-        /// </summary>
-        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
-        /// <param name="Action">Действие, которое необходимо попытаться выполнить</param>
-        /// <param name="Arg1">Аргумент, принимаемый действием</param>
-        /// <param name="Arg2">Аргумент, принимаемый действием</param>
-        /// <param name="Arg3">Аргумент, принимаемый действием</param>
-        /// <param name="Arg4">Аргумент, принимаемый действием</param>
-        /// <param name="Arg5">Аргумент, принимаемый действием</param>
-        /// <param name="Arg6">Аргумент, принимаемый действием</param>
-        /// <param name="Arg7">Аргумент, принимаемый действием</param>
-        /// <param name="Arg8">Аргумент, принимаемый действием</param>
-        /// <param name="Arg9">Аргумент, принимаемый действием</param>
-        /// <param name="Arg10">Аргумент, принимаемый действием</param>
-        /// <param name="Arg11">Аргумент, принимаемый действием</param>
-        /// <param name="Arg12">Аргумент, принимаемый действием</param>
-        /// <param name="Arg13">Аргумент, принимаемый действием</param>
-        /// <param name="Arg14">Аргумент, принимаемый действием</param>
-        /// <param name="Arg15">Аргумент, принимаемый действием</param>
-        /// <param name="Arg16">Аргумент, принимаемый действием</param>
-        /// <param name="InvokeException"></param>
-        /// <returns>Успешно ли выполнено действие</returns>
-        public static bool TryInvoke<TAction>(this TAction Action, object Arg1, object Arg2, object Arg3, object Arg4, object Arg5, object Arg6, object Arg7, object Arg8, object Arg9, object Arg10, object Arg11, object Arg12, object Arg13, object Arg14, object Arg15, object Arg16, [NotNullWhen(false)] out Exception? InvokeException) where TAction : Delegate?
-        {
-            return Action.TryInvoke(out InvokeException, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16);
+            try
+            {
+                action?.Invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
+
+            invokeException = null;
+            return true;
         }
 
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="invokeException">Исключение, которое вызванное выполняемым действием. Если исключения не возникало - NULL</param>
+        /// <param name="arguments">Аргументы делегата</param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, [NotNullWhen(false)] out Exception? invokeException, params object[] arguments) where TAction : Delegate?
+        {
+            try
+            {
+                action?.DynamicInvoke(arguments);
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
 
+            invokeException = null;
+            return true;
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="invokeException">Исключение, которое вызванное выполняемым действием. Если исключения не возникало - NULL</param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            try
+            {
+                action?.DynamicInvoke();
+            }
+            catch (Exception error)
+            {
+                invokeException = error;
+                return false;
+            }
 
+            invokeException = null;
+            return true;
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, object arg3, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2, arg3);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, object arg3, object arg4, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2, arg3, arg4);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, object arg3, object arg4, object arg5, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2, arg3, arg4, arg5);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2, arg3, arg4, arg5, arg6);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="arg10">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="arg10">Аргумент, принимаемый действием</param>
+        /// <param name="arg11">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="arg10">Аргумент, принимаемый действием</param>
+        /// <param name="arg11">Аргумент, принимаемый действием</param>
+        /// <param name="arg12">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="arg10">Аргумент, принимаемый действием</param>
+        /// <param name="arg11">Аргумент, принимаемый действием</param>
+        /// <param name="arg12">Аргумент, принимаемый действием</param>
+        /// <param name="arg13">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="arg10">Аргумент, принимаемый действием</param>
+        /// <param name="arg11">Аргумент, принимаемый действием</param>
+        /// <param name="arg12">Аргумент, принимаемый действием</param>
+        /// <param name="arg13">Аргумент, принимаемый действием</param>
+        /// <param name="arg14">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="arg10">Аргумент, принимаемый действием</param>
+        /// <param name="arg11">Аргумент, принимаемый действием</param>
+        /// <param name="arg12">Аргумент, принимаемый действием</param>
+        /// <param name="arg13">Аргумент, принимаемый действием</param>
+        /// <param name="arg14">Аргумент, принимаемый действием</param>
+        /// <param name="arg15">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
+        }
+        /// <summary>
+        /// Попытаться выполнить <see cref="Action"/>. <paramref name="action"/> может принимать NULL
+        /// </summary>
+        /// <typeparam name="TAction">Делегат для выполнения</typeparam>
+        /// <param name="action">Действие, которое необходимо попытаться выполнить</param>
+        /// <param name="arg1">Аргумент, принимаемый действием</param>
+        /// <param name="arg2">Аргумент, принимаемый действием</param>
+        /// <param name="arg3">Аргумент, принимаемый действием</param>
+        /// <param name="arg4">Аргумент, принимаемый действием</param>
+        /// <param name="arg5">Аргумент, принимаемый действием</param>
+        /// <param name="arg6">Аргумент, принимаемый действием</param>
+        /// <param name="arg7">Аргумент, принимаемый действием</param>
+        /// <param name="arg8">Аргумент, принимаемый действием</param>
+        /// <param name="arg9">Аргумент, принимаемый действием</param>
+        /// <param name="arg10">Аргумент, принимаемый действием</param>
+        /// <param name="arg11">Аргумент, принимаемый действием</param>
+        /// <param name="arg12">Аргумент, принимаемый действием</param>
+        /// <param name="arg13">Аргумент, принимаемый действием</param>
+        /// <param name="arg14">Аргумент, принимаемый действием</param>
+        /// <param name="arg15">Аргумент, принимаемый действием</param>
+        /// <param name="arg16">Аргумент, принимаемый действием</param>
+        /// <param name="invokeException"></param>
+        /// <returns>Успешно ли выполнено действие</returns>
+        public static bool TryInvoke<TAction>(this TAction action, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, [NotNullWhen(false)] out Exception? invokeException) where TAction : Delegate?
+        {
+            return action.TryInvoke(out invokeException, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16);
+        }
     }
 }

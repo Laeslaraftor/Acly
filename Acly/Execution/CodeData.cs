@@ -11,242 +11,247 @@ namespace Acly.Execution
         /// <summary>
         /// Записать <see cref="Boolean"/>
         /// </summary>
-        /// <param name="CodeStream">Код</param>
-        /// <param name="Value">Записываемое значение</param>
+        /// <param name="codeStream">Код</param>
+        /// <param name="value">Записываемое значение</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void Write(Stream CodeStream, bool Value)
+        public static void Write(Stream codeStream, bool value)
         {
-            if (CodeStream == null)
+            if (codeStream == null)
             {
-                throw new ArgumentNullException(nameof(CodeStream));
+                throw new ArgumentNullException(nameof(codeStream));
             }
 
-            byte ByteValue = 0;
+            byte byteValue = 0;
 
-            if (Value)
+            if (value)
             {
-                ByteValue = 1;
+                byteValue = 1;
             }
 
-            Write(CodeStream, CodeDataType.Bool, ByteValue);
+            Write(codeStream, CodeDataType.Bool, byteValue);
         }
         /// <summary>
         /// Записать <see cref="Byte"/>
         /// </summary>
-        /// <param name="CodeStream">Код</param>
-        /// <param name="Value">Записываемое значение</param>
+        /// <param name="codeStream">Код</param>
+        /// <param name="value">Записываемое значение</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void Write(Stream CodeStream, byte Value)
+        public static void Write(Stream codeStream, byte value)
         {
-            if (CodeStream == null)
+            if (codeStream == null)
             {
-                throw new ArgumentNullException(nameof(CodeStream));
+                throw new ArgumentNullException(nameof(codeStream));
             }
 
-            Write(CodeStream, CodeDataType.Byte, Value);
+            Write(codeStream, CodeDataType.Byte, value);
         }
         /// <summary>
         /// Записать <see cref="Int16"/>
         /// </summary>
-        /// <param name="CodeStream">Код</param>
-        /// <param name="Value">Записываемое значение</param>
+        /// <param name="codeStream">Код</param>
+        /// <param name="value">Записываемое значение</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void Write(Stream CodeStream, short Value)
+        public static void Write(Stream codeStream, short value)
         {
-            if (CodeStream == null)
+            if (codeStream == null)
             {
-                throw new ArgumentNullException(nameof(CodeStream));
+                throw new ArgumentNullException(nameof(codeStream));
             }
 
-            Write(CodeStream, CodeDataType.Short, BitConverter.GetBytes(Value));
+            Write(codeStream, CodeDataType.Short, BitConverter.GetBytes(value));
         }
         /// <summary>
         /// Записать <see cref="Int32"/>
         /// </summary>
-        /// <param name="CodeStream">Код</param>
-        /// <param name="Value">Записываемое значение</param>
+        /// <param name="codeStream">Код</param>
+        /// <param name="value">Записываемое значение</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void Write(Stream CodeStream, int Value)
+        public static void Write(Stream codeStream, int value)
         {
-            if (CodeStream == null)
+            if (codeStream == null)
             {
-                throw new ArgumentNullException(nameof(CodeStream));
+                throw new ArgumentNullException(nameof(codeStream));
             }
 
-            Write(CodeStream, CodeDataType.Int32, BitConverter.GetBytes(Value));
+            Write(codeStream, CodeDataType.Int32, BitConverter.GetBytes(value));
         }
         /// <summary>
         /// Записать <see cref="Int64"/>
         /// </summary>
-        /// <param name="CodeStream">Код</param>
-        /// <param name="Value">Записываемое значение</param>
+        /// <param name="codeStream">Код</param>
+        /// <param name="value">Записываемое значение</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void Write(Stream CodeStream, long Value)
+        public static void Write(Stream codeStream, long value)
         {
-            if (CodeStream == null)
+            if (codeStream == null)
             {
-                throw new ArgumentNullException(nameof(CodeStream));
+                throw new ArgumentNullException(nameof(codeStream));
             }
 
-            Write(CodeStream, CodeDataType.Int64, BitConverter.GetBytes(Value));
+            Write(codeStream, CodeDataType.Int64, BitConverter.GetBytes(value));
         }
         /// <summary>
         /// Записать <see cref="Char"/>
         /// </summary>
-        /// <param name="CodeStream">Код</param>
-        /// <param name="Value">Записываемое значение</param>
+        /// <param name="codeStream">Код</param>
+        /// <param name="value">Записываемое значение</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void Write(Stream CodeStream, char Value)
+        public static void Write(Stream codeStream, char value)
         {
-            if (CodeStream == null)
+            if (codeStream == null)
             {
-                throw new ArgumentNullException(nameof(CodeStream));
+                throw new ArgumentNullException(nameof(codeStream));
             }
 
-            Write(CodeStream, CodeDataType.Char, BitConverter.GetBytes(Value));
+            Write(codeStream, CodeDataType.Char, BitConverter.GetBytes(value));
         }
         /// <summary>
         /// Записать <see cref="Double"/>
         /// </summary>
-        /// <param name="CodeStream">Код</param>
-        /// <param name="Value">Записываемое значение</param>
+        /// <param name="codeStream">Код</param>
+        /// <param name="value">Записываемое значение</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void Write(Stream CodeStream, double Value)
+        public static void Write(Stream codeStream, double value)
         {
-            if (CodeStream == null)
+            if (codeStream == null)
             {
-                throw new ArgumentNullException(nameof(CodeStream));
+                throw new ArgumentNullException(nameof(codeStream));
             }
 
-            Write(CodeStream, CodeDataType.Double, BitConverter.GetBytes(Value));
+            Write(codeStream, CodeDataType.Double, BitConverter.GetBytes(value));
         }
         /// <summary>
         /// Записать <see cref="Single"/>
         /// </summary>
-        /// <param name="CodeStream">Код</param>
-        /// <param name="Value">Записываемое значение</param>
+        /// <param name="codeStream">Код</param>
+        /// <param name="value">Записываемое значение</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void Write(Stream CodeStream, float Value)
+        public static void Write(Stream codeStream, float value)
         {
-            if (CodeStream == null)
+            if (codeStream == null)
             {
-                throw new ArgumentNullException(nameof(CodeStream));
+                throw new ArgumentNullException(nameof(codeStream));
             }
 
-            Write(CodeStream, CodeDataType.Float, BitConverter.GetBytes(Value));
+            Write(codeStream, CodeDataType.Float, BitConverter.GetBytes(value));
         }
         /// <summary>
         /// Записать <see cref="String"/>
         /// </summary>
-        /// <param name="CodeStream">Код</param>
-        /// <param name="Value">Записываемое значение</param>
+        /// <param name="codeStream">Код</param>
+        /// <param name="value">Записываемое значение</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void Write(Stream CodeStream, string Value)
+        public static void Write(Stream codeStream, string value)
         {
-            if (CodeStream == null)
+            if (codeStream == null)
             {
-                throw new ArgumentNullException(nameof(CodeStream));
+                throw new ArgumentNullException(nameof(codeStream));
             }
-            if (Value == null)
+            if (value == null)
             {
-                throw new ArgumentNullException(nameof(Value));
+                throw new ArgumentNullException(nameof(value));
             }
 
-            byte[] Bytes = new byte[sizeof(int) + sizeof(char) * Value.Length];
+            byte[] bytes = new byte[sizeof(int) + sizeof(char) * value.Length];
 
-            Array.Copy(BitConverter.GetBytes(Value.Length), Bytes, sizeof(int));
+            Array.Copy(BitConverter.GetBytes(value.Length), bytes, sizeof(int));
 
-            for (int i = 0; i < Bytes.Length; i++)
+            for (int i = 0; i < bytes.Length; i++)
             {
                 int index = sizeof(int) + sizeof(char) * i;
-                Array.Copy(BitConverter.GetBytes(Value[i]), 0, Bytes, index, sizeof(int));
+                Array.Copy(BitConverter.GetBytes(value[i]), 0, bytes, index, sizeof(int));
             }
 
-            Write(CodeStream, CodeDataType.String, Bytes);
+            Write(codeStream, CodeDataType.String, bytes);
         }
 
         /// <summary>
         /// Прочитать следующее значение
         /// </summary>
-        /// <param name="CodeStream">Код</param>
+        /// <param name="codeStream">Код</param>
         /// <returns>Значение одного из типа <see cref="CodeDataType"/></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static object Read(Stream CodeStream)
+        public static object Read(Stream codeStream)
         {
-            if (CodeStream == null)
+            if (codeStream == null)
             {
-                throw new ArgumentNullException(nameof(CodeStream));
+                throw new ArgumentNullException(nameof(codeStream));
             }
 
-            var TypeValue = CodeStream.ReadByte();
+            var typeValue = codeStream.ReadByte();
 
-            if (TypeValue == -1)
+            if (typeValue == -1)
             {
                 throw new InvalidDataException("Не удалось получить тип данных");
             }
 
-            return (CodeDataType)TypeValue switch
+            return (CodeDataType)typeValue switch
             {
-                CodeDataType.Byte => (byte)CodeStream.ReadByte(),
-                CodeDataType.Bool => CodeStream.ReadByte() >= 1,
-                CodeDataType.String => ReadString(CodeStream),
-                CodeDataType.Short => Read(CodeStream, sizeof(short), BitConverter.ToInt16),
-                CodeDataType.Int32 => Read(CodeStream, sizeof(short), BitConverter.ToInt32),
-                CodeDataType.Int64 => Read(CodeStream, sizeof(short), BitConverter.ToInt64),
-                CodeDataType.Float => Read(CodeStream, sizeof(short), BitConverter.ToSingle),
-                CodeDataType.Double => Read(CodeStream, sizeof(short), BitConverter.ToDouble),
-                _ => throw new InvalidDataException($"Неизвестный тип: {TypeValue}"),
+                CodeDataType.Byte => (byte)codeStream.ReadByte(),
+                CodeDataType.Bool => codeStream.ReadByte() >= 1,
+                CodeDataType.String => ReadString(codeStream),
+                CodeDataType.Short => Read(codeStream, sizeof(short), BitConverter.ToInt16),
+                CodeDataType.Int32 => Read(codeStream, sizeof(short), BitConverter.ToInt32),
+                CodeDataType.Int64 => Read(codeStream, sizeof(short), BitConverter.ToInt64),
+                CodeDataType.Float => Read(codeStream, sizeof(short), BitConverter.ToSingle),
+                CodeDataType.Double => Read(codeStream, sizeof(short), BitConverter.ToDouble),
+                _ => throw new InvalidDataException($"Неизвестный тип: {typeValue}"),
             };
         }
 
-        private static void Write(Stream CodeStream, CodeDataType Type, params byte[] Bytes)
+        private static void Write(Stream codeStream, CodeDataType type, params byte[] bytes)
         {
-            CodeStream.WriteByte((byte)Type);
+            codeStream.WriteByte((byte)type);
 
-            foreach (var Byte in Bytes)
+            foreach (var Byte in bytes)
             {
-                CodeStream.WriteByte(Byte);
+                codeStream.WriteByte(Byte);
             }
         }
-        private static T Read<T>(Stream CodeStream, int Size, Func<byte[], int, T> Converter)
+        private static T Read<T>(Stream codeStream, int size, Func<byte[], int, T> converter)
         {
-            if (CodeStream == null)
+            if (codeStream == null)
             {
-                throw new ArgumentNullException(nameof(CodeStream));
+                throw new ArgumentNullException(nameof(codeStream));
             }
 
-            byte[] Buffer = new byte[Size];
-            var ReadSize = CodeStream.Read(Buffer, 0, Size);
+            byte[] buffer = new byte[size];
+            var readSize = codeStream.Read(buffer, 0, size);
 
-            if (ReadSize != Size)
+            if (readSize != size)
             {
-                throw new InvalidDataException($"Не удалось прочитать данные типа. Прочитано: {ReadSize}, требуется: {Size}");
+                throw new InvalidDataException($"Не удалось прочитать данные типа. Прочитано: {readSize}, требуется: {size}");
             }
 
-            return Converter(Buffer, 0);
+            return converter(buffer, 0);
         }
-        private static string ReadString(Stream CodeStream)
+        private static string ReadString(Stream codeStream)
         {
-            if (CodeStream == null)
+            if (codeStream == null)
             {
-                throw new ArgumentNullException(nameof(CodeStream));
+                throw new ArgumentNullException(nameof(codeStream));
             }
 
-            int Length = Read(CodeStream, sizeof(int), BitConverter.ToInt32);
+            int length = Read(codeStream, sizeof(int), BitConverter.ToInt32);
 
-            if (0 >= Length)
+            if (0 >= length)
             {
                 return string.Empty;
             }
 
-            char[] Chars = new char[Length];
+            Span<char> chars = stackalloc char[Math.Min(length, 1024)];
 
-            for (int i = 0; i < Length; i++)
+            if (length > 1024)
             {
-                Chars[i] = Read(CodeStream, sizeof(char), BitConverter.ToChar);
+                chars = new char[length];
             }
 
-            return new(Chars);
+            for (int i = 0; i < length; i++)
+            {
+                chars[i] = Read(codeStream, sizeof(char), BitConverter.ToChar);
+            }
+
+            return new(chars);
         }
     }
 }

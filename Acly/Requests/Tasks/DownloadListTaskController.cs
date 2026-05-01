@@ -4,69 +4,69 @@ using System.Collections.Generic;
 
 namespace Acly.Requests.Tasks
 {
-	/// <summary>
-	/// Котроллер задачи скачивания списка файлов
-	/// </summary>
-	public class DownloadListTaskController : AclyAsyncTaskController
-	{
-		/// <summary>
-		/// Котроллер задачи скачивания списка файлов
-		/// </summary>
-		/// <param name="Files">Файлы для скачивания</param>
-		public DownloadListTaskController(IEnumerable<DownloadFileInfo> Files)
-		{
-			if (Files == null)
-			{
-				throw new ArgumentNullException(nameof(Files), "Файлы для скачивания не указаны");
-			}
+    /// <summary>
+    /// Котроллер задачи скачивания списка файлов
+    /// </summary>
+    public class DownloadListTaskController : AclyAsyncTaskController
+    {
+        /// <summary>
+        /// Котроллер задачи скачивания списка файлов
+        /// </summary>
+        /// <param name="files">Файлы для скачивания</param>
+        public DownloadListTaskController(IEnumerable<DownloadFileInfo> files)
+        {
+            if (files == null)
+            {
+                throw new ArgumentNullException(nameof(files), "Файлы для скачивания не указаны");
+            }
 
-			_Files = new(Files);
-			_Count = _Files.Count;
-		}
+            _files = new(files);
+            _count = _files.Count;
+        }
 
-		private readonly Queue<DownloadFileInfo> _Files;
-		private readonly int _Count;
+        private readonly Queue<DownloadFileInfo> _files;
+        private readonly int _count;
 
-		#region Управление
-		
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public override async void Start()
-		{
-			int Index = 0;
+        #region Управление
 
-			while (_Files.TryDequeue(out DownloadFileInfo File))
-			{
-				try
-				{
-					await Ajax.Download(File, Percent =>
-					{
-						OnProgressUpdated(Index, Percent);
-					});
-				}
-				catch (Exception Error)
-				{
-					InvokeFailedEvent(Error);
-					break;
-				}
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public override async void Start()
+        {
+            int index = 0;
 
-				Index++;
-			}
+            while (_files.TryDequeue(out DownloadFileInfo file))
+            {
+                try
+                {
+                    await Ajax.Download(file, percent =>
+                    {
+                        OnProgressUpdated(index, percent);
+                    });
+                }
+                catch (Exception error)
+                {
+                    InvokeFailedEvent(error);
+                    break;
+                }
 
-			InvokeCompletedEvent();
-		}
+                index++;
+            }
 
-		#endregion
+            InvokeCompletedEvent();
+        }
 
-		#region События
+        #endregion
 
-		private void OnProgressUpdated(int Index, float Percent)
-		{
-			float OutPercent = Progress.FromAmountsRange(_Count, Index, Percent);
-			InvokeProgressUpdatedEvent(OutPercent);
-		}
+        #region События
 
-		#endregion
-	}
+        private void OnProgressUpdated(int index, float percent)
+        {
+            float outPercent = Progress.FromAmountsRange(_count, index, percent);
+            InvokeProgressUpdatedEvent(outPercent);
+        }
+
+        #endregion
+    }
 }

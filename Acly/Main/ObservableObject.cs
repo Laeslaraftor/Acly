@@ -1,0 +1,174 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading.Tasks;
+
+namespace Acly
+{
+    /// <summary>
+    /// Базовый класс объекта с отслеживанием изменением полей
+    /// </summary>
+    [Serializable]
+    public abstract class ObservableObject : INotifyPropertyChanging, INotifyPropertyChanged
+    {
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        [field: NonSerialized]
+        public event PropertyChangingEventHandler? PropertyChanging;
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// Этот планировщик будет использоваться при вызове событий <see cref="PropertyChanged"/> и <see cref="PropertyChanging"/>.
+        /// По умолчанию ссылается на <see cref="SharedDispatcher"/>
+        /// </summary>
+        protected virtual IDispatcher? Dispatcher => SharedDispatcher;
+
+        #region Управление
+
+        /// <summary>
+        /// Выполнить действие через планировщик, если его нет, то действие будет выполнено как обычно
+        /// </summary>
+        /// <param name="action">Действие, которое надо выполнить</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        protected async void Dispatch(Action action)
+        {
+            await DispatchAsync(action);
+        }
+        /// <summary>
+        /// Выполнить действие через планировщик, если его нет, то действие будет выполнено как обычно
+        /// </summary>
+        /// <param name="action">Действие, которое надо выполнить</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        protected async Task DispatchAsync(Action action)
+        {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            var dispatcher = Dispatcher;
+
+            if (dispatcher == null)
+            {
+                action();
+                return;
+            }
+
+            await dispatcher.DispatchAsync(action);
+        }
+        /// <summary>
+        /// Вызвать событие
+        /// </summary>
+        /// <typeparam name="T">Тип делегата события</typeparam>
+        /// <param name="eventDelegate">Метод события</param>
+        /// <param name="args">Аргументы вызова</param>
+        protected void Dispatch<T>(T? eventDelegate, params object?[]? args)
+            where T : Delegate
+        {
+            if (eventDelegate != null)
+            {
+                Dispatch(() =>
+                {
+                    eventDelegate.DynamicInvoke(args);
+                });
+            }
+        }
+        /// <summary>
+        /// Вызвать событие
+        /// </summary>
+        /// <typeparam name="T">Тип делегата события</typeparam>
+        /// <param name="eventDelegate">Метод события</param>
+        protected void Dispatch<T>(T? eventDelegate)
+            where T : Delegate
+        {
+            Dispatch(eventDelegate, null);
+        }
+        /// <summary>
+        /// Вызвать событие, в качестве аргумента которого будет предоставлен <see cref="EventArgs.Empty"/>
+        /// </summary>
+        /// <param name="eventHandler">Метод события</param>
+        protected void Dispatch(EventHandler? eventHandler)
+        {
+            Dispatch(eventHandler, EventArgs.Empty);
+        }
+
+        #endregion
+
+        #region События
+
+        /// <summary>
+        /// Событие изменения поля
+        /// </summary>
+        /// <param name="propertyName">Название поля, которое изменило своё значение</param>
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChangedEventArgs args;
+
+            lock (_changedEventArgs)
+            {
+                if (!_changedEventArgs.TryGetValue(propertyName, out args))
+                {
+                    args = new(propertyName);
+                    _changedEventArgs.Add(propertyName, args);
+                }
+            }
+
+            OnPropertyChanged(args);
+        }
+        /// <summary>
+        /// Событие изменения поля
+        /// </summary>
+        /// <param name="e">Аргументы события изменения поля</param>
+        protected void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            Dispatch(PropertyChanged, e);
+        }
+        /// <summary>
+        /// Событие начала изменения поля
+        /// </summary>
+        /// <param name="propertyName">Название поля, которое начало менять значение</param>
+        protected virtual void OnPropertyChanging(string propertyName)
+        {
+            PropertyChangingEventArgs args;
+
+            lock (_changingEventArgs)
+            {
+                if (!_changingEventArgs.TryGetValue(propertyName, out args))
+                {
+                    args = new(propertyName);
+                    _changingEventArgs.Add(propertyName, args);
+                }
+            }
+
+            OnPropertyChanging(args);
+        }
+        /// <summary>
+        /// Событие начала изменения поля
+        /// </summary>
+        /// <param name="e">Аргументы события начала изменения поля</param>
+        protected void OnPropertyChanging(PropertyChangingEventArgs e)
+        {
+            Dispatch(PropertyChanging, e);
+        }
+
+        #endregion
+
+        #region Статика
+
+        /// <summary>
+        /// Глобальный экземпляр планировщика. 
+        /// Этот планировщик будет использоваться при вызове событий <see cref="PropertyChanged"/> и <see cref="PropertyChanging"/>
+        /// </summary>
+        public static IDispatcher? SharedDispatcher { get; set; }
+
+        private static readonly Dictionary<string, PropertyChangingEventArgs> _changingEventArgs = [];
+        private static readonly Dictionary<string, PropertyChangedEventArgs> _changedEventArgs = [];
+
+        #endregion
+    }
+}

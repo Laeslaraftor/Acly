@@ -3,59 +3,64 @@
 namespace Acly.Player
 {
     /// <summary>
-    /// Работа со спертром
+    /// Работа со спектром
     /// </summary>
     public static class SpectrumBandBuffer
     {
-        private static float[]? _Buffer;
-        private static float[]? _BufferDecrease;
+        private static float[]? _buffer;
+        private static float[]? _bufferDecrease;
 
         /// <summary>
         /// Применить буфер для массива. Применяя этот буфер, значения, находящиеся в массиве уменьшаются, пока не станут равны нулю.
         /// Чем дольше значения уменьшаются тем сильнее начинают уменьшаться. С каждым уменьшением скорость умножается на множитель уменьшения.
         /// </summary>
-        /// <param name="Samples">Массив для уменьшения</param>
-        /// <param name="DecreaseSize">Начальная скорость уменьшения</param>
-        /// <param name="DecreaseMultiplier">Множитель уменьшения</param>
+        /// <param name="samples">Массив для уменьшения</param>
+        /// <param name="decreaseSize">Начальная скорость уменьшения</param>
+        /// <param name="decreaseMultiplier">Множитель уменьшения</param>
         /// <returns>Плавно уменьшенный буфер</returns>
-        public static float[] ApplyBuffer(float[] Samples, float DecreaseSize = 0.005f, float DecreaseMultiplier = 1.2f)
+        public static float[] ApplyBuffer(float[] samples, float decreaseSize = 0.005f, float decreaseMultiplier = 1.2f)
         {
-            return ApplyBuffer(Samples, ref _Buffer, ref _BufferDecrease, DecreaseSize, DecreaseMultiplier);
+            return ApplyBuffer(samples, ref _buffer, ref _bufferDecrease, decreaseSize, decreaseMultiplier);
         }
         /// <summary>
         /// Применить буфер для массива. Применяя этот буфер, значения, находящиеся в массиве уменьшаются, пока не станут равны нулю.
         /// Чем дольше значения уменьшаются тем сильнее начинают уменьшаться. С каждым уменьшением скорость умножается на множитель уменьшения.
         /// </summary>
-        /// <param name="Samples">Массив для уменьшения</param>
-        /// <param name="Buffer">Буфер</param>
-        /// <param name="BufferDecrease">Буфер уменьшения</param>
-        /// <param name="DecreaseSize">Начальная скорость уменьшения</param>
-        /// <param name="DecreaseMultiplier">Множитель уменьшения</param>
+        /// <param name="samples">Массив для уменьшения</param>
+        /// <param name="buffer">Буфер</param>
+        /// <param name="bufferDecrease">Буфер уменьшения</param>
+        /// <param name="decreaseSize">Начальная скорость уменьшения</param>
+        /// <param name="decreaseMultiplier">Множитель уменьшения</param>
         /// <returns>Плавно уменьшенный буфер</returns>
-        public static float[] ApplyBuffer(float[] Samples, ref float[]? Buffer, ref float[]? BufferDecrease, float DecreaseSize = 0.005f, float DecreaseMultiplier = 1.2f)
+        public static float[] ApplyBuffer(float[] samples, ref float[]? buffer, ref float[]? bufferDecrease, float decreaseSize = 0.005f, float decreaseMultiplier = 1.2f)
         {
-            if (Buffer == null || Samples.Length != Buffer.Length || BufferDecrease == null)
+            if (samples == null)
             {
-                Buffer = Samples;
-                BufferDecrease = new float[Samples.Length];
-                return Samples;
+                throw new ArgumentNullException(nameof(samples));
             }
 
-            for (int i = 0; i < Samples.Length; i++)
+            if (buffer == null || samples.Length != buffer.Length || bufferDecrease == null)
             {
-                if (Samples[i] > Buffer[i])
+                buffer = samples;
+                bufferDecrease = new float[samples.Length];
+                return samples;
+            }
+
+            for (int i = 0; i < samples.Length; i++)
+            {
+                if (samples[i] > buffer[i])
                 {
-                    Buffer[i] = Samples[i];
-                    BufferDecrease[i] = DecreaseSize;
+                    buffer[i] = samples[i];
+                    bufferDecrease[i] = decreaseSize;
                 }
-                else if (Samples[i] < Buffer[i])
+                else if (samples[i] < buffer[i])
                 {
-                    Buffer[i] = MathF.Max(Buffer[i] - BufferDecrease[i], 0);
-                    BufferDecrease[i] *= DecreaseMultiplier;
+                    buffer[i] = MathF.Max(buffer[i] - bufferDecrease[i], 0);
+                    bufferDecrease[i] *= decreaseMultiplier;
                 }
             }
 
-            return Buffer;
+            return buffer;
         }
     }
 }

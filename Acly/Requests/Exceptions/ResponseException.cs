@@ -7,26 +7,21 @@ namespace Acly.Requests
     /// </summary>
     [Serializable]
     public sealed class ResponseException : Exception
-	{
-		/// <summary>
-		/// Создать исключение как ответ
-		/// </summary>
-		/// <param name="Response">Ответ</param>
+    {
+        /// <summary>
+        /// Создать исключение как ответ
+        /// </summary>
+        /// <param name="response">Ответ</param>
 #pragma warning disable CA1062
-		public ResponseException(Response Response) : base(Response.Text)
+        public ResponseException(Response response) : base(response.Text)
 #pragma warning restore CA1062
-		{
-			if (Response == null)
-			{
-				throw new ArgumentNullException(nameof(Response), "Ответ не указан");
-			}
+        {
+            Response = response ?? throw new ArgumentNullException(nameof(response), "Ответ не указан");
+        }
 
-			this.Response = Response;
-		}
-
-		/// <summary>
-		/// Ответ
-		/// </summary>
-		public Response Response { get; private set; }
-	}
+        /// <summary>
+        /// Ответ
+        /// </summary>
+        public Response Response { get; private set; }
+    }
 }

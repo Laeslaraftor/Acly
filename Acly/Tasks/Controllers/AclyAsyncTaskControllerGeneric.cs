@@ -3,57 +3,48 @@ using System.Threading.Tasks;
 
 namespace Acly.Tasks
 {
-	/// <summary>
-	/// Стандартная реализация котроллера асинхронной задачи
-	/// </summary>
-	/// <typeparam name="TOutput">Тип выводимых данных</typeparam>
-	public sealed class AclyAsyncTaskController<TOutput> : AclyAsyncTaskController, IAsyncTaskController<TOutput>
-	{
-		/// <summary>
-		/// Создать экземпляр контроллера асинхронной задачи
-		/// </summary>
-		/// <param name="TaskToPerform">Асинхронная задача для выполнения</param>
-		/// <exception cref="ArgumentNullException">Задача не указана</exception>
-		public AclyAsyncTaskController(Func<Task<TOutput>> TaskToPerform)
-		{
-			if (TaskToPerform == null)
-			{
-				throw new ArgumentNullException(nameof(TaskToPerform), "Задача для выполнения не указана");
-			}
+    /// <summary>
+    /// Стандартная реализация котроллера асинхронной задачи
+    /// </summary>
+    /// <typeparam name="TOutput">Тип выводимых данных</typeparam>
+    /// <remarks>
+    /// Создать экземпляр контроллера асинхронной задачи
+    /// </remarks>
+    /// <param name="taskToPerform">Асинхронная задача для выполнения</param>
+    /// <exception cref="ArgumentNullException">Задача не указана</exception>
+    public sealed class AclyAsyncTaskController<TOutput>(Func<Task<TOutput>> taskToPerform)
+        : AclyAsyncTaskController, IAsyncTaskController<TOutput>
+    {
 
-			_Task = TaskToPerform;
-		}
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public new event AsyncTaskComplete<TOutput>? Completed;
 
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public new event AsyncTaskComplete<TOutput>? Completed;
+        private readonly Func<Task<TOutput>> _task = taskToPerform
+                ?? throw new ArgumentNullException(nameof(taskToPerform), "Задача для выполнения не указана");
 
-		private readonly Func<Task<TOutput>> _Task;
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public override async void Start()
+        {
+            TOutput? result = default;
 
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public override async void Start()
-		{
-#pragma warning disable CS8600
-			TOutput Result = default;
-#pragma warning restore CS8600
+            try
+            {
+                result = await _task.Invoke();
+            }
+            catch (Exception error)
+            {
+                IAsyncTaskError fail = new AclyAsyncTaskError(error);
+                InvokeFailedEvent(fail);
+                return;
+            }
 
-			try
-			{
-				Result = await _Task.Invoke();
-			}
-			catch (Exception Error)
-			{
-				IAsyncTaskError Fail = new AclyAsyncTaskError(Error);
-				InvokeFailedEvent(Fail);
-				return;
-			}
-
-			InvokeProgressUpdatedEvent(1);
-			InvokeCompletedEvent();
-			Completed?.Invoke(Result);
-		}
-	}
+            InvokeProgressUpdatedEvent(1);
+            InvokeCompletedEvent();
+            Completed?.Invoke(result);
+        }
+    }
 }

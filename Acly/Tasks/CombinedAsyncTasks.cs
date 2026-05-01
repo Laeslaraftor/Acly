@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Acly.Tasks
@@ -12,32 +12,32 @@ namespace Acly.Tasks
         /// <summary>
         /// Создать новый экземпляр асинхронной задачи, выполняющей асинхронные задачи по порядку
         /// </summary>
-        /// <param name="Tasks">Функции для получения задач на выполнение</param>
+        /// <param name="tasks">Функции для получения задач на выполнение</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
 #pragma warning disable CS8618
-        public CombinedAsyncTasks(params Func<IAsyncTask>[] Tasks)
+        public CombinedAsyncTasks(params Func<IAsyncTask>[] tasks)
 #pragma warning restore CS8618
         {
-            if (Tasks == null)
+            if (tasks == null)
             {
-                throw new ArgumentNullException(nameof(Tasks), "Задачи не указаны");
+                throw new ArgumentNullException(nameof(tasks), "Задачи не указаны");
             }
-            if (Tasks.Length == 0)
+            if (tasks.Length == 0)
             {
-                throw new ArgumentException("Список функций для получения задач пуст", nameof(Tasks));
+                throw new ArgumentException("Список функций для получения задач пуст", nameof(tasks));
             }
 
-            _Tasks = new(Tasks);
+            _tasks = [.. tasks];
             Start();
         }
-        
+
         /// <summary>
         /// Текущая выполняющаяся задача
         /// </summary>
         public IAsyncTask CurrentTask { get; private set; }
 
-        private readonly List<Func<IAsyncTask>> _Tasks;
+        private readonly List<Func<IAsyncTask>> _tasks;
 
         #region Управление
 
@@ -45,59 +45,59 @@ namespace Acly.Tasks
         {
             try
             {
-                for (int i = 0; i < _Tasks.Count; i++)
+                for (int i = 0; i < _tasks.Count; i++)
                 {
-                    CurrentTask = _Tasks[0]();
+                    CurrentTask = _tasks[0]();
                     TaskIndex = i;
-                    IAsyncTaskError? Result = await Start(CurrentTask, i);
+                    IAsyncTaskError? result = await Start(CurrentTask, i);
 
-                    if (Result != null)
+                    if (result != null)
                     {
-                        InvokeFailedEvent(Result);
+                        InvokeFailedEvent(result);
                         return;
                     }
                 }
             }
-            catch (Exception Error)
+            catch (Exception error)
             {
-                InvokeFailedEvent(new AclyAsyncTaskError(Error));
+                InvokeFailedEvent(new AclyAsyncTaskError(error));
                 return;
             }
 
             InvokeCompletedEvent();
         }
-        private async Task<IAsyncTaskError?> Start(IAsyncTask AsyncTask, int Index)
+        private async Task<IAsyncTaskError?> Start(IAsyncTask asyncTask, int index)
         {
-            AsyncTask.Completed += OnCompleted;
-            AsyncTask.Failed += OnFailed;
-            AsyncTask.ProgressUpdated += OnProgressUpdated;
-            bool Completed = false;
-            IAsyncTaskError? Error = null;
+            asyncTask.Completed += OnCompleted;
+            asyncTask.Failed += OnFailed;
+            asyncTask.ProgressUpdated += OnProgressUpdated;
+            bool completed = false;
+            IAsyncTaskError? error = null;
 
             void OnCompleted()
             {
-                AsyncTask.Completed -= OnCompleted;
-                AsyncTask.Failed -= OnFailed;
-                AsyncTask.ProgressUpdated -= OnProgressUpdated;
-                Completed = false;
+                asyncTask.Completed -= OnCompleted;
+                asyncTask.Failed -= OnFailed;
+                asyncTask.ProgressUpdated -= OnProgressUpdated;
+                completed = false;
             }
-            void OnFailed(IAsyncTaskError Info)
+            void OnFailed(IAsyncTaskError info)
             {
-                Error = Info;
+                error = info;
                 OnCompleted();
             }
-            void OnProgressUpdated(float Percent)
+            void OnProgressUpdated(float percent)
             {
-                Percent = Progress.FromAmountsRange(_Tasks.Count, Index, Percent);
-                InvokeProgressUpdatedEvent(Percent);
+                percent = Progress.FromAmountsRange(_tasks.Count, index, percent);
+                InvokeProgressUpdatedEvent(percent);
             }
 
-            while (!Completed)
+            while (!completed)
             {
                 await Task.Delay(50);
             }
 
-            return Error;
+            return error;
         }
 
         #endregion

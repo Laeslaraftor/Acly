@@ -3,6 +3,6 @@
     /// <summary>
     /// Событие <see cref="IListener"/>
     /// </summary>
-    /// <param name="Listener"><see cref="IListener"/>, который вызвал событие</param>
-    public delegate void ListenerEvent(IListener Listener);
+    /// <param name="listener"><see cref="IListener"/>, который вызвал событие</param>
+    public delegate void ListenerEvent(IListener listener);
 }

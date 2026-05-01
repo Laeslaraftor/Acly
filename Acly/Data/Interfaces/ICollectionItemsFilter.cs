@@ -16,9 +16,9 @@ namespace Acly
         /// <summary>
         /// Проверить проходит ли элемент фильтры
         /// </summary>
-        /// <param name="Collection">Коллекция, содержащая элемент</param>
-        /// <param name="Item">Элемент, который надо проверить</param>
+        /// <param name="collection">Коллекция, содержащая элемент</param>
+        /// <param name="item">Элемент, который надо проверить</param>
         /// <returns>Проходит ли элемент фильтры</returns>
-        public bool Check(IEnumerable Collection, object Item);
+        public bool Check(IEnumerable collection, object item);
     }
 }

@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using Acly.Serialize;
 using System;
-using Acly.Serialize;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Acly.Requests
@@ -15,45 +14,45 @@ namespace Acly.Requests
         /// <summary>
         /// Создать экземпляр информации о сообщении
         /// </summary>
-        /// <param name="Data">Данные сообщения</param>
+        /// <param name="data">Данные сообщения</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public MessageData(byte[] Data)
+        public MessageData(byte[] data)
         {
-            if (Data == null)
+            if (data == null)
             {
-                throw new ArgumentNullException(nameof(Data));
+                throw new ArgumentNullException(nameof(data));
             }
 
-            int ZeroCount = 0;
-            List<byte> TypeStringBytes = new();
-            List<byte> ListData = new(Data);
+            int zeroCount = 0;
+            List<byte> typeStringBytes = [];
+            List<byte> listData = [.. data];
 
-            foreach (var Value in Data)
+            foreach (var value in data)
             {
-                if (Value == 0)
+                if (value == 0)
                 {
-                    ZeroCount++;
+                    zeroCount++;
                 }
 
-                TypeStringBytes.Add(Value);
+                typeStringBytes.Add(value);
 
-                if (ZeroCount == 3)
+                if (zeroCount == 3)
                 {
                     break;
                 }
             }
 
-            if (TypeStringBytes.Count <= 3)
+            if (typeStringBytes.Count <= 3)
             {
                 throw new ArgumentException("Неверные данные");
             }
 
-            ListData.RemoveRange(0, TypeStringBytes.Count);
-            TypeStringBytes.RemoveRange(TypeStringBytes.Count - 3, 3);
+            listData.RemoveRange(0, typeStringBytes.Count);
+            typeStringBytes.RemoveRange(typeStringBytes.Count - 3, 3);
 
-            Type = DefaultEncoding.GetString(TypeStringBytes.ToArray());
-            this.Data = ListData.ToArray();
+            Type = DefaultEncoding.GetString([.. typeStringBytes]);
+            Data = [.. listData];
         }
 
         /// <summary>
@@ -77,21 +76,21 @@ namespace Acly.Requests
         /// <summary>
         /// Получить массив байтов объекта
         /// </summary>
-        /// <param name="Object">Объект для создания сообщения</param>
+        /// <param name="obj">Объект для создания сообщения</param>
         /// <returns>Сообщение в виде массива байтов</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static byte[] Create(object Object)
+        public static byte[] Create(object obj)
         {
-            if (Object == null)
+            if (obj == null)
             {
-                throw new ArgumentNullException(nameof(Object));
+                throw new ArgumentNullException(nameof(obj));
             }
 
-            List<byte> Result = new(DefaultEncoding.GetBytes(Object.GetType().FullName));
-            Result.AddRange(new byte[] { 0, 0, 0 });
-            Result.AddRange(Object.Serialize());
+            List<byte> result = [.. DefaultEncoding.GetBytes(obj.GetType().FullName)];
+            result.AddRange([0, 0, 0]);
+            result.AddRange(obj.Serialize());
 
-            return Result.ToArray();
+            return [.. result];
         }
 
         #endregion

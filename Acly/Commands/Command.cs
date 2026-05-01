@@ -1,262 +1,240 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Acly.Commands
 {
-	/// <summary>
-	/// Команда
-	/// </summary>
-	[Serializable]
-	public struct Command : IEquatable<Command>
-	{
-		/// <summary>
-		/// Команда
-		/// </summary>
-		/// <param name="Value">Строка-команда</param>
-		/// <exception cref="ArgumentNullException"></exception>
-		/// <exception cref="ArgumentException"></exception>
-		public Command(string Value)
-		{
-			if (Value == null)
-			{
-				throw new ArgumentNullException(nameof(Value), "Команда не указана");
-			}
-			if (Value.Length == 0)
-			{
-				throw new ArgumentException("Команда не указана");
-			}
-			if (Value[0] != '/')
-			{
-				throw new ArgumentException("Команда должна начинаться с /");
-			}
+    /// <summary>
+    /// Команда
+    /// </summary>
+    [Serializable]
+    public struct Command : IEquatable<Command>
+    {
+        /// <summary>
+        /// Команда
+        /// </summary>
+        /// <param name="value">Строка-команда</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public Command(string value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value), "Команда не указана");
+            }
+            if (value.Length == 0)
+            {
+                throw new ArgumentException("Команда не указана");
+            }
+            if (value[0] != '/')
+            {
+                throw new ArgumentException("Команда должна начинаться с /");
+            }
 
-			Name = "";
-			Parameters = new(Array.Empty<string>());
-			Parse(Value);
-		}
+            Name = string.Empty;
+            Parameters = new(Array.Empty<string>());
+            Parse(value);
+        }
 
-		/// <summary>
-		/// Название команды
-		/// </summary>
-		public string Name { get; private set; }
-		/// <summary>
-		/// Параметры команды
-		/// </summary>
-		public ReadOnlyCollection<string> Parameters { get; private set; }
+        /// <summary>
+        /// Название команды
+        /// </summary>
+        public string Name { get; private set; }
+        /// <summary>
+        /// Параметры команды
+        /// </summary>
+        public ReadOnlyCollection<string> Parameters { get; private set; }
 
-		#region Установка
+        #region Установка
 
-		private void Parse(string Value)
-		{
-			List<string> Parts = new();
-			string CurrentPart = "";
-			bool NowText = false;
-			bool IgnoreNext = false;
-			bool SuperText = false;
+        private void Parse(string value)
+        {
+            List<string> parts = [];
+            string currentPart = string.Empty;
+            bool nowText = false;
+            bool ignoreNext = false;
+            bool superText = false;
 
-			Value = Value[1..];
+            value = value[1..];
 
-			foreach (var Symbol in Value)
-			{
-				if (Symbol != '"' && !NowText && SuperText)
-				{
-					SuperText = false;
-				}
-				if (Symbol == '\\' && !IgnoreNext && !SuperText)
-				{
-					IgnoreNext = true;
-					continue;
-				}
-				else if (Symbol == '"' && !IgnoreNext)
-				{
-					if (NowText)
-					{
-						SuperText = false;
-					}
+            foreach (var symbol in value)
+            {
+                if (symbol != '"' && !nowText && superText)
+                {
+                    superText = false;
+                }
+                if (symbol == '\\' && !ignoreNext && !superText)
+                {
+                    ignoreNext = true;
+                    continue;
+                }
+                else if (symbol == '"' && !ignoreNext)
+                {
+                    if (nowText)
+                    {
+                        superText = false;
+                    }
 
-					NowText = !NowText;
-					continue;
-				}
-				else if (Symbol == ' ' && !NowText)
-				{
-					Parts.Add(CurrentPart.Trim());
-					CurrentPart = "";
-					continue;
-				}
-				else if (Symbol == '@' && !NowText)
-				{
-					SuperText = true;
-					continue;
-				}
+                    nowText = !nowText;
+                    continue;
+                }
+                else if (symbol == ' ' && !nowText)
+                {
+                    parts.Add(currentPart.Trim());
+                    currentPart = string.Empty;
+                    continue;
+                }
+                else if (symbol == '@' && !nowText)
+                {
+                    superText = true;
+                    continue;
+                }
 
-				CurrentPart += Symbol;
-				IgnoreNext = false;
-			}
+                currentPart += symbol;
+                ignoreNext = false;
+            }
 
-			if (CurrentPart.Length > 0)
-			{
-				Parts.Add(CurrentPart);
-			}
-			if (Parts.Count == 0)
-			{
-				return;
-			}
+            if (currentPart.Length > 0)
+            {
+                parts.Add(currentPart);
+            }
+            if (parts.Count == 0)
+            {
+                return;
+            }
 
-			Name = Parts[0];
-			Parts.RemoveAt(0);
-			Parameters = new(Parts);
-		}
+            Name = parts[0];
+            parts.RemoveAt(0);
+            Parameters = new(parts);
+        }
 
-		#endregion
+        #endregion
 
-		#region Операторы
+        #region Операторы
 
-		/// <summary>
-		/// Равенство команд
-		/// </summary>
-		/// <param name="l">Команда 1</param>
-		/// <param name="r">Команда 2</param>
-		/// <returns>Равны ли команды</returns>
-		public static bool operator ==(Command l, Command r)
-		{
-			if (l == null && r == null)
-			{
-				return true;
-			}
-			if (l == null || r == null)
-			{
-				return false;
-			}
+        /// <summary>
+        /// Равенство команд
+        /// </summary>
+        /// <param name="l">Команда 1</param>
+        /// <param name="r">Команда 2</param>
+        /// <returns>Равны ли команды</returns>
+        public static bool operator ==(Command l, Command r)
+        {
+            return l.Equals(r);
+        }
+        /// <summary>
+        /// Неравенство команд
+        /// </summary>
+        /// <param name="l">Команда 1</param>
+        /// <param name="r">Команда 2</param>
+        /// <returns>Неравны ли команды</returns>
+        public static bool operator !=(Command l, Command r)
+        {
+            return !(l == r);
+        }
 
-			bool Names = l.Name == r.Name;
-			bool Params = l.Parameters.Count == r.Parameters.Count;
+        #endregion
 
-			if (Params)
-			{
-				for (int i = 0; i < l.Parameters.Count; i++)
-				{
-					if (l.Parameters[i] != r.Parameters[i])
-					{
-						Params = false;
-						break;
-					}
-				}
-			}
+        #region Управление
 
-			return Names && Params;
-		}
-		/// <summary>
-		/// Неравенство команд
-		/// </summary>
-		/// <param name="l">Команда 1</param>
-		/// <param name="r">Команда 2</param>
-		/// <returns>Неравны ли команды</returns>
-		public static bool operator !=(Command l, Command r)
-		{
-			return !(l == r);
-		}
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <returns><inheritdoc/></returns>
+        public readonly override string ToString()
+        {
+            string result = "Команда: " + Name;
 
-		#endregion
+            if (Parameters.Count > 0)
+            {
+                result += "; Параметры: ";
+                string parameters = string.Empty;
 
-		#region Управление
+                foreach (var parameter in Parameters)
+                {
+                    if (parameters.Length != 0)
+                    {
+                        parameters += ", ";
+                    }
 
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		/// <returns><inheritdoc/></returns>
-		public readonly override string ToString()
-		{
-			string Result = "Команда: " + Name;
+                    parameters += parameter;
+                }
 
-			if (Parameters.Count > 0)
-			{
-				Result += "; Параметры: ";
-				string Params = "";
+                result += parameters;
+            }
 
-				foreach (var Param in Parameters)
-				{
-					if (Params.Length != 0)
-					{
-						Params += ", ";
-					}
+            return result;
+        }
 
-					Params += Param;
-				}
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="obj"><inheritdoc/></param>
+        /// <returns><inheritdoc/></returns>
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Command other &&
+                   Equals(other);
+        }
 
-				Result += Params;
-			}
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <returns><inheritdoc/></returns>
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(Name, Parameters);
+        }
 
-			return Result;
-		}
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="other">Команда</param>
+        /// <returns>Равны ли команды</returns>
+        public readonly bool Equals(Command other)
+        {
+            if (Name != other.Name)
+            {
+                return false;
+            }
+            if (ReferenceEquals(Parameters, other.Parameters))
+            {
+                return true;
+            }
+            else if (Parameters == null || other.Parameters == null)
+            {
+                return false;
+            }
 
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		/// <param name="obj"><inheritdoc/></param>
-		/// <returns><inheritdoc/></returns>
-		public override bool Equals(object obj)
-		{
-			if (obj == null)
-			{
-				return false;
-			}
-			if (obj.GetType() != typeof(Command))
-			{
-				return false;
-			}
+            return Parameters.FullyEquals(other.Parameters);
+        }
 
-			return this == ((Command)obj);
-		}
+        #endregion
 
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		/// <returns><inheritdoc/></returns>
-		public override int GetHashCode()
-		{
-			HashCode Code = new();
-			Code.Add(Name);
-			Code.Add(Parameters);
+        #region Статика
 
-			return Code.ToHashCode();
-		}
+        /// <summary>
+        /// Попытаться создать команду
+        /// </summary>
+        /// <param name="value">Строка-команда</param>
+        /// <param name="result">Команда (если не удалось создать, то пусто)</param>
+        /// <returns>Удалось ли создать команду</returns>
+        public static bool TryParse(string value, [NotNullWhen(true)] out Command? result)
+        {
+            result = null;
 
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		/// <param name="other">Команда</param>
-		/// <returns>Равны ли команды</returns>
-		public bool Equals(Command other)
-		{
-			return this == other;
-		}
+            try
+            {
+                result = new(value);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
-		#endregion
-
-		#region Статика
-
-		/// <summary>
-		/// Попытаться создать команду
-		/// </summary>
-		/// <param name="Value">Строка-команда</param>
-		/// <param name="Result">Команда (если не удалось создать, то пусто)</param>
-		/// <returns>Удалось ли создать команду</returns>
-		public static bool TryParse(string Value, out Command? Result)
-		{
-			Result = null;
-
-			try
-			{
-				Result = new(Value);
-				return true;
-			}
-			catch
-			{
-				return false;
-			}
-		}
-
-		#endregion
-	}
+        #endregion
+    }
 }

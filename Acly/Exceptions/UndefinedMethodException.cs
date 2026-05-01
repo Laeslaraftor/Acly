@@ -10,25 +10,25 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Message"><inheritdoc/></param>
-        public UndefinedMethodException(string Message) : base(Message)
+        /// <param name="message"><inheritdoc/></param>
+        public UndefinedMethodException(string message) : base(message)
         {
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Message"><inheritdoc/></param>
-        /// <param name="InnerException"><inheritdoc/></param>
-        public UndefinedMethodException(string Message, Exception InnerException) : base(Message, InnerException)
+        /// <param name="message"><inheritdoc/></param>
+        /// <param name="innerException"><inheritdoc/></param>
+        public UndefinedMethodException(string message, Exception innerException) : base(message, innerException)
         {
         }
         /// <summary>
         /// Создать экземпляр исключения о неизвестном методе
         /// </summary>
-        /// <param name="MethodName">Название метода</param>
-        /// <param name="SearchType">Тип в котором происходил поиск</param>
+        /// <param name="methodName">Название метода</param>
+        /// <param name="searchType">Тип в котором происходил поиск</param>
 #pragma warning disable CA1062
-        public UndefinedMethodException(string MethodName, Type SearchType) : base(string.Format(_Message, MethodName, SearchType.FullName))
+        public UndefinedMethodException(string methodName, Type searchType) : base(string.Format(_Message, methodName, searchType.FullName))
 #pragma warning restore CA1062
         {
         }

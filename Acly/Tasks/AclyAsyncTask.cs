@@ -3,108 +3,104 @@ using System.Threading.Tasks;
 
 namespace Acly.Tasks
 {
-	/// <summary>
-	/// Асинхронная задача
-	/// </summary>
-	public class AclyAsyncTask : IAsyncTask
-	{
-		/// <summary>
-		/// Пустой конструктор для наследования класса
-		/// </summary>
-		protected AclyAsyncTask()
-		{
-		}
-		/// <summary>
-		/// Создать экземпляр асинхронной задачи
-		/// </summary>
-		/// <param name="Controller">Контроллер асинхронной задачи</param>
-		/// <exception cref="ArgumentNullException">Контролер не установлен</exception>
-		public AclyAsyncTask(IAsyncTaskController Controller)
-		{
-			if (Controller == null)
-			{
-				throw new ArgumentNullException(nameof(Controller), "Контроллер асинхронной задачи не указан");
-			}
+    /// <summary>
+    /// Асинхронная задача
+    /// </summary>
+    public class AclyAsyncTask : Disposable, IAsyncTask
+    {
+        /// <summary>
+        /// Пустой конструктор для наследования класса
+        /// </summary>
+        protected AclyAsyncTask()
+        {
+        }
+        /// <summary>
+        /// Создать экземпляр асинхронной задачи
+        /// </summary>
+        /// <param name="controller">Контроллер асинхронной задачи</param>
+        /// <exception cref="ArgumentNullException">Контролер не установлен</exception>
+        public AclyAsyncTask(IAsyncTaskController controller)
+        {
+            _controller = controller ??
+                throw new ArgumentNullException(nameof(controller), "Контроллер асинхронной задачи не указан");
+            UpdateController(controller);
+        }
+        /// <summary>
+        /// Создать экземпляр асинхронной задачи c <see cref="AclyAsyncTaskController"/>
+        /// </summary>
+        /// <param name="taskFunction">Асинхронная задача для выполнения</param>
+        public AclyAsyncTask(Func<Task> taskFunction)
+        {
+            if (taskFunction == null)
+            {
+                throw new ArgumentNullException(nameof(taskFunction), "Задача для выполнения не указана");
+            }
 
-			_Controller = Controller;
-			UpdateController(Controller);
-		}
-		/// <summary>
-		/// Создать экземпляр асинхронной задачи c <see cref="AclyAsyncTaskController"/>
-		/// </summary>
-		/// <param name="TaskFunction">Асинхронная задача для выполнения</param>
-		public AclyAsyncTask(Func<Task> TaskFunction)
-		{
-			if (TaskFunction == null)
-			{
-				throw new ArgumentNullException(nameof(TaskFunction), "Задача для выполнения не указана");
-			}
+            _controller = new AclyAsyncTaskController(taskFunction);
+            UpdateController(_controller);
+        }
 
-			_Controller = new AclyAsyncTaskController(TaskFunction);
-			UpdateController(_Controller);
-		}
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public event Action? Completed
+        {
+            add
+            {
+                LocalCompleted += value;
 
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public event Action? Completed
-		{
-			add
-			{
-				LocalCompleted += value;
+                if (IsCompleted && Error == null)
+                {
+                    value?.Invoke();
+                }
+            }
+            remove => LocalCompleted -= value;
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public event AsyncTaskProgress? ProgressUpdated;
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public event AsyncTaskFail? Failed
+        {
+            add
+            {
+                LocalFailed += value;
 
-				if (IsCompleted && Error == null)
-				{
-					value?.Invoke();
-				}
-			}
-			remove => LocalCompleted -= value;
-		}
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public event AsyncTaskProgress? ProgressUpdated;
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public event AsyncTaskFail? Failed
-		{
-			add
-			{
-				LocalFailed += value;
+                if (Error != null)
+                {
+                    value?.Invoke(Error);
+                }
+            }
+            remove => LocalFailed -= value;
+        }
 
-				if (Error != null)
-				{
-					value?.Invoke(Error);
-				}
-			}
-			remove => LocalFailed -= value;
-		}
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public IAsyncTaskError? Error { get; private set; }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public bool IsCompleted { get; private set; }
 
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public IAsyncTaskError? Error { get; private set; }
-		/// <summary>
-		/// <inheritdoc/>
-		/// </summary>
-		public bool IsCompleted { get; private set; }
+        private event Action? LocalCompleted;
+        private event AsyncTaskFail? LocalFailed;
 
-		private event Action? LocalCompleted;
-		private event AsyncTaskFail? LocalFailed;
+        private IAsyncTaskController? _controller;
 
-		private IAsyncTaskController? _Controller;
+        #region Установка
 
-		#region Установка
+        private void UpdateController(IAsyncTaskController controller)
+        {
+            controller.Completed += OnTaskCompleted;
+            controller.ProgressUpdated += OnProgressUpdated;
+            controller.Failed += OnTaskFailed;
 
-		private void UpdateController(IAsyncTaskController Controller)
-		{
-			Controller.Completed += OnTaskCompleted;
-			Controller.ProgressUpdated += OnProgressUpdated;
-			Controller.Failed += OnTaskFailed;
-
-			Controller.Start();
-		}
+            controller.Start();
+        }
 
         #endregion
 
@@ -113,71 +109,65 @@ namespace Acly.Tasks
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void Dispose()
+        /// <param name="isDisposing"><inheritdoc/></param>
+        protected override void Dispose(bool isDisposing)
         {
-			Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Очистить ресурсы
-        /// </summary>
-        /// <param name="All">true - очистка всех ресурсов, false - только ресурсы базового класса</param>
-        protected virtual void Dispose(bool All)
-		{
+            base.Dispose(isDisposing);
+
             Error = null;
-            _Controller = null;
+            _controller = null;
             LocalFailed = null;
             LocalCompleted = null;
         }
 
-		#endregion
+        #endregion
 
-		#region События
+        #region События
 
-		/// <summary>
-		/// Задача успешно завершена
-		/// </summary>
-		protected void OnTaskCompleted()
-		{
-			RemoveEvents();
+        /// <summary>
+        /// Задача успешно завершена
+        /// </summary>
+        protected void OnTaskCompleted()
+        {
+            RemoveEvents();
 
-			IsCompleted = true;
-			LocalCompleted?.Invoke();
-		}
-		/// <summary>
-		/// Обновление прогресса выполнения задачи
-		/// </summary>
-		/// <param name="Percent">Прогресс выполнения</param>
-		protected void OnProgressUpdated(float Percent)
-		{
-			ProgressUpdated?.Invoke(Percent);
-		}
-		/// <summary>
-		/// Во время выполнения задачи произошла ошибка
-		/// </summary>
-		/// <param name="Error">Ошибка</param>
-		protected void OnTaskFailed(IAsyncTaskError Error)
-		{
-			RemoveEvents();
+            IsCompleted = true;
+            LocalCompleted?.Invoke();
+        }
+        /// <summary>
+        /// Обновление прогресса выполнения задачи
+        /// </summary>
+        /// <param name="percent">Прогресс выполнения</param>
+        protected void OnProgressUpdated(float percent)
+        {
+            ProgressUpdated?.Invoke(percent);
+        }
+        /// <summary>
+        /// Во время выполнения задачи произошла ошибка
+        /// </summary>
+        /// <param name="error">Ошибка</param>
+        protected void OnTaskFailed(IAsyncTaskError error)
+        {
+            RemoveEvents();
 
-			this.Error = Error;
-			IsCompleted = true;
+            Error = error;
+            IsCompleted = true;
 
-			LocalFailed?.Invoke(Error);
-		}
+            LocalFailed?.Invoke(error);
+        }
 
-		private void RemoveEvents()
-		{
-			if (_Controller == null)
-			{
-				return;
-			}
+        private void RemoveEvents()
+        {
+            if (_controller == null)
+            {
+                return;
+            }
 
-			_Controller.Completed -= OnTaskCompleted;
-			_Controller.ProgressUpdated -= OnProgressUpdated;
-			_Controller.Failed -= OnTaskFailed;
-		}
+            _controller.Completed -= OnTaskCompleted;
+            _controller.ProgressUpdated -= OnProgressUpdated;
+            _controller.Failed -= OnTaskFailed;
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 }

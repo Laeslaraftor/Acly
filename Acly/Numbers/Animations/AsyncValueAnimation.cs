@@ -1,89 +1,89 @@
-﻿using System.Threading.Tasks;
+﻿using Acly.Tokens;
 using System;
-using Acly.Tokens;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Acly.Numbers
 {
-	/// <summary>
-	/// Асинхронная анимация значения
-	/// </summary>
-	public class AsyncValueAnimation : ValueAnimation
-	{
-		private Token? _TaskToken;
-		private readonly Queue<Action> _FramesToComplete = new();
+    /// <summary>
+    /// Асинхронная анимация значения
+    /// </summary>
+    public class AsyncValueAnimation : ValueAnimation
+    {
+        private Token? _taskToken;
+        private readonly Queue<Action> _framesToComplete = new();
 
-		#region Анимация
+        #region Анимация
 
-		/// <summary>
-		/// Запустить проигрывание анимации
-		/// </summary>
-		/// <param name="From">Начальное значение анимации</param>
-		/// <param name="To">Конечное значение анимации</param>
-		/// <param name="Mode">Режим проигрывания анимации</param>
-		protected override void StartAnimation(float From, float To, AnimationMode Mode)
-		{
-			Token CurrentTaskToken = new();
-			_TaskToken = CurrentTaskToken;
+        /// <summary>
+        /// Запустить проигрывание анимации
+        /// </summary>
+        /// <param name="from">Начальное значение анимации</param>
+        /// <param name="to">Конечное значение анимации</param>
+        /// <param name="mode">Режим проигрывания анимации</param>
+        protected override void StartAnimation(float from, float to, AnimationMode mode)
+        {
+            Token currentTaskToken = new();
+            _taskToken = currentTaskToken;
 
-			Ended += OnAnimationEnded;
+            Ended += OnAnimationEnded;
 
-			_FramesToComplete.Clear();
-			StartAnimationTask(CurrentTaskToken);
+            _framesToComplete.Clear();
+            StartAnimationTask(currentTaskToken);
 
-			base.StartAnimation(From, To, Mode);
-		}
+            base.StartAnimation(from, to, mode);
+        }
 
-		/// <summary>
-		/// Выполнить кадр анимации в отдельном потоке
-		/// </summary>
-		/// <param name="From">Начальное значение анимации</param>
-		/// <param name="To">Конечное значение анимации</param>
-		/// <param name="Frames">Количество кадров анимации</param>
-		/// <param name="FramesCompleted">Количество выполненных кадров</param>
-		protected override void DoAnimationLoopFrame(float From, float To, int Frames, int FramesCompleted)
-		{
-			_FramesToComplete.Enqueue(() =>
-			{
-				base.DoAnimationLoopFrame(From, To, Frames, FramesCompleted);
-			});
-		}
+        /// <summary>
+        /// Выполнить кадр анимации в отдельном потоке
+        /// </summary>
+        /// <param name="from">Начальное значение анимации</param>
+        /// <param name="to">Конечное значение анимации</param>
+        /// <param name="frames">Количество кадров анимации</param>
+        /// <param name="framesCompleted">Количество выполненных кадров</param>
+        protected override void DoAnimationLoopFrame(float from, float to, int frames, int framesCompleted)
+        {
+            _framesToComplete.Enqueue(() =>
+            {
+                base.DoAnimationLoopFrame(from, to, frames, framesCompleted);
+            });
+        }
 
-		#endregion
+        #endregion
 
-		#region Отдельный поток
+        #region Отдельный поток
 
-		private async void StartAnimationTask(Token TaskToken)
-		{
-			await Task.Run(async () =>
-			{
-				while (TaskToken == _TaskToken)
-				{
-					AnimationTaskTick();
-					await Task.Delay(10);
-				}
+        private async void StartAnimationTask(Token taskToken)
+        {
+            await Task.Run(async () =>
+            {
+                while (taskToken == _taskToken)
+                {
+                    AnimationTaskTick();
+                    await Task.Delay(10);
+                }
 
-				Log.Message("Поток завершён");
-			});
-		}
-		private void AnimationTaskTick()
-		{
-			if (_FramesToComplete.TryDequeue(out Action Frame))
-			{
-				Frame?.Invoke();
-			}
-		}
+                Log.Message("Поток завершён");
+            });
+        }
+        private void AnimationTaskTick()
+        {
+            if (_framesToComplete.TryDequeue(out Action frame))
+            {
+                frame?.Invoke();
+            }
+        }
 
-		#endregion
+        #endregion
 
-		#region События
+        #region События
 
-		private void OnAnimationEnded(ValueAnimation Animation, AnimationMode Mode)
-		{
-			Ended -= OnAnimationEnded;
-			_TaskToken = null;
-		}
+        private void OnAnimationEnded(ValueAnimation animation, AnimationMode mode)
+        {
+            Ended -= OnAnimationEnded;
+            _taskToken = null;
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 }

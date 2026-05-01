@@ -5,7 +5,7 @@ namespace Acly.Performing
     /// <summary>
     /// Событие загрузки
     /// </summary>
-    /// <param name="Loading">Загрузка, вызвавшая событие</param>
-    /// <param name="Error">Возникшая ошибка</param>
-    public delegate void LoadingFailEvent(ILoading Loading, IAsyncTaskError Error);
+    /// <param name="loading">Загрузка, вызвавшая событие</param>
+    /// <param name="error">Возникшая ошибка</param>
+    public delegate void LoadingFailEvent(ILoading loading, IAsyncTaskError error);
 }

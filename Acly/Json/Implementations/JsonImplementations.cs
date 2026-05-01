@@ -4,39 +4,39 @@ using System.Threading.Tasks;
 
 namespace Acly.JsonData.Implementations
 {
-	/// <summary>
-	/// Класс для поиска реализации <see cref="IJsonConverter"/>
-	/// </summary>
-	public static class JsonImplementations
-	{
-		private static IEnumerable<Type>? _Implementations;
+    /// <summary>
+    /// Класс для поиска реализации <see cref="IJsonConverter"/>
+    /// </summary>
+    public static class JsonImplementations
+    {
+        private static IEnumerable<Type>? _implementations;
 
-		/// <summary>
-		/// Получить тип объекта, помеченного как реализация <see cref="IJsonConverter"/>
-		/// </summary>
-		/// <returns>Тип объекта, помеченного как реализация <see cref="IJsonConverter"/></returns>
-		public static async Task<Type?> GetConverterType()
-		{
-			IEnumerable<Type> Implementations = await GetImplementations();
+        /// <summary>
+        /// Получить тип объекта, помеченного как реализация <see cref="IJsonConverter"/>
+        /// </summary>
+        /// <returns>Тип объекта, помеченного как реализация <see cref="IJsonConverter"/></returns>
+        public static async Task<Type?> GetConverterType()
+        {
+            IEnumerable<Type> implementations = await GetImplementations();
 
-			foreach (var Type in Implementations)
-			{
-				return Type;
-			}
+            foreach (var type in implementations)
+            {
+                return type;
+            }
 
-			return null;
-		}
+            return null;
+        }
 
-		private static async Task<IEnumerable<Type>> GetImplementations()
-		{
-			if (_Implementations != null)
-			{
-				return _Implementations;
-			}
+        private static async Task<IEnumerable<Type>> GetImplementations()
+        {
+            if (_implementations != null)
+            {
+                return _implementations;
+            }
 
-			_Implementations = await Helper.GetTypesWithAttribute<JsonConverterImplementationAttribute>();
+            _implementations = await Helper.GetTypesWithAttribute<JsonConverterImplementationAttribute>();
 
-			return _Implementations;
-		}
-	}
+            return _implementations;
+        }
+    }
 }

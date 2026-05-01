@@ -1,29 +1,29 @@
-﻿using System.Runtime.Serialization.Formatters.Binary;
+﻿using System.IO;
 using System.Runtime.Serialization.Formatters;
-using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Acly.Serialize
 {
-    internal class StandardFormatter : IFormatter
+    internal sealed class StandardFormatter : IFormatter
     {
-        private readonly BinaryFormatter _Formatter = new()
+        private readonly BinaryFormatter _formatter = new()
         {
             AssemblyFormat = FormatterAssemblyStyle.Simple,
             TypeFormat = FormatterTypeStyle.TypesWhenNeeded,
             FilterLevel = TypeFilterLevel.Full,
         };
 
-        public byte[] Serialize(object ObjectToSerialize)
+        public byte[] Serialize(object objectToSerialize)
         {
-            using MemoryStream Memory = new();
-            _Formatter.Serialize(Memory, ObjectToSerialize);
+            using MemoryStream memory = new();
+            _formatter.Serialize(memory, objectToSerialize);
 
-            return Memory.ToArray();
+            return memory.ToArray();
         }
-        public T Deserialize<T>(byte[] SerializedObject)
+        public T Deserialize<T>(byte[] serializedObject)
         {
-            using MemoryStream Memory = new(SerializedObject);
-            return (T)_Formatter.Deserialize(Memory);
+            using MemoryStream memory = new(serializedObject);
+            return (T)_formatter.Deserialize(memory);
         }
     }
 }

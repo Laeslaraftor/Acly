@@ -3,65 +3,74 @@ using System.Diagnostics;
 
 namespace Acly.Logger
 {
-	/// <summary>
-	/// Реализация <see cref="ILogger"/> по умолчанию
-	/// </summary>
-	public class StandardLogger : ILogger
-	{
-		/// <summary>
-		/// Отправить обычное сообщение
-		/// </summary>
-		/// <param name="Message">Сообщение</param>
-		public void Message(string Message)
-		{
-			Debug.WriteLine(Message);
-		}
-		/// <summary>
-		/// Отправить объект как сообщение
-		/// </summary>
-		/// <param name="Object">Объект для сообщения</param>
-		public void Message(object Object)
-		{
-			Debug.WriteLine(Object);
-		}
+    /// <summary>
+    /// Реализация <see cref="ILogger"/> по умолчанию
+    /// </summary>
+    public class StandardLogger : ILogger
+    {
+        /// <summary>
+        /// Отправить обычное сообщение
+        /// </summary>
+        /// <param name="message">Сообщение</param>
+        public void Message(string message)
+        {
+            Debug.WriteLine(message);
+        }
+        /// <summary>
+        /// Отправить объект как сообщение
+        /// </summary>
+        /// <param name="obj">Объект для сообщения</param>
+        public void Message(object obj)
+        {
+            Debug.WriteLine(obj);
+        }
 
-		/// <summary>
-		/// Отправить предупреждение
-		/// </summary>
-		/// <param name="Message">Предупреждение</param>
-		public void Warning(string Message)
-		{
-			Debug.WriteLine("Предупреждение: " + Message);
-		}
-		/// <summary>
-		/// Отправить объект как предупреждение
-		/// </summary>
-		/// <param name="Object">Объект для предупреждения</param>
-		public void Warning(object Object)
-		{
-			Debug.WriteLine("Предупреждение: " + Object);
-		}
+        /// <summary>
+        /// Отправить предупреждение
+        /// </summary>
+        /// <param name="message">Предупреждение</param>
+        public void Warning(string message)
+        {
+            Debug.WriteLine("Предупреждение: " + message);
+        }
+        /// <summary>
+        /// Отправить объект как предупреждение
+        /// </summary>
+        /// <param name="obj">Объект для предупреждения</param>
+        public void Warning(object obj)
+        {
+            Debug.WriteLine("Предупреждение: " + obj);
+        }
 
-		/// <summary>
-		/// Отправить сообщение об ошибке
-		/// </summary>
-		/// <param name="Message">Текст ошибки</param>
-		public void Error(string Message)
-		{
-			Debug.Fail(Message);
-		}
-		/// <summary>
-		/// Отправить объект как сообщение об ошибке
-		/// </summary>
-		/// <param name="Object">Объект для сообщения об ошибке</param>
-		public void Error(object Object)
-		{
-			if (Object == null)
-			{
-				throw new ArgumentNullException(nameof(Object), "Объект для вывода не указан");
-			}
+        /// <summary>
+        /// Отправить сообщение об ошибке
+        /// </summary>
+        /// <param name="message">Текст ошибки</param>
+        public void Error(string message)
+        {
+            Debug.Fail(message);
+        }
+        /// <summary>
+        /// Отправить объект как сообщение об ошибке
+        /// </summary>
+        /// <param name="obj">Объект для сообщения об ошибке</param>
+        public void Error(object obj)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj), "Объект для вывода не указан");
+            }
 
-			Debug.Fail(Object.ToString());
-		}
-	}
+            Debug.Fail(obj.ToString());
+        }
+
+        #region Статика
+
+        /// <summary>
+        /// Глобальный экземпляр стандартного логгера
+        /// </summary>
+        public static readonly StandardLogger Instance = new();
+
+        #endregion
+    }
 }

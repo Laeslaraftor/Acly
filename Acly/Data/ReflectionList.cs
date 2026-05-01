@@ -8,66 +8,66 @@ namespace Acly
     /// Список, основанный на рефлексии
     /// </summary>
 #pragma warning disable CA1010 // Также необходимо реализовать универсальный интерфейс
-    public class ReflectionList : IList, IEnumerable, IDisposable
+    public class ReflectionList : Disposable, IList, IEnumerable
 #pragma warning restore CA1010 // Также необходимо реализовать универсальный интерфейс
     {
         /// <summary>
         /// Создать новый экземпляр списка
         /// </summary>
-        /// <param name="Obj">Список</param>
+        /// <param name="obj">Список</param>
         /// <exception cref="ArgumentException"></exception>
-        public ReflectionList(object Obj)
-            : this(Obj as IEnumerable ?? throw new ArgumentException($"Объект {Obj} не является перечисляемым!", nameof(Obj)))
+        public ReflectionList(object obj)
+            : this(obj as IEnumerable ?? throw new ArgumentException($"Объект {obj} не является перечисляемым!", nameof(obj)))
         {
         }
         /// <summary>
         /// Создать новый экземпляр списка
         /// </summary>
-        /// <param name="List">Список</param>
-        public ReflectionList(IEnumerable List)
+        /// <param name="list">Список</param>
+        public ReflectionList(IEnumerable list)
         {
-            if (List == null)
+            Enumerable = list ?? throw new ArgumentNullException(nameof(list));
+
+            Type listType = list.GetType();
+
+            if (listType.TryFindMethod(nameof(Add), out var addMethod) &&
+                listType.TryFindMethod(nameof(Insert), out var insertMethod) &&
+                listType.TryFindMethod(nameof(RemoveAt), out var removeAtMethod) &&
+                listType.TryFindMethod(nameof(Remove), out var removeMethod) &&
+                listType.TryFindMethod(nameof(Clear), out var clearMethod) &&
+                listType.TryFindProperty(nameof(Count), out var countProperty) &&
+                listType.TryFindProperty("Item", out var itemProperty))
             {
-                throw new ArgumentNullException(nameof(List));
-            }
-
-            Enumerable = List;
-
-            Type ListType = List.GetType();
-
-            if (ListType.TryFindMethod(nameof(Add), out var AddMethod) &&
-                ListType.TryFindMethod(nameof(Insert), out var InsertMethod) &&
-                ListType.TryFindMethod(nameof(RemoveAt), out var RemoveAtMethod) &&
-                ListType.TryFindMethod(nameof(Remove), out var RemoveMethod) &&
-                ListType.TryFindMethod(nameof(Clear), out var ClearMethod) &&
-                ListType.TryFindProperty(nameof(Count), out var CountProperty) &&
-                ListType.TryFindProperty("Item", out var ItemProperty))
-            {
-                _AddMethod = AddMethod;
-                _InsertMethod = InsertMethod;
-                _RemoveAtMethod = RemoveAtMethod;
-                _RemoveMethod = RemoveMethod;
-                _ClearMethod = ClearMethod;
-                _CountProperty = CountProperty;
-                _ItemProperty = ItemProperty;
+                _addMethod = addMethod;
+                _insertMethod = insertMethod;
+                _removeAtMethod = removeAtMethod;
+                _removeMethod = removeMethod;
+                _clearMethod = clearMethod;
+                _countProperty = countProperty;
+                _itemProperty = itemProperty;
             }
             else
             {
-                throw new ArgumentException($"Объект не является списком!", nameof(List));
+                throw new ArgumentException($"Объект не является списком!", nameof(list));
             }
-        }
-        /// <summary>
-        /// Очистить экземпляр
-        /// </summary>
-        ~ReflectionList()
-        {
-            Dispose(false);
         }
 
         /// <summary>
         /// Конвертер значений. Используется для обработки входящих значений.
         /// </summary>
-        public ConvertCollectionValue? Converter { get; set; }
+        public ConvertCollectionValue? Converter
+        {
+            get => field;
+            set
+            {
+                if (field != value)
+                {
+                    OnPropertyChanging(nameof(Converter));
+                    field = value;
+                    OnPropertyChanged(nameof(Converter));
+                }
+            }
+        }
         /// <summary>
         /// Список объектов
         /// </summary>
@@ -75,7 +75,7 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public int Count => (int)_CountProperty.GetValue(Enumerable);
+        public int Count => (int)_countProperty.GetValue(Enumerable);
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
@@ -95,53 +95,53 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Index"><inheritdoc/></param>
+        /// <param name="index"><inheritdoc/></param>
         /// <returns><inheritdoc/></returns>
-        public object this[int Index]
+        public object this[int index]
         {
             get
             {
-                _MethodParams[0] = Index;
-                return _ItemProperty.GetValue(Enumerable, _MethodParams);
+                _methodParams[0] = index;
+                return _itemProperty.GetValue(Enumerable, _methodParams);
             }
             set
             {
-                _MethodParams[0] = Index;
-                _ItemProperty.SetValue(Enumerable, Convert(value, Index), _MethodParams);
+                _methodParams[0] = index;
+                _itemProperty.SetValue(Enumerable, Convert(value, index), _methodParams);
             }
         }
 
-        private readonly MethodInfo _RemoveAtMethod;
-        private readonly MethodInfo _RemoveMethod;
-        private readonly MethodInfo _InsertMethod;
-        private readonly MethodInfo _AddMethod;
-        private readonly MethodInfo _ClearMethod;
-        private readonly PropertyInfo _CountProperty;
-        private readonly PropertyInfo _ItemProperty;
-        private readonly object?[] _MethodParams = new object?[1];
-        private readonly object?[] _MethodParams2 = new object?[2];
+        private readonly MethodInfo _removeAtMethod;
+        private readonly MethodInfo _removeMethod;
+        private readonly MethodInfo _insertMethod;
+        private readonly MethodInfo _addMethod;
+        private readonly MethodInfo _clearMethod;
+        private readonly PropertyInfo _countProperty;
+        private readonly PropertyInfo _itemProperty;
+        private readonly object?[] _methodParams = new object?[1];
+        private readonly object?[] _methodParams2 = new object?[2];
 
         #region Управление
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Value"><inheritdoc/></param>
+        /// <param name="value"><inheritdoc/></param>
         /// <returns><inheritdoc/></returns>
-        public bool Contains(object? Value)
+        public bool Contains(object? value)
         {
-            return IndexOf(Value) != -1;
+            return IndexOf(value) != -1;
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Value"><inheritdoc/></param>
+        /// <param name="value"><inheritdoc/></param>
         /// <returns><inheritdoc/></returns>
-        public int IndexOf(object? Value)
+        public int IndexOf(object? value)
         {
             for (int i = 0; i < Count; i++)
             {
-                if (Value?.Equals(this[i]) == true)
+                if (value?.Equals(this[i]) == true)
                 {
                     return i;
                 }
@@ -153,14 +153,14 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Item"><inheritdoc/></param>
+        /// <param name="item"><inheritdoc/></param>
         /// <returns><inheritdoc/></returns>
-        public int Add(object? Item)
+        public int Add(object? item)
         {
             int startCount = Count;
 
-            _MethodParams[0] = Convert(Item, startCount);
-            _AddMethod.Invoke(Enumerable, _MethodParams);
+            _methodParams[0] = Convert(item, startCount);
+            _addMethod.Invoke(Enumerable, _methodParams);
 
             int endCount = Count;
 
@@ -174,13 +174,13 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Index"><inheritdoc/></param>
-        /// <param name="Item"><inheritdoc/></param>
-        public void Insert(int Index, object? Item)
+        /// <param name="index"><inheritdoc/></param>
+        /// <param name="item"><inheritdoc/></param>
+        public void Insert(int index, object? item)
         {
-            _MethodParams2[0] = Index;
-            _MethodParams2[1] = Convert(Item, Index);
-            _InsertMethod.Invoke(Enumerable, _MethodParams2);
+            _methodParams2[0] = index;
+            _methodParams2[1] = Convert(item, index);
+            _insertMethod.Invoke(Enumerable, _methodParams2);
         }
 
         /// <summary>
@@ -188,74 +188,67 @@ namespace Acly
         /// </summary>
         public void Clear()
         {
-            _ClearMethod.Invoke(Enumerable, Array.Empty<object>());
+            _clearMethod.Invoke(Enumerable, []);
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Index"><inheritdoc/></param>
-        public void RemoveAt(int Index)
+        /// <param name="index"><inheritdoc/></param>
+        public void RemoveAt(int index)
         {
-            _MethodParams[0] = Index;
-            _RemoveAtMethod.Invoke(Enumerable, _MethodParams);
+            _methodParams[0] = index;
+            _removeAtMethod.Invoke(Enumerable, _methodParams);
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Value"><inheritdoc/></param>
-        public void Remove(object? Value)
+        /// <param name="value"><inheritdoc/></param>
+        public void Remove(object? value)
         {
-            _MethodParams[0] = Value;
-            _RemoveMethod.Invoke(Enumerable, _MethodParams);
+            _methodParams[0] = value;
+            _removeMethod.Invoke(Enumerable, _methodParams);
         }
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Array"><inheritdoc/></param>
-        /// <param name="Index"><inheritdoc/></param>
+        /// <param name="array"><inheritdoc/></param>
+        /// <param name="index"><inheritdoc/></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public void CopyTo(Array Array, int Index)
+        public void CopyTo(Array array, int index)
         {
-            if (Array == null)
+            if (array == null)
             {
-                throw new ArgumentNullException(nameof(Array));
+                throw new ArgumentNullException(nameof(array));
             }
 
             for (int i = 0; i < Count; i++)
             {
-                Array.SetValue(this[i], i + Index);
+                array.SetValue(this[i], i + index);
             }
         }
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void Dispose()
+        /// <param name="isDisposing"><inheritdoc/></param>
+        protected override void Dispose(bool isDisposing)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            base.Dispose(isDisposing);
+
+            _methodParams[0] = null;
+            _methodParams2[0] = null;
+            _methodParams2[1] = null;
         }
 
-        /// <summary>
-        /// Очистить экземпляр объекта
-        /// </summary>
-        /// <param name="isDisposing">true - ручной вызов, false - вызов сборщиком мусора</param>
-        protected virtual void Dispose(bool isDisposing)
-        {
-            _MethodParams[0] = null;
-            _MethodParams2[0] = null;
-            _MethodParams2[1] = null;
-        }
-
-        private object? Convert(object? Value, int Index)
+        private object? Convert(object? value, int index)
         {
             if (Converter != null)
             {
-                Value = Converter(Value, Index, this);
+                value = Converter(value, index, this);
             }
 
-            return Value;
+            return value;
         }
 
         #endregion

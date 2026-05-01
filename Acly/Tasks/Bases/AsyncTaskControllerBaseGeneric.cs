@@ -26,13 +26,13 @@ namespace Acly.Tasks
         public event AsyncTaskFail? Failed;
         event AsyncTaskComplete<T> IAsyncTaskController<T>.Completed
         {
-            add => _CompleteHandlers.Add(value);
-            remove => _CompleteHandlers.Remove(value);
+            add => _completeHandlers.Add(value);
+            remove => _completeHandlers.Remove(value);
         }
 
-        private readonly List<AsyncTaskComplete<T>> _CompleteHandlers = new();
-        private bool _IsFailed;
-        private Thread? _TaskThread;
+        private readonly List<AsyncTaskComplete<T>> _completeHandlers = [];
+        private bool _isFailed;
+        private Thread? _taskThread;
 
         #region Управление
 
@@ -41,37 +41,35 @@ namespace Acly.Tasks
         /// </summary>
         public async void Start()
         {
-            bool IsCompleted = false;
-            T? Result = default;
-            _TaskThread = new(async () =>
+            bool isCompleted = false;
+            T? result = default;
+            _taskThread = new(async () =>
             {
                 try
                 {
-                    Result = await StartTask();
-                    IsCompleted = true;
+                    result = await StartTask();
+                    isCompleted = true;
                 }
-                catch (Exception Error)
+                catch (Exception error)
                 {
-                    IsCompleted = true;
-                    Interrupt(Error);
+                    isCompleted = true;
+                    Interrupt(error);
                 }
             });
-            _TaskThread.Start();
+            _taskThread.Start();
 
-            while (_TaskThread.IsAlive || !IsCompleted)
+            while (_taskThread.IsAlive || !isCompleted)
             {
                 await Task.Delay(50);
             }
 
-            if (_IsFailed)
+            if (_isFailed)
             {
                 return;
             }
 
             SendProgress(1);
-#pragma warning disable CS8604
-            InvokeCompletedEvents(Result);
-#pragma warning restore CS8604
+            InvokeCompletedEvents(result!);
         }
 
         /// <summary>
@@ -83,55 +81,64 @@ namespace Acly.Tasks
         /// <summary>
         /// Отправить прогресс выполнения задачи
         /// </summary>
-        /// <param name="Progress">Прогресс выполнения задачи</param>
-        protected void SendProgress(float Progress)
+        /// <param name="progress">Прогресс выполнения задачи</param>
+        protected void SendProgress(float progress)
         {
-            ProgressUpdated?.Invoke(Progress);
+            ProgressUpdated?.Invoke(progress);
+        }
+        /// <summary>
+        /// Отправить прогресс выполнения задачи
+        /// </summary>
+        /// <param name="progress">Прогресс выполнения задачи</param>
+        protected void SendProgress(double progress)
+        {
+            SendProgress((float)progress);
         }
         /// <summary>
         /// Прервать с ошибкой
         /// </summary>
-        /// <param name="Error">Ошибка</param>
-        protected void Interrupt(Exception Error)
+        /// <param name="error">Ошибка</param>
+        protected void Interrupt(Exception error)
         {
-            if (_IsFailed)
+            if (_isFailed)
             {
                 return;
             }
 
-            _IsFailed = true;
+            _isFailed = true;
             Stop();
-            Failed?.Invoke(new AclyAsyncTaskError(Error));
+            Failed?.Invoke(new AclyAsyncTaskError(error));
         }
         /// <summary>
         /// Прервать с сообщением
         /// </summary>
-        /// <param name="Message">Сообщение</param>
-        protected void Interrupt(Response Message)
+        /// <param name="message">Сообщение</param>
+        protected void Interrupt(Response message)
         {
-            if (_IsFailed)
+            if (_isFailed)
             {
                 return;
             }
 
-            _IsFailed = true;
+            _isFailed = true;
             Stop();
-            Failed?.Invoke(new AclyAsyncTaskError(Message));
+            Failed?.Invoke(new AclyAsyncTaskError(message));
         }
 
         private void Stop()
         {
-            if (_TaskThread == null)
+            if (_taskThread == null)
             {
                 return;
             }
 
             try
             {
-                _TaskThread.Abort();
+                _taskThread.Abort();
             }
-            catch
+            catch (Exception error)
             {
+                Log.Error(error);
             }
         }
 
@@ -139,15 +146,15 @@ namespace Acly.Tasks
 
         #region События
 
-        private void InvokeCompletedEvents(T Result)
+        private void InvokeCompletedEvents(T result)
         {
             Completed?.Invoke();
 
-            List<AsyncTaskComplete<T>> Handlers = new(_CompleteHandlers);
+            List<AsyncTaskComplete<T>> Handlers = [.. _completeHandlers];
 
             foreach (var Handler in Handlers)
             {
-                Handler(Result);
+                Handler(result);
             }
         }
 

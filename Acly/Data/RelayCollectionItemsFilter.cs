@@ -18,27 +18,26 @@ namespace Acly
         /// </summary>
         public Func<IEnumerable, object, bool>? Filter
         {
-            get => _Filter;
+            get => field;
             set
             {
-                if (_Filter != value)
+                if (field != value)
                 {
-                    _Filter = value;
+                    field = value;
+                    Update();
                 }
             }
         }
-
-        private Func<IEnumerable, object, bool>? _Filter;
 
         #region Управление
 
         /// <summary>
         /// Обновить фильтр
         /// </summary>
-        /// <param name="Args">Аргументы события изменения фильтра</param>
-        public void Update(EventArgs Args)
+        /// <param name="args">Аргументы события изменения фильтра</param>
+        public void Update(EventArgs args)
         {
-            FilterChanged?.Invoke(this, Args);
+            FilterChanged?.Invoke(this, args);
         }
         /// <summary>
         /// Обновить фильтр
@@ -48,19 +47,19 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Collection"><inheritdoc/></param>
-        /// <param name="Item"><inheritdoc/></param>
+        /// <param name="collection"><inheritdoc/></param>
+        /// <param name="item"><inheritdoc/></param>
         /// <returns><inheritdoc/></returns>
-        public bool Check(IEnumerable Collection, object Item)
+        public bool Check(IEnumerable collection, object item)
         {
-            var Filter = this.Filter;
+            var filter = Filter;
 
-            if (Filter == null)
+            if (filter == null)
             {
                 return true;
             }
 
-            return Filter(Collection, Item);
+            return filter(collection, item);
         }
 
         #endregion

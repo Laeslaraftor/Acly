@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Acly.Requests
@@ -14,13 +12,11 @@ namespace Acly.Requests
         /// <summary>
         /// Создать экземпляр класс веб прослушивания
         /// </summary>
-        /// <param name="Prefix">URI префикс для прослушивания. Например, http://localhost:8080/</param>
-        protected WebListenerBase(string Prefix)
+        /// <param name="prefix">URI префикс для прослушивания. Например, http://localhost:8080/</param>
+        protected WebListenerBase(string prefix)
         {
             Listener = new();
-            Listener.Prefixes.Add(Prefix);
-
-            //StartListenTask();
+            Listener.Prefixes.Add(prefix);
         }
 
         /// <summary>
@@ -32,10 +28,6 @@ namespace Acly.Requests
         /// <see cref="HttpListener"/>
         /// </summary>
         protected HttpListener Listener { get; }
-        /// <summary>
-        /// Очищен ли прослушиватель
-        /// </summary>
-        protected bool Disposed { get; private set; }
 
         #region Управление
 
@@ -74,21 +66,11 @@ namespace Acly.Requests
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void Dispose()
+        /// <param name="isDisposing"><inheritdoc/></param>
+        protected override void Dispose(bool isDisposing)
         {
-            Dispose(true);
-#pragma warning disable CA1816
-            GC.SuppressFinalize(this);
-#pragma warning restore CA1816
-        }
+            base.Dispose(isDisposing);
 
-        /// <summary>
-        /// Очистить прослушиватель
-        /// </summary>
-        /// <param name="OnlyLocal"></param>
-        protected virtual void Dispose(bool OnlyLocal)
-        {
-            Disposed = true;
             Listener.Stop();
             Listener.Abort();
             Listener.Close();
@@ -103,15 +85,15 @@ namespace Acly.Requests
         {
             await Task.Run(() =>
             {
-                while (!Disposed)
+                while (!IsDisposed)
                 {
                     if (!Listen())
                     {
-                        Debug.WriteLine("Http прослушивание остановлено из-за возникшей проблемы!");
+                        Log.Warning("Http прослушивание остановлено из-за возникшей проблемы!");
                         break;
                     }
                 }
-            }).ConfigureAwait(true);
+            });
 
             if (IsStarted)
             {
@@ -128,10 +110,9 @@ namespace Acly.Requests
                 {
                     context = Listener.GetContext();
                 }
-                catch (Exception Error)
+                catch (Exception error)
                 {
-                    OnHandledException(Error);
-                    PrintException(Error);
+                    OnHandledException(error);
                     return false;
                 }
 
@@ -144,16 +125,6 @@ namespace Acly.Requests
             return true;
         }
 
-        private static void PrintException(Exception Error)
-        {
-            StringBuilder Builder = new();
-            Builder.AppendLine($"Произошла ошибка {Error.GetType().Name}");
-            Builder.AppendLine(Error.Message);
-            Builder.AppendLine(Error.StackTrace);
-
-            Debug.WriteLine(Builder.ToString());
-        }
-
         #endregion
 
         #region События
@@ -161,14 +132,15 @@ namespace Acly.Requests
         /// <summary>
         /// Вызывается при получении веб запроса
         /// </summary>
-        /// <param name="Context">Запрос</param>
-        protected abstract void OnHandledRequest(HttpListenerContext Context);
+        /// <param name="context">Запрос</param>
+        protected abstract void OnHandledRequest(HttpListenerContext context);
         /// <summary>
         /// Вызывается при обработке исключения
         /// </summary>
-        /// <param name="Error">Обрабатываемое исключение</param>
-        protected virtual void OnHandledException(Exception Error)
+        /// <param name="error">Обрабатываемое исключение</param>
+        protected virtual void OnHandledException(Exception error)
         {
+            Log.Error(error);
         }
 
         #endregion

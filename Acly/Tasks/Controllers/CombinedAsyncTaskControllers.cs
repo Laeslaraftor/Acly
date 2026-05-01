@@ -7,18 +7,13 @@ namespace Acly.Tasks
     /// <summary>
     /// Контроллер объединённых асинхронных задач. Последовательно выполняет каждую задачу
     /// </summary>
-    public class CombinedAsyncTaskControllers : AsyncTaskControllerBase
+    /// <remarks>
+    /// Создать новый экземпляр контроллера объединённых асинхронных задач
+    /// </remarks>
+    /// <param name="tasksGetters">Список методов для получения асинхронных задач</param>
+    public class CombinedAsyncTaskControllers(IEnumerable<Func<IAsyncTask>> tasksGetters) : AsyncTaskControllerBase
     {
-        /// <summary>
-        /// Создать новый экземпляр контроллера объединённых асинхронных задач
-        /// </summary>
-        /// <param name="TasksGetters">Список методов для получения асинхронных задач</param>
-        public CombinedAsyncTaskControllers(IEnumerable<Func<IAsyncTask>> TasksGetters)
-        {
-            _TasksGetters = new(TasksGetters);
-        }
-
-        private readonly List<Func<IAsyncTask>> _TasksGetters;
+        private readonly List<Func<IAsyncTask>> _tasksGetters = [.. tasksGetters];
 
         /// <summary>
         /// <inheritdoc/>
@@ -26,26 +21,26 @@ namespace Acly.Tasks
         /// <returns><inheritdoc/></returns>
         protected override async Task StartTask()
         {
-            for (int i = 0; i < _TasksGetters.Count; i++)
+            for (int i = 0; i < _tasksGetters.Count; i++)
             {
-                var CurrentTask = _TasksGetters[i]();
-                CurrentTask.ProgressUpdated += OnProgressUpdated;
+                var currentTask = _tasksGetters[i]();
+                currentTask.ProgressUpdated += OnProgressUpdated;
 
-                void OnProgressUpdated(float Progress)
+                void OnProgressUpdated(float progress)
                 {
-                    Progress = Acly.Progress.FromAmountsRange(_TasksGetters.Count, i, Progress);
+                    progress = Acly.Progress.FromAmountsRange(_tasksGetters.Count, i, progress);
                 }
 
-                while (!CurrentTask.IsCompleted)
+                while (!currentTask.IsCompleted)
                 {
                     await Task.Delay(50);
                 }
 
-                CurrentTask.ProgressUpdated -= OnProgressUpdated;
+                currentTask.ProgressUpdated -= OnProgressUpdated;
 
-                if (CurrentTask.Error != null)
+                if (currentTask.Error != null)
                 {
-                    Interrupt(CurrentTask.Error.Exception);
+                    Interrupt(currentTask.Error.Exception);
                     break;
                 }
             }

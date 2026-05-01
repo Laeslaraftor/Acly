@@ -4,132 +4,118 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Reflection;
 
 namespace Acly
 {
     /// <summary>
     /// Синхронизатор списков
     /// </summary>
-    public class CollectionSynchronizer<T1, T2> : IEnumerable<T1>, INotifyPropertyChanged, IDisposable
+    public class CollectionSynchronizer<T1, T2> : Disposable, IEnumerable<T1>, INotifyPropertyChanged
     {
         /// <summary>
         /// Создать новый экземпляр синхронизатора коллекций
         /// </summary>
-        /// <param name="First"><inheritdoc cref="_FirstCollection"/></param>
+        /// <param name="first"><inheritdoc cref="_firstCollection"/></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public CollectionSynchronizer(INotifyCollectionChanged First) 
-            : this(First, new ObservableCollection<T1>())
+        public CollectionSynchronizer(INotifyCollectionChanged first)
+            : this(first, new ObservableCollection<T1>())
         {
         }
         /// <summary>
         /// Создать новый экземпляр синхронизатора коллекций
         /// </summary>
-        /// <param name="First"><inheritdoc cref="_FirstCollection"/></param>
-        /// <param name="Converter"><inheritdoc cref="Converter"/></param>
+        /// <param name="first"><inheritdoc cref="_firstCollection"/></param>
+        /// <param name="converter"><inheritdoc cref="Converter"/></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public CollectionSynchronizer(INotifyCollectionChanged First, IValueConverter<T1, T2> Converter) 
-            : this(First, new ObservableCollection<T2>(), Converter)
+        public CollectionSynchronizer(INotifyCollectionChanged first, IValueConverter<T1, T2> converter)
+            : this(first, new ObservableCollection<T2>(), converter)
         {
         }
         /// <summary>
         /// Создать новый экземпляр синхронизатора коллекций
         /// </summary>
-        /// <param name="First"><inheritdoc cref="_FirstCollection"/></param>
-        /// <param name="Converter"><inheritdoc cref="Converter"/></param>
+        /// <param name="first"><inheritdoc cref="_firstCollection"/></param>
+        /// <param name="converter"><inheritdoc cref="Converter"/></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public CollectionSynchronizer(INotifyCollectionChanged First, ICollectionValueConverter<T1, T2> Converter)
-            : this(First, new ObservableCollection<T2>(), Converter)
+        public CollectionSynchronizer(INotifyCollectionChanged first, ICollectionValueConverter<T1, T2> converter)
+            : this(first, new ObservableCollection<T2>(), converter)
         {
         }
         /// <summary>
         /// Создать новый экземпляр синхронизатора коллекций
         /// </summary>
-        /// <param name="First"><inheritdoc cref="_FirstCollection"/></param>
-        /// <param name="Second"><inheritdoc cref="_SecondCollection"/></param>
-        /// <param name="Converter"><inheritdoc cref="Converter"/></param>
+        /// <param name="first"><inheritdoc cref="_firstCollection"/></param>
+        /// <param name="second"><inheritdoc cref="_secondCollection"/></param>
+        /// <param name="converter"><inheritdoc cref="Converter"/></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public CollectionSynchronizer(INotifyCollectionChanged First, INotifyCollectionChanged Second, IValueConverter<T1, T2>? Converter)
-            : this(First, Second, CreateIfNotNull(Converter))
+        public CollectionSynchronizer(INotifyCollectionChanged first, INotifyCollectionChanged second, IValueConverter<T1, T2>? converter)
+            : this(first, second, (ICollectionValueConverter<T1, T2>?)CreateIfNotNull(converter))
         {
         }
         /// <summary>
         /// Создать новый экземпляр синхронизатора коллекций
         /// </summary>
-        /// <param name="First"><inheritdoc cref="_FirstCollection"/></param>
-        /// <param name="Second"><inheritdoc cref="_SecondCollection"/></param>
-        /// <param name="Converter"><inheritdoc cref="Converter"/></param>
+        /// <param name="first"><inheritdoc cref="_firstCollection"/></param>
+        /// <param name="second"><inheritdoc cref="_secondCollection"/></param>
+        /// <param name="converter"><inheritdoc cref="Converter"/></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public CollectionSynchronizer(INotifyCollectionChanged First, INotifyCollectionChanged Second, ICollectionValueConverter<T1, T2>? Converter = null)
+        public CollectionSynchronizer(INotifyCollectionChanged first, INotifyCollectionChanged second, ICollectionValueConverter<T1, T2>? converter = null)
         {
-            bool TypesNotEquals = typeof(T1) != typeof(T2);
+            bool typesNotEquals = typeof(T1) != typeof(T2);
 
-            if (TypesNotEquals && Converter == null)
+            if (typesNotEquals && converter == null)
             {
-                throw new ArgumentNullException("При указании разных типов необходимо указать и конвертер!", nameof(Converter));
+                throw new ArgumentNullException("При указании разных типов необходимо указать и конвертер!", nameof(converter));
             }
 
-            FirstCollection = First ?? throw new ArgumentNullException(nameof(First));
-            SecondCollection = Second ?? throw new ArgumentNullException(nameof(Second));
-            this.Converter = Converter;
+            FirstCollection = first ?? throw new ArgumentNullException(nameof(first));
+            SecondCollection = second ?? throw new ArgumentNullException(nameof(second));
+            Converter = converter;
 
-            if (First is not IEnumerable Collection)
+            if (first is not IEnumerable collection)
             {
-                throw new ArgumentException($"Объект не является списком!", nameof(First));
+                throw new ArgumentException($"Объект не является списком!", nameof(first));
             }
-            if (Second is not IEnumerable Collection2)
+            if (second is not IEnumerable collection2)
             {
-                throw new ArgumentException($"Объект не является списком!", nameof(Second));
+                throw new ArgumentException($"Объект не является списком!", nameof(second));
             }
 
             FirstCollection.CollectionChanged += FirstCollectionChanged;
             SecondCollection.CollectionChanged += SecondCollectionChanged;
 
-            ConvertCollectionValue? ConvertMethod = null;
-            ConvertCollectionValue? ConvertBackMethod = null;
-            _FirstCollection = new(Collection);
-            _SecondCollection = new(Collection2);
+            ConvertCollectionValue? convertMethod = null;
+            ConvertCollectionValue? convertBackMethod = null;
+            _firstCollection = new(collection);
+            _secondCollection = new(collection2);
 
-            if (TypesNotEquals && Converter != null)
+            if (typesNotEquals && converter != null)
             {
-                ConvertMethod = (Obj, Index, List) =>
+                convertMethod = (obj, index, list) =>
                 {
-                    if (Obj != null)
+                    if (obj != null)
                     {
-                        return Converter.Convert((T1)Obj, Index, _FirstCollection, _SecondCollection);
+                        return converter.Convert((T1)obj, index, _firstCollection, _secondCollection);
                     }
 
                     return null;
                 };
-                ConvertBackMethod = (Obj, Index, List) =>
+                convertBackMethod = (obj, index, list) =>
                 {
-                    if (Obj != null)
+                    if (obj != null)
                     {
-                        return Converter.ConvertBack((T2)Obj, Index, _FirstCollection, _SecondCollection);
+                        return converter.ConvertBack((T2)obj, index, _firstCollection, _secondCollection);
                     }
 
                     return null;
                 };
             }
 
-            _FirstCollection.Converter = ConvertBackMethod;
-            _SecondCollection.Converter = ConvertMethod;
+            _firstCollection.Converter = convertBackMethod;
+            _secondCollection.Converter = convertMethod;
 
             SyncFirstToSecond();
         }
-        /// <summary>
-        /// Очистка синхронизатора
-        /// </summary>
-        ~CollectionSynchronizer()
-        {
-            Dispose(false);
-        }
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        [field: NonSerialized] public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Первая отслеживаемая коллекция
@@ -148,20 +134,20 @@ namespace Acly
         /// </summary>
         public bool IsUpdating
         {
-            get => _IsUpdating;
+            get => field;
             private set
             {
-                if (_IsUpdating != value)
+                if (field != value)
                 {
-                    _IsUpdating = value;
-                    InvokePropertyChanged(nameof(IsUpdating));
+                    OnPropertyChanging(nameof(IsUpdating));
+                    field = value;
+                    OnPropertyChanged(nameof(IsUpdating));
                 }
             }
         }
 
-        private readonly ReflectionList _FirstCollection;
-        private readonly ReflectionList _SecondCollection;
-        private bool _IsUpdating;
+        private readonly ReflectionList _firstCollection;
+        private readonly ReflectionList _secondCollection;
 
         #region Управление
 
@@ -170,39 +156,32 @@ namespace Acly
         /// </summary>
         public void SyncFirstToSecond()
         {
-            ForceSync(_FirstCollection, _SecondCollection);
+            ForceSync(_firstCollection, _secondCollection);
         }
         /// <summary>
         /// Синхронизировать значения первой коллекции со второй.
         /// </summary>
         public void SyncSecondToFirst()
         {
-            ForceSync(_SecondCollection, _FirstCollection);
+            ForceSync(_secondCollection, _firstCollection);
         }
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void Dispose()
+        /// <param name="isDisposing"><inheritdoc/></param>
+        protected override void Dispose(bool isDisposing)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+            base.Dispose(isDisposing);
 
-        /// <summary>
-        /// Очистка синхронизатора
-        /// </summary>
-        /// <param name="IsDisposing"></param>
-        protected virtual void Dispose(bool IsDisposing)
-        {
             FirstCollection.CollectionChanged -= FirstCollectionChanged;
             SecondCollection.CollectionChanged -= SecondCollectionChanged;
 
-            _FirstCollection.Dispose();
-            _SecondCollection.Dispose();
+            _firstCollection.Dispose();
+            _secondCollection.Dispose();
         }
 
-        private bool TrySync(ReflectionList From, ReflectionList To, NotifyCollectionChangedEventArgs Args)
+        private bool TrySync(ReflectionList from, ReflectionList to, NotifyCollectionChangedEventArgs args)
         {
             if (IsUpdating)
             {
@@ -212,11 +191,11 @@ namespace Acly
             try
             {
                 IsUpdating = true;
-                Sync(From, To, Args);
+                Sync(from, to, args);
             }
-            catch (Exception Error)
+            catch (Exception error)
             {
-                Debug.WriteLine(Error);
+                Log.Error(error);
             }
             finally
             {
@@ -225,26 +204,26 @@ namespace Acly
 
             return true;
         }
-        private void ForceSync(ReflectionList From, ReflectionList To)
+        private void ForceSync(ReflectionList from, ReflectionList to)
         {
-            _IsUpdating = true;
+            IsUpdating = true;
 
             try
             {
-                To.Clear();
+                to.Clear();
 
-                foreach (var Item in From)
+                foreach (var Item in from)
                 {
-                    To.Add(Item);
+                    to.Add(Item);
                 }
             }
-            catch (Exception Error)
+            catch (Exception error)
             {
-                Debug.WriteLine(Error);
+                Log.Error(error);
             }
             finally
             {
-                _IsUpdating = false;
+                IsUpdating = false;
             }
         }
 
@@ -269,77 +248,73 @@ namespace Acly
 
         #region События
 
-        private void InvokePropertyChanged(string PropertyName)
-        {
-            PropertyChanged?.Invoke(this, new(PropertyName));
-        }
         private void FirstCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            TrySync(_FirstCollection, _SecondCollection, e);
+            TrySync(_firstCollection, _secondCollection, e);
         }
         private void SecondCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            TrySync(_SecondCollection, _FirstCollection, e);
+            TrySync(_secondCollection, _firstCollection, e);
         }
 
         #endregion
 
         #region Статика
 
-        private static void Sync(ReflectionList From, ReflectionList To, NotifyCollectionChangedEventArgs Args)
+        private static void Sync(ReflectionList from, ReflectionList to, NotifyCollectionChangedEventArgs args)
         {
-            switch (Args.Action)
+            switch (args.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    if (Args.NewItems != null)
+                    if (args.NewItems != null)
                     {
-                        for (int i = 0; i < Args.NewItems.Count; i++)
+                        for (int i = 0; i < args.NewItems.Count; i++)
                         {
-                            var newIndex = Args.NewStartingIndex + i;
-                            if (newIndex <= To.Count)
+                            var newIndex = args.NewStartingIndex + i;
+                            if (newIndex <= to.Count)
                             {
-                                To.Insert(newIndex, Args.NewItems[i]);
+                                to.Insert(newIndex, args.NewItems[i]);
                             }
                             else
                             {
-                                To.Add(Args.NewItems[i]);
+                                to.Add(args.NewItems[i]);
                             }
                         }
                     }
                     break;
 
                 case NotifyCollectionChangedAction.Remove:
-                    if (Args.OldStartingIndex >= 0 && Args.OldStartingIndex < To.Count)
+                    if (args.OldStartingIndex >= 0 && args.OldStartingIndex < to.Count)
                     {
-                        for (int i = 0; i < Args.OldItems.Count; i++)
+                        for (int i = 0; i < args.OldItems.Count; i++)
                         {
-                            To.RemoveAt(Args.OldStartingIndex);
+                            to.RemoveAt(args.OldStartingIndex);
                         }
                     }
                     break;
 
                 case NotifyCollectionChangedAction.Replace:
-                    if (Args.NewStartingIndex >= 0 && Args.NewStartingIndex < To.Count)
+                    if (args.NewStartingIndex >= 0 && args.NewStartingIndex < to.Count)
                     {
-                        To[Args.NewStartingIndex] = Args.NewItems[0];
+                        to[args.NewStartingIndex] = args.NewItems[0];
                     }
                     break;
 
                 case NotifyCollectionChangedAction.Move:
-                    if (Args.OldStartingIndex >= 0 && Args.OldStartingIndex < To.Count &&
-                        Args.NewStartingIndex >= 0 && Args.NewStartingIndex <= To.Count)
+                    if (args.OldStartingIndex >= 0 && args.OldStartingIndex < to.Count &&
+                        args.NewStartingIndex >= 0 && args.NewStartingIndex <= to.Count)
                     {
-                        var item = To[Args.OldStartingIndex];
-                        To.RemoveAt(Args.OldStartingIndex);
-                        To.Insert(Args.NewStartingIndex, item);
+                        var item = to[args.OldStartingIndex];
+                        to.RemoveAt(args.OldStartingIndex);
+                        to.Insert(args.NewStartingIndex, item);
                     }
                     break;
 
                 case NotifyCollectionChangedAction.Reset:
-                    To.Clear();
-                    foreach (var item in From)
+                    to.Clear();
+                    foreach (var item in from)
                     {
-                        To.Add(item);
+                        to.Add(item);
                     }
                     break;
             }
@@ -349,14 +324,14 @@ namespace Acly
 
         #region Статика
 
-        private static ICollectionValueConverter<T1, T2>? CreateIfNotNull(IValueConverter<T1, T2>? Converter)
+        private static CollectionValueConverterToCommonConverter<T1, T2>? CreateIfNotNull(IValueConverter<T1, T2>? converter)
         {
-            if (Converter == null)
+            if (converter == null)
             {
                 return null;
             }
 
-            return new CollectionValueConverterToCommonConverter<T1, T2>(Converter);
+            return new CollectionValueConverterToCommonConverter<T1, T2>(converter);
         }
 
         #endregion

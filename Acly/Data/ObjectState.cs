@@ -13,27 +13,27 @@ namespace Acly
         /// <summary>
         /// Создать сохранённое состояние объекта
         /// </summary>
-        /// <param name="Object">Объект для сохранения состояния</param>
+        /// <param name="obj">Объект для сохранения состояния</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public ObjectState(object Object)
+        public ObjectState(object obj)
         {
-            if (Object == null)
+            if (obj == null)
             {
-                throw new ArgumentNullException(nameof(Object), "Объект не указан");
+                throw new ArgumentNullException(nameof(obj), "Объект не указан");
             }
 
-            Dictionary<PropertyInfo, object> SavedValues = new();
-            
-            foreach (var Prop in Object.GetType().GetProperties())
+            Dictionary<PropertyInfo, object> savedValues = [];
+
+            foreach (var property in obj.GetType().GetProperties())
             {
-                if (Prop.CanRead && Prop.CanWrite)
+                if (property.CanRead && property.CanWrite)
                 {
-                    SavedValues.Add(Prop, Prop.GetValue(Object));
+                    savedValues.Add(property, property.GetValue(obj));
                 }
             }
 
-            this.Object = Object;
-            Values = new(SavedValues);
+            Object = obj;
+            Values = new(savedValues);
         }
 
         /// <summary>
@@ -52,9 +52,9 @@ namespace Acly
         /// </summary>
         public void Restore()
         {
-            foreach (var Pair in Values)
+            foreach (var info in Values)
             {
-                Pair.Key.SetValue(Object, Pair.Value);
+                info.Key.SetValue(Object, info.Value);
             }
         }
 

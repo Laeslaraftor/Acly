@@ -47,7 +47,19 @@ namespace Acly
         /// Возвращает или задает положение местозаполнителя нового элемента в представлении коллекции.
         /// </summary>
         public NewItemPosition NewItemPosition { get; set; }
+        /// <summary>
+        /// Получить или задать элемент по индексу
+        /// </summary>
+        /// <param name="index">Индекс по которому надо получить или задать элемент</param>
+        /// <returns>Элемент по указанному индексу</returns>
+        public object? this[int index] { get; set; }
 
+        /// <summary>
+        /// Проверить наличие элемента в коллекции.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool Contains(object? item);
         /// <summary>
         /// Добавляет новый элемент в коллекцию.
         /// </summary>
@@ -55,8 +67,8 @@ namespace Acly
         /// <summary>
         /// Добавляет новый элемент в коллекцию.
         /// </summary>
-        /// <param name="Item">Объект, который надо добавить</param>
-        public void AddNew(object? Item);
+        /// <param name="item">Объект, который надо добавить</param>
+        public void AddNew(object? item);
         /// <summary>
         /// Завершает транзакцию изменения и, если это возможно, восстанавливает исходное значение для элемента.
         /// </summary>
@@ -76,15 +88,15 @@ namespace Acly
         /// <summary>
         /// Начинает транзакцию изменения заданного элемента.
         /// </summary>
-        public void EditItem(object Item);
+        public void EditItem(object item);
         /// <summary>
         /// Удаляет заданный элемент из коллекции.
         /// </summary>
-        public void Remove(object Item);
+        public void Remove(object item);
         /// <summary>
         /// Удаляет элемент в указанной позиции из коллекции.
         /// </summary>
-        public void RemoveAt(int Index);
+        public void RemoveAt(int index);
         /// <summary>
         /// Очистить список
         /// </summary>
@@ -92,8 +104,8 @@ namespace Acly
         /// <summary>
         /// Задать значение по индексу
         /// </summary>
-        /// <param name="Item">Новое значение</param>
-        /// <param name="Index">Индекс значения</param>
-        public void SetValue(object? Item, int Index);
+        /// <param name="item">Новое значение</param>
+        /// <param name="index">Индекс значения</param>
+        public void SetValue(object? item, int index);
     }
 }

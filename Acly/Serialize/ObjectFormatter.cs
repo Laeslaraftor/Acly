@@ -1,5 +1,5 @@
-﻿using System.IO;
-using System;
+﻿using System;
+using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Acly.Serialize
@@ -25,71 +25,69 @@ namespace Acly.Serialize
         /// <summary>
 		/// Сериализовать объект в указанный Stream
 		/// </summary>
-		/// <param name="Obj">Объект, который будет сериализован</param>
-		/// <param name="Stream">Stream в который будет происходить сериализация</param>
+		/// <param name="obj">Объект, который будет сериализован</param>
+		/// <param name="stream">Stream в который будет происходить сериализация</param>
 		/// <exception cref="ArgumentNullException">Ссылка на <see cref="Stream"/> не указывает на экземпляр</exception>
-		public static void Serialize(this object Obj, Stream Stream)
+		public static void Serialize(this object obj, Stream stream)
         {
-            if (Stream == null)
+            if (stream == null)
             {
-                throw new ArgumentNullException(nameof(Stream), "Нельзя сериализовать объект в пустой Stream");
+                throw new ArgumentNullException(nameof(stream), "Нельзя сериализовать объект в пустой Stream");
             }
 
-            var Data = Formatter.Serialize(Obj);
-            using MemoryStream Memory = new(Data);
+            var data = Formatter.Serialize(obj);
+            using MemoryStream memory = new(data);
 
-            Memory.CopyTo(Stream);
+            memory.CopyTo(stream);
         }
         /// <summary>
         /// Сериализовать объект в файл
         /// </summary>
-        /// <param name="Obj">Объект, который будет сериализован</param>
-        /// <param name="PathToFile">Путь к файлу, в который будет записан результат сериализации. Если файла не существует, то он будет создан, иначе - перезаписан</param>
-        public static void Serialize(this object Obj, string PathToFile)
+        /// <param name="obj">Объект, который будет сериализован</param>
+        /// <param name="pathToFile">Путь к файлу, в который будет записан результат сериализации. Если файла не существует, то он будет создан, иначе - перезаписан</param>
+        public static void Serialize(this object obj, string pathToFile)
         {
-            if (PathToFile == null)
+            if (pathToFile == null)
             {
-                throw new ArgumentNullException(nameof(PathToFile), "Путь к файлу не указан");
+                throw new ArgumentNullException(nameof(pathToFile), "Путь к файлу не указан");
+            }
+            if (File.Exists(pathToFile))
+            {
+                File.Delete(pathToFile);
             }
 
-            if (File.Exists(PathToFile))
-            {
-                File.Delete(PathToFile);
-            }
+            using FileStream stream = File.Open(pathToFile, FileMode.OpenOrCreate);
 
-            using FileStream Stream = File.Open(PathToFile, FileMode.OpenOrCreate);
-
-            Obj.Serialize(Stream);
+            obj.Serialize(stream);
         }
         /// <summary>
         /// Сериализовать объект и получить результат
         /// </summary>
-        /// <param name="Obj">Объект, который будет сериализован</param>
+        /// <param name="obj">Объект, который будет сериализован</param>
         /// <returns>Результат сериализации</returns>
-        public static byte[] Serialize(this object Obj)
+        public static byte[] Serialize(this object obj)
         {
-            using var Mem = new MemoryStream();
+            using var memory = new MemoryStream();
 
-            Obj.Serialize(Mem);
+            obj.Serialize(memory);
 
-            return Mem.ToArray();
+            return memory.ToArray();
         }
         /// <summary>
         /// Получить копию объекта
         /// </summary>
         /// <typeparam name="T">Тип объекта</typeparam>
-        /// <param name="Obj">Объект, который будет скопирован</param>
+        /// <param name="obj">Объект, который будет скопирован</param>
         /// <returns>Копия объекта</returns>
-        public static T Copy<T>(this T Obj)
+        public static T Copy<T>(this T obj)
         {
-            if (Obj == null)
+            if (obj == null)
             {
-                throw new ArgumentNullException(nameof(Obj) + " не указан");
+                throw new ArgumentNullException(nameof(obj) + " не указан");
             }
 
-            byte[] SerializeResult = Obj.Serialize();
-
-            return SerializeResult.Deserialize<T>();
+            byte[] serializeResult = obj.Serialize();
+            return serializeResult.Deserialize<T>();
         }
 
         #endregion
@@ -99,46 +97,46 @@ namespace Acly.Serialize
         /// <summary>
 		/// Десериализовать файл
 		/// </summary>
-		/// <param name="PathToFile">Путь к файлу, который необходимо десериализовать</param>
+		/// <param name="pathToFile">Путь к файлу, который необходимо десериализовать</param>
 		/// <returns>Десериализованный объект</returns>
 		/// <exception cref="IOException">Файл для десериализации не найден</exception>
-		public static T Deserialize<T>(string PathToFile)
+		public static T Deserialize<T>(string pathToFile)
         {
-            if (!File.Exists(PathToFile))
+            if (!File.Exists(pathToFile))
             {
-                throw new IOException("Файл (" + PathToFile + ") не найден");
+                throw new IOException("Файл (" + pathToFile + ") не найден");
             }
 
-            using FileStream Stream = File.OpenRead(PathToFile);
+            using FileStream stream = File.OpenRead(pathToFile);
 
-            return Stream.Deserialize<T>();
+            return stream.Deserialize<T>();
         }
         /// <summary>
         /// Десериализовать объект из указанного Stream
         /// </summary>
-        /// <param name="Obj">Stream из которого будет десериализовываться объект</param>
+        /// <param name="obj">Stream из которого будет десериализовываться объект</param>
         /// <returns>Десериализованный объект</returns>
-        public static T Deserialize<T>(this Stream Obj)
+        public static T Deserialize<T>(this Stream obj)
         {
-            if (Obj == null)
+            if (obj == null)
             {
-                throw new ArgumentNullException(nameof(Obj));
+                throw new ArgumentNullException(nameof(obj));
             }
 
-            using MemoryStream Memory = new();
-            Obj.CopyTo(Memory);
+            using MemoryStream memory = new();
+            obj.CopyTo(memory);
 
-            return Formatter.Deserialize<T>(Memory.ToArray());
+            return Formatter.Deserialize<T>(memory.ToArray());
         }
         /// <summary>
         /// Десериализовать массив байтов
         /// </summary>
-        /// <param name="Obj">Массив байтов, который будет десериализован</param>
+        /// <param name="obj">Массив байтов, который будет десериализован</param>
         /// <returns>Десериализованный объект</returns>
-        public static T Deserialize<T>(this byte[] Obj)
+        public static T Deserialize<T>(this byte[] obj)
         {
-            using MemoryStream Mem = new(Obj);
-            return Mem.Deserialize<T>();
+            using MemoryStream memory = new(obj);
+            return memory.Deserialize<T>();
         }
 
         #endregion

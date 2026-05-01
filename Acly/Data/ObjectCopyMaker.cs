@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Drawing;
 
 namespace Acly.Data
@@ -12,134 +11,130 @@ namespace Acly.Data
         /// <summary>
         /// Создать копию объекта
         /// </summary>
-        /// <param name="Object">Объект, который надо скопировать</param>
-        /// <param name="DeepCopy">Копировать значения</param>
-        /// <param name="CtorParameters">Параметры конструктора</param>
+        /// <param name="obj">Объект, который надо скопировать</param>
+        /// <param name="deepCopy">Копировать значения</param>
+        /// <param name="ctorParameters">Параметры конструктора</param>
         /// <returns>Скопированный объект (если получилось)</returns>
-        public object CreateCopy(object Object, bool DeepCopy, params object[]? CtorParameters)
+        public object CreateCopy(object obj, bool deepCopy, params object[]? ctorParameters)
         {
-            if (Object == null)
+            if (obj == null)
             {
-                throw new ArgumentNullException(nameof(Object));
+                throw new ArgumentNullException(nameof(obj));
             }
 
-            return CreateCopy(Object, Object.GetType(), DeepCopy, CtorParameters);
+            return CreateCopy(obj, obj.GetType(), deepCopy, ctorParameters);
         }
         /// <summary>
         /// Скопировать значения объекта в другой объект
         /// </summary>
-        /// <param name="Source">Объект из которого будут взяты значения</param>
-        /// <param name="Destination">Объект в который будут вставлены значения</param>
-        /// <param name="DeepCopy">Копировать значения</param>
+        /// <param name="source">Объект из которого будут взяты значения</param>
+        /// <param name="destination">Объект в который будут вставлены значения</param>
+        /// <param name="deepCopy">Копировать значения</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public void CopyTo(object Source, ref object Destination, bool DeepCopy)
+        public void CopyTo(object source, ref object destination, bool deepCopy)
         {
-            if (Source == null)
+            if (source == null)
             {
-                throw new ArgumentNullException(nameof(Source));
+                throw new ArgumentNullException(nameof(source));
             }
-            if (Destination == null)
+            if (destination == null)
             {
-                throw new ArgumentNullException(nameof(Destination));
-            }
-
-            Type? ResultType = null;
-            Type SourceType = Source.GetType();
-            Type DestinationType = Destination.GetType();
-
-            if (SourceType.IsAssignableFrom(DestinationType))
-            {
-                ResultType = SourceType;
-            }
-            else if (DestinationType.IsAssignableFrom(SourceType))
-            {
-                ResultType = DestinationType;
+                throw new ArgumentNullException(nameof(destination));
             }
 
-            if (ResultType == null)
+            Type? resultType = null;
+            Type sourceType = source.GetType();
+            Type destinationType = destination.GetType();
+
+            if (sourceType.IsAssignableFrom(destinationType))
+            {
+                resultType = sourceType;
+            }
+            else if (destinationType.IsAssignableFrom(sourceType))
+            {
+                resultType = destinationType;
+            }
+
+            if (resultType == null)
             {
                 throw new ArgumentException("Невозможно вставить значения, так как типы объектов разные");
             }
 
-            CopyTo(Source, ref Destination, Source.GetType(), DeepCopy);
+            CopyTo(source, ref destination, source.GetType(), deepCopy);
         }
 
         /// <summary>
         /// Проверить можно ли просто вернуть скопированный объект
         /// </summary>
-        /// <param name="Object">Скопированный объект</param>
-        /// <param name="ObjectType">Тип скопированного объекта</param>
+        /// <param name="obj">Скопированный объект</param>
+        /// <param name="objectType">Тип скопированного объекта</param>
         /// <returns>Можно ли просто вернуть скопированный объект</returns>
-        protected virtual bool ShouldReturnCopiedObject(object Object, Type ObjectType)
+        protected virtual bool ShouldReturnCopiedObject(object obj, Type objectType)
         {
-            return ObjectType == typeof(string) 
-                || ObjectType == typeof(Enum) 
-                || ObjectType == typeof(Color) 
-                || ObjectType.IsStandardStruct();
+            return objectType == typeof(string)
+                || objectType == typeof(Enum)
+                || objectType == typeof(Color)
+                || objectType.IsStandardStruct();
         }
 
         /// <summary>
         /// Создать копию объекта
         /// </summary>
-        /// <param name="Object">Объект, который надо скопировать</param>
-        /// <param name="ObjectType">Тип скопированного объекта</param>
-        /// <param name="DeepCopy">Копировать значения</param>
-        /// <param name="CtorParameters">Параметры конструктора</param>
+        /// <param name="obj">Объект, который надо скопировать</param>
+        /// <param name="objectType">Тип скопированного объекта</param>
+        /// <param name="deepCopy">Копировать значения</param>
+        /// <param name="ctorParameters">Параметры конструктора</param>
         /// <returns>Копия объекта</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        protected virtual object CreateCopy(object Object, Type ObjectType, bool DeepCopy, params object[]? CtorParameters)
+        protected virtual object CreateCopy(object obj, Type objectType, bool deepCopy, params object[]? ctorParameters)
         {
-            if (ObjectType == null)
+            if (objectType == null)
             {
-                throw new ArgumentNullException(nameof(ObjectType));
+                throw new ArgumentNullException(nameof(objectType));
             }
-            if (ShouldReturnCopiedObject(Object, ObjectType))
+            if (ShouldReturnCopiedObject(obj, objectType))
             {
-                return Object;
-            }
-
-            object? Result = Activator.CreateInstance(ObjectType, CtorParameters);
-
-            if (Result == null)
-            {
-                throw new InvalidOperationException("Не удалось создать экземпляр объекта типа " +  ObjectType.Name);
+                return obj;
             }
 
-            CopyTo(Object, ref Result, DeepCopy);
+            object? result = Activator.CreateInstance(objectType, ctorParameters)
+                ?? throw new InvalidOperationException("Не удалось создать экземпляр объекта типа " + objectType.Name);
 
-            return Result;
+            CopyTo(obj, ref result, deepCopy);
+
+            return result;
         }
         /// <summary>
         /// Скопировать значения объекта в другой объект
         /// </summary>
-        /// <param name="Source">Объект из которого будут взяты значения</param>
-        /// <param name="Destination">Объект в который будут вставлены значения</param>
-        /// <param name="DeepCopy">Копировать значения</param>
-        /// <param name="ObjectsType">Тип объектов</param>
-        protected virtual void CopyTo(object Source, ref object Destination, Type ObjectsType, bool DeepCopy)
+        /// <param name="source">Объект из которого будут взяты значения</param>
+        /// <param name="destination">Объект в который будут вставлены значения</param>
+        /// <param name="deepCopy">Копировать значения</param>
+        /// <param name="objectsType">Тип объектов</param>
+        protected virtual void CopyTo(object source, ref object destination, Type objectsType, bool deepCopy)
         {
-            if (ObjectsType == null)
+            if (objectsType == null)
             {
-                throw new ArgumentNullException(nameof(ObjectsType));
+                throw new ArgumentNullException(nameof(objectsType));
             }
-            if (ShouldReturnCopiedObject(Source, ObjectsType))
+            if (ShouldReturnCopiedObject(source, objectsType))
             {
-                Destination = Source;
+                destination = source;
                 return;
             }
 
-            foreach (var Property in ObjectsType.GetProperties())
+            foreach (var property in objectsType.GetProperties())
             {
-                if (Property.CanWrite && Property.CanRead)
+                if (property.CanWrite && property.CanRead)
                 {
-                    object? Value = Property.GetValue(Source);
+                    object? value = property.GetValue(source);
 
-                    if (DeepCopy)
+                    if (deepCopy)
                     {
-                        Value = Value.SoftCopy(DeepCopy);
+                        value = value.SoftCopy(deepCopy);
                     }
 
-                    Property.SetValue(Destination, Value, null);
+                    property.SetValue(destination, value, null);
                 }
             }
         }

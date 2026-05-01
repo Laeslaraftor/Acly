@@ -3,6 +3,6 @@
     /// <summary>
     /// Событие <see cref="ISimplePlayer"/>
     /// </summary>
-    /// <param name="Player">Плеер, вызвавший событие</param>
-    public delegate void SimplePlayerEvent(ISimplePlayer Player);
+    /// <param name="player">Плеер, вызвавший событие</param>
+    public delegate void SimplePlayerEvent(ISimplePlayer player);
 }

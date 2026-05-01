@@ -4,109 +4,108 @@ using System.Threading.Tasks;
 
 namespace Acly
 {
-	/// <summary>
-	/// Класс для отправки сообщений
-	/// </summary>
-	public static class Log
-	{
-		/// <summary>
-		/// Если Logger выключен, то сообщения отправляться не будут
-		/// </summary>
-		public static bool Enabled { get; set; } = true;
+    /// <summary>
+    /// Класс для отправки сообщений
+    /// </summary>
+    public static class Log
+    {
+        /// <summary>
+        /// Если Logger выключен, то сообщения отправляться не будут
+        /// </summary>
+        public static bool Enabled { get; set; } = true;
 
-		private static readonly ILogger _Default = new StandardLogger();
-		private static ILogger? _Logger;
+        private static ILogger? _logger;
 
-		#region Сообщения
+        #region Сообщения
 
-		/// <summary>
-		/// Отправить обычное сообщение
-		/// </summary>
-		/// <param name="Message">Сообщение</param>
-		public static async void Message(string Message)
-		{
-			ILogger? Logger = await GetImplementation();
-			Logger?.Message(Message);
-		}
-		/// <summary>
-		/// Отправить объект как сообщение
-		/// </summary>
-		/// <param name="Object">Объект для сообщения</param>
-		public static async void Message(object Object)
-		{
-			ILogger? Logger = await GetImplementation();
-			Logger?.Message(Object);
-		}
+        /// <summary>
+        /// Отправить обычное сообщение
+        /// </summary>
+        /// <param name="message">Сообщение</param>
+        public static async void Message(string message)
+        {
+            ILogger? logger = await GetImplementation();
+            logger?.Message(message);
+        }
+        /// <summary>
+        /// Отправить объект как сообщение
+        /// </summary>
+        /// <param name="obj">Объект для сообщения</param>
+        public static async void Message(object obj)
+        {
+            ILogger? logger = await GetImplementation();
+            logger?.Message(obj);
+        }
 
-		/// <summary>
-		/// Отправить предупреждение
-		/// </summary>
-		/// <param name="Message">Предупреждение</param>
-		public static async void Warning(string Message)
-		{
-			ILogger? Logger = await GetImplementation();
-			Logger?.Warning(Message);
-		}
-		/// <summary>
-		/// Отправить объект как предупреждение
-		/// </summary>
-		/// <param name="Object">Объект для предупреждения</param>
-		public static async void Warning(object Object)
-		{
-			ILogger? Logger = await GetImplementation();
-			Logger?.Warning(Object);
-		}
+        /// <summary>
+        /// Отправить предупреждение
+        /// </summary>
+        /// <param name="message">Предупреждение</param>
+        public static async void Warning(string message)
+        {
+            ILogger? logger = await GetImplementation();
+            logger?.Warning(message);
+        }
+        /// <summary>
+        /// Отправить объект как предупреждение
+        /// </summary>
+        /// <param name="obj">Объект для предупреждения</param>
+        public static async void Warning(object obj)
+        {
+            ILogger? logger = await GetImplementation();
+            logger?.Warning(obj);
+        }
 
-		/// <summary>
-		/// Отправить сообщение об ошибке
-		/// </summary>
-		/// <param name="Message">Текст ошибки</param>
-		public static async void Error(string Message)
-		{
-			ILogger? Logger = await GetImplementation();
-			Logger?.Error(Message);
-		}
-		/// <summary>
-		/// Отправить объект как сообщение об ошибке
-		/// </summary>
-		/// <param name="Object">Объект для сообщения об ошибке</param>
-		public static async void Error(object Object)
-		{
-			ILogger? Logger = await GetImplementation();
-			Logger?.Error(Object);
-		}
+        /// <summary>
+        /// Отправить сообщение об ошибке
+        /// </summary>
+        /// <param name="message">Текст ошибки</param>
+        public static async void Error(string message)
+        {
+            ILogger? logger = await GetImplementation();
+            logger?.Error(message);
+        }
+        /// <summary>
+        /// Отправить объект как сообщение об ошибке
+        /// </summary>
+        /// <param name="obj">Объект для сообщения об ошибке</param>
+        public static async void Error(object obj)
+        {
+            ILogger? logger = await GetImplementation();
+            logger?.Error(obj);
+        }
 
-		#endregion
+        #endregion
 
-		#region Поиск реализации
+        #region Поиск реализации
 
-		private static async Task<ILogger?> GetImplementation()
-		{
-			if (!Enabled)
-			{
-				return null;
-			}
-			if (_Logger != null)
-			{
-				return _Logger;
-			}
+        private static async Task<ILogger?> GetImplementation()
+        {
+            if (!Enabled)
+            {
+                return null;
+            }
+            if (_logger != null)
+            {
+                return _logger;
+            }
 
-			Type? Implementation = await LoggerImplementations.GetImplementationType();
+            Type? implementation = await LoggerImplementations.GetImplementationType();
 
-			if (Implementation == null)
-			{
-				return _Default;
-			}
-			if (!Implementation.IsImplementsInterface<ILogger>())
-			{
-				throw new LoggerImplementationException(Implementation);
-			}
+            if (implementation == null)
+            {
+                return StandardLogger.Instance;
+            }
+            if (!implementation.IsImplementsInterface<ILogger>())
+            {
+                throw new LoggerImplementationException(implementation);
+            }
 
-			_Logger = (ILogger)Activator.CreateInstance(Implementation);
+            _logger = (ILogger)Activator.CreateInstance(implementation);
 
-			return _Logger;
-		}
+            return _logger;
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 }

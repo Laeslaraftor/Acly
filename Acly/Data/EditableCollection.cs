@@ -13,31 +13,31 @@ namespace Acly
         /// <summary>
         /// Создать новый экземпляр редактируемой коллекции
         /// </summary>
-        public EditableCollection() : this(() => Activator.CreateInstance<T>())
+        public EditableCollection() : this(Activator.CreateInstance<T>)
         {
         }
         /// <summary>
         /// Создать новый экземпляр редактируемой коллекции
         /// </summary>
-        public EditableCollection(IEnumerable<T> Items) : this(() => Activator.CreateInstance<T>(), Items)
+        public EditableCollection(IEnumerable<T> items) : this(Activator.CreateInstance<T>, items)
         {
         }
         /// <summary>
         /// Создать новый экземпляр редактируемой коллекции
         /// </summary>
-        /// <param name="Fabric">Фабрика элементов списка</param>
-        public EditableCollection(Func<T> Fabric)
+        /// <param name="fabric">Фабрика элементов списка</param>
+        public EditableCollection(Func<T> fabric)
         {
-            _Fabric = Fabric;
-            _EditingItemSavedValues = GetEditableProperties();
+            _fabric = fabric;
+            _editingItemSavedValues = GetEditableProperties();
         }
         /// <summary>
         /// Создать новый экземпляр редактируемой коллекции
         /// </summary>
-        public EditableCollection(Func<T> Fabric, IEnumerable<T> Items) : base(Items)
+        public EditableCollection(Func<T> fabric, IEnumerable<T> items) : base(items)
         {
-            _Fabric = Fabric;
-            _EditingItemSavedValues = GetEditableProperties();
+            _fabric = fabric;
+            _editingItemSavedValues = GetEditableProperties();
         }
 
         /// <summary>
@@ -50,14 +50,14 @@ namespace Acly
             {
                 if (value != null)
                 {
-                    _ChangeEventHandlers.Add(value);
+                    _changeEventHandlers.Add(value);
                 }
             }
             remove
             {
                 if (value != null)
                 {
-                    _ChangeEventHandlers.Remove(value);
+                    _changeEventHandlers.Remove(value);
                 }
             }
         }
@@ -69,53 +69,140 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public bool CanCancelEdit => CurrentEditItem != null;
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public bool CanRemove => !IsReadOnly && Count > 0;
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public object? CurrentAddItem => CurrentAdd;
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public object? CurrentEditItem => CurrentEdit;
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public bool IsAddingNew => CurrentAddItem != null;
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public bool IsEditingItem => CurrentEditItem != null;
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        public NewItemPosition NewItemPosition { get; set; }
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        /// <param name="Index"><inheritdoc/></param>
-        /// <returns><inheritdoc/></returns>
-        public override T this[int Index]
+        public bool CanCancelEdit
         {
-            get => base[Index];
+            get => field;
+            private set
+            {
+                if (field != value)
+                {
+                    OnPropertyChanging(nameof(CanCancelEdit));
+                    field = value;
+                    OnPropertyChanged(nameof(CanCancelEdit));
+                }
+            }
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public bool CanRemove
+        {
+            get => field;
+            private set
+            {
+                if (field != value)
+                {
+                    OnPropertyChanging(nameof(CanRemove));
+                    field = value;
+                    OnPropertyChanged(nameof(CanRemove));
+                }
+            }
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public object? CurrentAddItem
+        {
+            get => field;
+            private set
+            {
+                if (!Equals(field, value))
+                {
+                    OnPropertyChanging(nameof(CurrentAddItem));
+                    field = value;
+                    IsAddingNew = value != null;
+                    OnPropertyChanged(nameof(CurrentAddItem));
+                }
+            }
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public object? CurrentEditItem
+        {
+            get => field;
+            private set
+            {
+                if (!Equals(field, value))
+                {
+                    OnPropertyChanging(nameof(CurrentEditItem));
+                    field = value;
+                    IsEditingItem = value != null;
+                    CanCancelEdit = value != null;
+                    OnPropertyChanged(nameof(CurrentEditItem));
+                }
+            }
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public bool IsAddingNew
+        {
+            get => field;
+            private set
+            {
+                if (field != value)
+                {
+                    OnPropertyChanging(nameof(IsAddingNew));
+                    field = value;
+                    OnPropertyChanged(nameof(IsAddingNew));
+                }
+            }
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public bool IsEditingItem
+        {
+            get => field;
+            private set
+            {
+                if (field != value)
+                {
+                    OnPropertyChanging(nameof(IsEditingItem));
+                    field = value;
+                    OnPropertyChanged(nameof(IsEditingItem));
+                }
+            }
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public NewItemPosition NewItemPosition
+        {
+            get => field;
             set
             {
-                var Item = this[Index];
+                if (field != value)
+                {
+                    OnPropertyChanging(nameof(NewItemPosition));
+                    field = value;
+                    OnPropertyChanged(nameof(NewItemPosition));
+                }
+            }
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="index"><inheritdoc/></param>
+        /// <returns><inheritdoc/></returns>
+        public override T this[int index]
+        {
+            get => base[index];
+            set
+            {
+                var item = this[index];
 
-                if (Item?.Equals(value) == true)
+                if (item?.Equals(value) == true)
                 {
                     return;
                 }
 
-                base[Index] = value;
+                base[index] = value;
 
-                if (Item != null)
+                if (item != null)
                 {
-                    InvokeItemChanged(CollectionItemAction.Remove, Item);
+                    InvokeItemChanged(CollectionItemAction.Remove, item);
                 }
                 if (value != null)
                 {
@@ -123,42 +210,81 @@ namespace Acly
                 }
             }
         }
-
         /// <summary>
         /// <inheritdoc cref="CurrentAddItem"/>
         /// </summary>
-        public T? CurrentAdd { get; private set; }
+        public T? CurrentAdd
+        {
+            get => field;
+            private set
+            {
+                if (!Equals(field, value))
+                {
+                    OnPropertyChanging(nameof(CurrentAdd));
+                    field = value;
+                    CurrentAddItem = value;
+                    OnPropertyChanged(nameof(CurrentAdd));
+                }
+            }
+        }
         /// <summary>
         /// <inheritdoc cref="CurrentEditItem"/>
         /// </summary>
-        protected T? CurrentEdit { get; private set; }
+        public T? CurrentEdit
+        {
+            get => field;
+            private set
+            {
+                if (!Equals(field, value))
+                {
+                    OnPropertyChanging(nameof(CurrentEdit));
+                    field = value;
+                    CurrentEditItem = value;
+                    OnPropertyChanged(nameof(CurrentEdit));
+                }
+            }
+        }
 
-        [field: NonSerialized] private readonly Func<T> _Fabric;
-        [field: NonSerialized] private readonly Dictionary<PropertyInfo, object?> _EditingItemSavedValues;
-        [field: NonSerialized] private readonly List<EventHandler<CollectionItemEventArgs>> _ChangeEventHandlers = new();
+        object? IEditableList.this[int index]
+        {
+            get => this[index];
+            set
+            {
+                if (value != null && !value.GetType().IsNullable() && value is not T)
+                {
+                    throw new ArgumentException("Недопустимый тип объекта!", nameof(value));
+                }
+
+                this[index] = (T)value!;
+            }
+        }
+
+        [field: NonSerialized] private readonly Func<T> _fabric;
+        [field: NonSerialized] private readonly Dictionary<PropertyInfo, object?> _editingItemSavedValues;
+        [field: NonSerialized] private readonly List<EventHandler<CollectionItemEventArgs>> _changeEventHandlers = [];
 
         #region Управление
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Item"><inheritdoc/></param>
-        public override void Add(T Item)
+        /// <param name="item"><inheritdoc/></param>
+        public override void Add(T item)
         {
-            base.Add(Item);
-            InvokeItemChanged(CollectionItemAction.Add, Item);
+            base.Add(item);
+            InvokeItemChanged(CollectionItemAction.Add, item);
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Index"><inheritdoc/></param>
-        /// <param name="Item"><inheritdoc/></param>
-        public override void Insert(int Index, T Item)
+        /// <param name="index"><inheritdoc/></param>
+        /// <param name="item"><inheritdoc/></param>
+        public override void Insert(int index, T item)
         {
-            base.Insert(Index, Item);
+            base.Insert(index, item);
 
-            HandleMovedItems(Index + 1, Count);
-            InvokeItemChanged(CollectionItemAction.Add, Item);
+            HandleMovedItems(index + 1, Count);
+            InvokeItemChanged(CollectionItemAction.Add, item);
         }
 
         /// <summary>
@@ -166,32 +292,32 @@ namespace Acly
         /// </summary>
         public override void Clear()
         {
-            List<T> TempItems = new(this);
+            List<T> tempItems = [.. this];
 
             base.Clear();
 
-            foreach (var Item in TempItems)
+            foreach (var item in tempItems)
             {
-                InvokeItemChanged(CollectionItemAction.Remove, Item);
+                InvokeItemChanged(CollectionItemAction.Remove, item);
             }
 
-            TempItems.Clear();
-            TempItems.Capacity = 0;
+            tempItems.Clear();
+            tempItems.Capacity = 0;
         }
 
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Item"><inheritdoc/></param>
+        /// <param name="item"><inheritdoc/></param>
         /// <returns><inheritdoc/></returns>
-        public override bool Remove(T Item)
+        public override bool Remove(T item)
         {
-            int ItemIndex = IndexOf(Item);
+            int itemIndex = IndexOf(item);
 
-            if (base.Remove(Item))
+            if (base.Remove(item))
             {
-                HandleMovedItems(ItemIndex, Count);
-                InvokeItemChanged(CollectionItemAction.Remove, Item);
+                HandleMovedItems(itemIndex, Count);
+                InvokeItemChanged(CollectionItemAction.Remove, item);
                 return true;
             }
 
@@ -200,25 +326,25 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Index"><inheritdoc/></param>
-        public override void RemoveAt(int Index)
+        /// <param name="index"><inheritdoc/></param>
+        public override void RemoveAt(int index)
         {
-            if (0 > Index || Index >= Count)
+            if (0 > index || index >= Count)
             {
                 return;
             }
 
-            var Item = this[Index];
+            var item = this[index];
 
-            base.RemoveAt(Index);
+            base.RemoveAt(index);
 
-            HandleMovedItems(Index, Count);
-            InvokeItemChanged(CollectionItemAction.Remove, Item);
+            HandleMovedItems(index, Count);
+            InvokeItemChanged(CollectionItemAction.Remove, item);
         }
 
-        private void HandleMovedItems(int StartIndex, int Count)
+        private void HandleMovedItems(int startIndex, int count)
         {
-            for (int i = StartIndex; i < Count; i++)
+            for (int i = startIndex; i < count; i++)
             {
                 InvokeItemChanged(CollectionItemAction.Move, this[i]);
             }
@@ -234,23 +360,23 @@ namespace Acly
         /// <returns><inheritdoc/></returns>
         public object? AddNew()
         {
-            var Item = _Fabric();
-            CurrentAdd = Item;
+            var item = _fabric();
+            CurrentAdd = item;
 
-            return Item;
+            return item;
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Item"><inheritdoc/></param>
-        public void AddNew(object? Item)
+        /// <param name="item"><inheritdoc/></param>
+        public void AddNew(object? item)
         {
-            if (Item is not T TypedItem)
+            if (item != null && !item.GetType().IsNullable() && item is not T)
             {
-                throw new ArgumentException($"Недопустимый тип объекта!", nameof(Item));
+                throw new ArgumentException($"Недопустимый тип объекта! Требуется: {typeof(T).FullName}, получено: {item.GetType().FullName}", nameof(item));
             }
 
-            Add(TypedItem);
+            Add((T)item!);
         }
         /// <summary>
         /// <inheritdoc/>
@@ -299,55 +425,64 @@ namespace Acly
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Item"><inheritdoc/></param>
-        public void EditItem(object Item)
+        /// <param name="item"><inheritdoc/></param>
+        public void EditItem(object item)
         {
-            if (Item is not T TypedItem)
+            if (item is not T typedItem)
             {
-                throw new ArgumentException($"Недопустимый тип объекта!", nameof(Item));
+                throw new ArgumentException("Недопустимый тип объекта!", nameof(item));
             }
 
-            SaveValues(TypedItem);
-            CurrentEdit = TypedItem;
+            SaveValues(typedItem);
+            CurrentEdit = typedItem;
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Item"><inheritdoc/></param>
-        /// <param name="Index"><inheritdoc/></param>
+        /// <param name="item"><inheritdoc/></param>
+        /// <param name="index"><inheritdoc/></param>
         /// <exception cref="ArgumentException"></exception>
-        public void SetValue(object? Item, int Index)
+        public void SetValue(object? item, int index)
         {
-            if (Item is not T TypedItem)
+            if (item != null && !item.GetType().IsNullable() && item is not T)
             {
-                throw new ArgumentException($"Недопустимый тип объекта!", nameof(Item));
+                throw new ArgumentException("Недопустимый тип объекта!", nameof(item));
             }
 
-            this[Index] = TypedItem;
+            this[index] = (T)item!;
         }
 
-        void IEditableList.Remove(object Item)
+        bool IEditableList.Contains(object? item)
         {
-            if (Item is not T TypedItem)
+            if (item != null && !item.GetType().IsNullable() && item is not T)
             {
-                throw new ArgumentException($"Недопустимый тип объекта!", nameof(Item));
+                return false;
             }
 
-            Remove(TypedItem);
+            return Contains((T)item!);
+        }
+        void IEditableList.Remove(object item)
+        {
+            if (item is not T typedItem)
+            {
+                throw new ArgumentException("Недопустимый тип объекта!", nameof(item));
+            }
+
+            Remove(typedItem);
         }
 
-        private void SaveValues(T Item)
+        private void SaveValues(T item)
         {
-            foreach (var Property in _EditingItemSavedValues.Keys)
+            foreach (var property in _editingItemSavedValues.Keys)
             {
-                _EditingItemSavedValues[Property] = Property.GetValue(Item);
+                _editingItemSavedValues[property] = property.GetValue(item);
             }
         }
-        private void RestoreValues(T Item)
+        private void RestoreValues(T item)
         {
-            foreach (var Info in _EditingItemSavedValues)
+            foreach (var info in _editingItemSavedValues)
             {
-                Info.Key.SetValue(Item, Info.Value);
+                info.Key.SetValue(item, info.Value);
             }
         }
 
@@ -356,22 +491,31 @@ namespace Acly
         #region События
 
         /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="oldValue"><inheritdoc/></param>
+        /// <param name="newValue"><inheritdoc/></param>
+        protected override void OnCountChanged(int oldValue, int newValue)
+        {
+            base.OnCountChanged(oldValue, newValue);
+            CanRemove = !IsReadOnly && newValue > 0;
+        }
+
+        /// <summary>
         /// Вызвать событие изменения элемента списка
         /// </summary>
-        /// <param name="Action"><inheritdoc cref="CollectionItemAction"/></param>
-        /// <param name="Item">Изменённый элемент списка</param>
-        protected void InvokeItemChanged(CollectionItemAction Action, T Item)
+        /// <param name="action"><inheritdoc cref="CollectionItemAction"/></param>
+        /// <param name="item">Изменённый элемент списка</param>
+        protected void InvokeItemChanged(CollectionItemAction action, T item)
         {
-#pragma warning disable CS8604 // Возможно, аргумент-ссылка, допускающий значение NULL.
-            CollectionItemEventArgs Args = new(Action, Item);
-#pragma warning restore CS8604 // Возможно, аргумент-ссылка, допускающий значение NULL.
+            CollectionItemEventArgs args = new(action, item!);
 
-            foreach (var Handler in _ChangeEventHandlers)
+            foreach (var handler in _changeEventHandlers)
             {
-                Handler(this, Args);
+                handler(this, args);
             }
 
-            ItemChanged?.Invoke(this, new(Action, Item));
+            ItemChanged?.Invoke(this, new(action, item));
         }
 
         #endregion
@@ -380,17 +524,17 @@ namespace Acly
 
         private static Dictionary<PropertyInfo, object?> GetEditableProperties()
         {
-            Dictionary<PropertyInfo, object?> Result = new();
+            Dictionary<PropertyInfo, object?> result = [];
 
-            foreach (var Property in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            foreach (var property in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                if (Property.CanRead && Property.CanWrite)
+                if (property.CanRead && property.CanWrite)
                 {
-                    Result.Add(Property, null);
+                    result.Add(property, null);
                 }
             }
 
-            return Result;
+            return result;
         }
 
         #endregion
