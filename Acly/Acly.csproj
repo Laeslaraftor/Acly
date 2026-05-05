@@ -15,12 +15,13 @@
     <Title>Acly Main Library</Title>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>acly</PackageTags>
-    <Version>1.14.0</Version>
+    <Version>1.14.5</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Laeslaraftor/Acly</RepositoryUrl>
     <Authors>Laeslaraftor</Authors>
     <PackageIcon>Icon.png</PackageIcon>
+    <Description>Библиотека со всякими приколюхами</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

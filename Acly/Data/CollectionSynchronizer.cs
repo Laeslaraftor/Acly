@@ -271,7 +271,7 @@ namespace Acly
                         for (int i = 0; i < args.NewItems.Count; i++)
                         {
                             var newIndex = args.NewStartingIndex + i;
-                            if (newIndex <= to.Count)
+                            if (newIndex != -1 && newIndex < to.Count)
                             {
                                 to.Insert(newIndex, args.NewItems[i]);
                             }

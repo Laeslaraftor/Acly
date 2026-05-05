@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Acly
 {
@@ -19,6 +20,7 @@ namespace Acly
         /// <summary>
         /// Событие, которое вызывается при очистке экземпляра
         /// </summary>
+        [field: NonSerialized]
         public event EventHandler? Disposed;
 
         /// <summary>
@@ -65,6 +67,22 @@ namespace Acly
         /// <param name="isDisposing">Ручная ли очистка</param>
         protected virtual void Dispose(bool isDisposing)
         {
+        }
+
+        #endregion
+
+        #region Статика
+
+        /// <summary>
+        /// Очистить все объекты
+        /// </summary>
+        /// <param name="disposables">Объекты для очистки</param>
+        public static void DisposeAll(IEnumerable<IDisposable> disposables)
+        {
+            foreach (var disposable in disposables)
+            {
+                disposable.Dispose();
+            }
         }
 
         #endregion

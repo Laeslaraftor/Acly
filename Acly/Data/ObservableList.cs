@@ -203,7 +203,7 @@ namespace Acly
         }
         private void InvokeAdd(T? newItem)
         {
-            InvokeInsert(newItem, Count - 1);
+            InvokeInsert(newItem, _list.Count - 1);
         }
         private void InvokeRemove(T? newItem, int index)
         {

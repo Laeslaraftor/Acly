@@ -37,7 +37,20 @@ namespace Acly
         /// <exception cref="ArgumentNullException"></exception>
         protected async void Dispatch(Action action)
         {
-            await DispatchAsync(action);
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            var dispatcher = Dispatcher;
+
+            if (dispatcher == null)
+            {
+                action();
+                return;
+            }
+
+            dispatcher.Dispatch(action);
         }
         /// <summary>
         /// Выполнить действие через планировщик, если его нет, то действие будет выполнено как обычно
@@ -94,7 +107,7 @@ namespace Acly
         /// <param name="eventHandler">Метод события</param>
         protected void Dispatch(EventHandler? eventHandler)
         {
-            Dispatch(eventHandler, EventArgs.Empty);
+            Dispatch(eventHandler, this, EventArgs.Empty);
         }
 
         #endregion
@@ -126,7 +139,7 @@ namespace Acly
         /// <param name="e">Аргументы события изменения поля</param>
         protected void OnPropertyChanged(PropertyChangedEventArgs e)
         {
-            Dispatch(PropertyChanged, e);
+            Dispatch(PropertyChanged, this, e);
         }
         /// <summary>
         /// Событие начала изменения поля
@@ -153,7 +166,7 @@ namespace Acly
         /// <param name="e">Аргументы события начала изменения поля</param>
         protected void OnPropertyChanging(PropertyChangingEventArgs e)
         {
-            Dispatch(PropertyChanging, e);
+            Dispatch(PropertyChanging, this, e);
         }
 
         #endregion

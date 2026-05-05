@@ -1,7 +1,9 @@
 ﻿using Acly.JsonData;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -86,6 +88,8 @@ namespace Acly.Requests
                 {
                     request.Headers.Add(header.Key, header.Value);
                 }
+
+                request.Headers.Authorization = client.DefaultRequestHeaders.Authorization;
 
                 using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                 var encoding = response.GetEncoding();
@@ -202,8 +206,45 @@ namespace Acly.Requests
                 {
                     return new StreamContent(stream);
                 }
+                else if (content is IEnumerable<KeyValuePair<string, string>> values)
+                {
+                    return new FormUrlEncodedContent(values);
+                }
+                else if (content is IEnumerable<KeyValuePair<string, object?>> objectValues)
+                {
+                    Dictionary<string, string?> textValues = [];
 
-                string json = await Json.Convert(content);
+                    foreach (var info in objectValues)
+                    {
+                        if (info.Value is string str)
+                        {
+                            textValues.Add(info.Key, str);
+                            continue;
+                        }
+                        else if (info.Value != null)
+                        {
+                            var jsonValue = await Json.Convert(info.Value);
+                            textValues.Add(info.Key, jsonValue);
+                            continue;
+                        }
+
+                        textValues.Add(info.Key, null);
+                    }
+
+                    return new FormUrlEncodedContent(textValues);
+                }
+
+                string json;
+
+                if (content is string textContent)
+                {
+                    json = textContent;
+                }
+                else
+                {
+                    json = await Json.Convert(content);
+                }
+
                 return new StringContent(json, Encoding.UTF8, Json.MediaType);
             }
         }

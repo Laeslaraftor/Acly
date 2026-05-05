@@ -115,10 +115,10 @@ namespace Acly.Tasks
 
         private void OnTaskCompleted(TOutput value)
         {
+            Result = value;
+
             OnTaskCompleted();
             RemoveEvents();
-
-            Result = value;
 
 #pragma warning disable CS8604
             if (!LocalCompleted.TryInvoke(value, out Exception? error))
