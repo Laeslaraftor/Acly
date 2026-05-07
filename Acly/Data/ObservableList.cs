@@ -207,20 +207,20 @@ namespace Acly
         }
         private void InvokeRemove(T? newItem, int index)
         {
+            UpdateCount();
             OnCollectionChanged(
                 new(NotifyCollectionChangedAction.Remove, newItem, index));
-            UpdateCount();
         }
         private void InvokeInsert(T? newItem, int index)
         {
+            UpdateCount();
             OnCollectionChanged(
                 new(NotifyCollectionChangedAction.Add, newItem, index));
-            UpdateCount();
         }
         private void InvokeClear()
         {
-            OnCollectionChanged(new(NotifyCollectionChangedAction.Reset));
             UpdateCount();
+            OnCollectionChanged(new(NotifyCollectionChangedAction.Reset));
         }
 
         #endregion

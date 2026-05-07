@@ -120,17 +120,7 @@ namespace Acly
         /// <param name="propertyName">Название поля, которое изменило своё значение</param>
         protected virtual void OnPropertyChanged(string propertyName)
         {
-            PropertyChangedEventArgs args;
-
-            lock (_changedEventArgs)
-            {
-                if (!_changedEventArgs.TryGetValue(propertyName, out args))
-                {
-                    args = new(propertyName);
-                    _changedEventArgs.Add(propertyName, args);
-                }
-            }
-
+            PropertyChangedEventArgs args = GetPropertyChangedEventArgs(propertyName);
             OnPropertyChanged(args);
         }
         /// <summary>
@@ -147,17 +137,7 @@ namespace Acly
         /// <param name="propertyName">Название поля, которое начало менять значение</param>
         protected virtual void OnPropertyChanging(string propertyName)
         {
-            PropertyChangingEventArgs args;
-
-            lock (_changingEventArgs)
-            {
-                if (!_changingEventArgs.TryGetValue(propertyName, out args))
-                {
-                    args = new(propertyName);
-                    _changingEventArgs.Add(propertyName, args);
-                }
-            }
-
+            var args = GetPropertyChangingEventArgs(propertyName); 
             OnPropertyChanging(args);
         }
         /// <summary>
@@ -181,6 +161,42 @@ namespace Acly
 
         private static readonly Dictionary<string, PropertyChangingEventArgs> _changingEventArgs = [];
         private static readonly Dictionary<string, PropertyChangedEventArgs> _changedEventArgs = [];
+
+        /// <summary>
+        /// Получить аргументы события начала изменения поля
+        /// </summary>
+        /// <param name="propertyName">Название изменяемого поля</param>
+        /// <returns>Аргументы события начала изменения поля</returns>
+        public static PropertyChangingEventArgs GetPropertyChangingEventArgs(string propertyName)
+        {
+            lock (_changingEventArgs)
+            {
+                return GetEventArgs(propertyName, _changingEventArgs, () => new(propertyName));
+            }
+        }
+        /// <summary>
+        /// Получить аргументы события изменения поля
+        /// </summary>
+        /// <param name="propertyName">Название изменённого поля</param>
+        /// <returns>Аргументы события изменения поля</returns>
+        public static PropertyChangedEventArgs GetPropertyChangedEventArgs(string propertyName)
+        {
+            lock (_changedEventArgs)
+            {
+                return GetEventArgs(propertyName, _changedEventArgs, () => new(propertyName));
+            }
+        }
+
+        private static T GetEventArgs<T>(string propertyName, Dictionary<string, T> dictionary, Func<T> fabric)
+        {
+            if (!dictionary.TryGetValue(propertyName, out var args))
+            {
+                args = fabric();
+                dictionary.Add(propertyName, args);
+            }
+
+            return args;
+        }
 
         #endregion
     }
