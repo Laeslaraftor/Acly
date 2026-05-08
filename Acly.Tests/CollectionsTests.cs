@@ -38,6 +38,28 @@ namespace Acly.Tests
                 Console.WriteLine(item);
             }
         }
+        [Test]
+        public void TestCollectionSynchronizer()
+        {
+            EditableCollection<string> collection1 = ["1", "22", "333"];
+            EditableCollection<int> collection2 = [];
+            CollectionSynchronizer<string, int> sync = new(collection1, collection2, new TestConverter());
+
+            collection1.Remove("1");
+
+            void PrintCollection<T>(IEnumerable<T> values)
+            {
+                foreach (var value in values)
+                {
+                    Console.WriteLine(value);
+                }
+            }
+
+            Console.WriteLine("collection 1:");
+            PrintCollection(collection1);
+            Console.WriteLine("collection 2:");
+            PrintCollection(collection2);
+        }
 
         private class Dispatcher : IDispatcher
         {
@@ -49,6 +71,17 @@ namespace Acly.Tests
             {
                 await Task.Delay(20);
                 action();
+            }
+        }
+        private class TestConverter : IValueConverter<string, int>
+        {
+            public int Convert(string value)
+            {
+                return value.Length;
+            }
+            public string ConvertBack(int value)
+            {
+                return value.ToString();
             }
         }
     }

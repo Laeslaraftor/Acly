@@ -5,9 +5,21 @@ namespace Acly.Tests
 {
     public class Tests
     {
-        [SetUp]
-        public void Setup()
+        public class A
         {
+        }
+        public class Ba : A
+        {
+        }
+
+        [Test]
+        public void AssignableTest()
+        {
+            var a = typeof(A);
+            var ba = typeof(Ba);
+
+            Console.WriteLine(a.IsAssignableFrom(ba));
+            Console.WriteLine(ba.IsAssignableFrom(a));
         }
 
         [Test]

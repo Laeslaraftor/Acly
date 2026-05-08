@@ -177,6 +177,48 @@ namespace Acly
 
         #endregion
 
+        #region Сортировка
+
+        /// <summary>
+        /// <inheritdoc cref="List{T}.Sort()"/>
+        /// </summary>
+        public void Sort()
+        {
+            _list.Sort();
+            InvokeClear();
+        }
+        /// <summary>
+        /// <inheritdoc cref="List{T}.Sort(Comparison{T})"/>
+        /// </summary>
+        /// <param name="comparison"><inheritdoc cref="List{T}.Sort(Comparison{T})"/></param>
+        public void Sort(Comparison<T> comparison)
+        {
+            _list.Sort(comparison);
+            InvokeClear();
+        }
+        /// <summary>
+        /// <inheritdoc cref="List{T}.Sort(IComparer{T})"/>
+        /// </summary>
+        /// <param name="comparer"><inheritdoc cref="List{T}.Sort(IComparer{T})"/></param>
+        public void Sort(IComparer<T> comparer)
+        {
+            _list.Sort(comparer);
+            InvokeClear();
+        }
+        /// <summary>
+        /// <inheritdoc cref="List{T}.Sort(int, int, IComparer{T})"/>
+        /// </summary>
+        /// <param name="index"><inheritdoc cref="List{T}.Sort(int, int, IComparer{T})"/></param>
+        /// <param name="count"><inheritdoc cref="List{T}.Sort(int, int, IComparer{T})"/></param>
+        /// <param name="comparer"><inheritdoc cref="List{T}.Sort(int, int, IComparer{T})"/></param>
+        public void Sort(int index, int count, IComparer<T> comparer)
+        {
+            _list.Sort(index, count, comparer);
+            InvokeClear();
+        }
+
+        #endregion
+
         #region События
 
         /// <summary>
