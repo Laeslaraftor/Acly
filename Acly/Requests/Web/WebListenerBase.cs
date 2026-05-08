@@ -89,7 +89,7 @@ namespace Acly.Requests
                 {
                     if (!Listen())
                     {
-                        Log.Warning("Http прослушивание остановлено из-за возникшей проблемы!");
+                        LogWarning("Http прослушивание остановлено из-за возникшей проблемы!");
                         break;
                     }
                 }
@@ -112,7 +112,7 @@ namespace Acly.Requests
                 }
                 catch (Exception error)
                 {
-                    OnHandledException(error);
+                    LogError(error);
                     return false;
                 }
 
@@ -134,14 +134,6 @@ namespace Acly.Requests
         /// </summary>
         /// <param name="context">Запрос</param>
         protected abstract void OnHandledRequest(HttpListenerContext context);
-        /// <summary>
-        /// Вызывается при обработке исключения
-        /// </summary>
-        /// <param name="error">Обрабатываемое исключение</param>
-        protected virtual void OnHandledException(Exception error)
-        {
-            Log.Error(error);
-        }
 
         #endregion
     }

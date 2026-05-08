@@ -14,7 +14,7 @@ namespace Acly
         /// </summary>
         ~Disposable()
         {
-            Dispose(false);
+            TryExecute(() => Dispose(false));
         }
 
         /// <summary>

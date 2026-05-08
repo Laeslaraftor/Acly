@@ -48,6 +48,11 @@ namespace Acly.Requests
             }
         } = 50;
 
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        protected override bool UseDispatcherForLogging => false;
+
         private readonly IPAddress _address;
         private readonly IPEndPoint _endPoint;
         private readonly Socket _socket;
@@ -146,7 +151,7 @@ namespace Acly.Requests
                 {
                     if (!Received.TryInvoke(out Exception? error, buffer))
                     {
-                        Log.Error(error);
+                        LogError(error);
                     }
                 });
 
@@ -177,7 +182,7 @@ namespace Acly.Requests
             catch (Exception error)
             {
                 success = false;
-                Log.Error(error);
+                LogError(error);
             }
 
             if (!success)
@@ -207,7 +212,7 @@ namespace Acly.Requests
             }
             catch (Exception error)
             {
-                Log.Error(error);
+                LogError(error);
             }
         }
 

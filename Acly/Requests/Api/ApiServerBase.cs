@@ -297,7 +297,7 @@ namespace Acly.Requests
                     }
                     catch (Exception error)
                     {
-                        Log.Error(error);
+                        LogError(error);
                     }
                 }
 

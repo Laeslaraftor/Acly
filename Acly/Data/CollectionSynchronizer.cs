@@ -195,7 +195,7 @@ namespace Acly
             }
             catch (Exception error)
             {
-                Log.Error(error);
+                LogError(error);
             }
             finally
             {
@@ -219,7 +219,7 @@ namespace Acly
             }
             catch (Exception error)
             {
-                Log.Error(error);
+                LogError(error);
             }
             finally
             {

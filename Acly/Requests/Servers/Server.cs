@@ -90,6 +90,11 @@ namespace Acly.Requests
             }
         }
 
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        protected override bool UseDispatcherForLogging => false;
+
         private readonly List<Socket> _connections = [];
         private readonly IPAddress _address;
         private readonly IPEndPoint _endPoint;
@@ -190,7 +195,7 @@ namespace Acly.Requests
                     InvokeDisconnectEvent(connection, error.Message);
                 }
 
-                Log.Error(error);
+                LogError(error);
             }
         }
         private static void ShutdownSocket(Socket connection)
@@ -202,7 +207,7 @@ namespace Acly.Requests
             }
             catch (Exception error)
             {
-                Log.Error(error);
+                Acly.Log.Error(error);
             }
         }
 
@@ -227,7 +232,7 @@ namespace Acly.Requests
             }
             catch (Exception error)
             {
-                Log.Error(error);
+                LogError(error);
             }
 
             Connected -= OnClientConnected;
@@ -244,7 +249,7 @@ namespace Acly.Requests
             {
                 if (!Connected.TryInvoke(out Exception? error, socket))
                 {
-                    Log.Error(error);
+                    LogError(error);
                 }
             });
         }
@@ -254,7 +259,7 @@ namespace Acly.Requests
             {
                 if (!Received.TryInvoke(out Exception? error, socket, data))
                 {
-                    Log.Error(error);
+                    LogError(error);
                 }
             });
         }
@@ -264,7 +269,7 @@ namespace Acly.Requests
             {
                 if (!Disconnected.TryInvoke(out Exception? error, socket, reason))
                 {
-                    Log.Error(error);
+                    LogError(error);
                 }
             });
         }

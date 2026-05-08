@@ -11,8 +11,8 @@ namespace Acly.Requests
         /// <summary>
         /// Простой прослушиватель веб запросов
         /// </summary>
-        /// <param name="Prefix"><inheritdoc/></param>
-        public SimpleWebListener(string Prefix) : base(Prefix)
+        /// <param name="prefix"><inheritdoc/></param>
+        public SimpleWebListener(string prefix) : base(prefix)
         {
         }
 
@@ -39,16 +39,16 @@ namespace Acly.Requests
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Context"><inheritdoc/></param>
-        protected override void OnHandledRequest(HttpListenerContext Context) => RequestHandled?.Invoke(this, Context);
+        /// <param name="context"><inheritdoc/></param>
+        protected override void OnHandledRequest(HttpListenerContext context) => RequestHandled?.Invoke(this, context);
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="Error"><inheritdoc/></param>
-        protected override void OnHandledException(Exception Error)
+        /// <param name="exception"><inheritdoc/></param>
+        protected override void OnExceptionSent(Exception exception)
         {
-            base.OnHandledException(Error);
-            ExceptionHandled?.Invoke(this, Error);
+            base.OnExceptionSent(exception);
+            ExceptionHandled?.Invoke(this, exception);
         }
 
         #endregion

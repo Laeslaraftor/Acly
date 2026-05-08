@@ -9,7 +9,7 @@ namespace Acly
     /// Базовый класс объекта с отслеживанием изменением полей
     /// </summary>
     [Serializable]
-    public abstract class ObservableObject : INotifyPropertyChanging, INotifyPropertyChanged
+    public abstract class ObservableObject : LogObject, INotifyPropertyChanging, INotifyPropertyChanged
     {
         /// <summary>
         /// <inheritdoc/>
@@ -27,6 +27,10 @@ namespace Acly
         /// По умолчанию ссылается на <see cref="SharedDispatcher"/>
         /// </summary>
         protected virtual IDispatcher? Dispatcher => SharedDispatcher;
+        /// <summary>
+        /// Использовать планировщик для записи событий
+        /// </summary>
+        protected virtual bool UseDispatcherForLogging => true;
 
         #region Управление
 
@@ -108,6 +112,49 @@ namespace Acly
         protected void Dispatch(EventHandler? eventHandler)
         {
             Dispatch(eventHandler, this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="value"><inheritdoc/></param>
+        protected sealed override void LogMessage(object? value)
+        {
+            if (!UseDispatcherForLogging)
+            {
+                base.LogMessage(value);
+                return;
+            }
+
+            Dispatch(() => base.LogMessage(value));
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="value"><inheritdoc/></param>
+        protected sealed override void LogWarning(object? value)
+        {
+            if (!UseDispatcherForLogging)
+            {
+                base.LogWarning(value);
+                return;
+            }
+
+            Dispatch(() => base.LogWarning(value));
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="value"><inheritdoc/></param>
+        protected sealed override void LogError(object? value)
+        {
+            if (!UseDispatcherForLogging)
+            {
+                base.LogError(value);
+                return;
+            }
+
+            Dispatch(() => base.LogError(value));
         }
 
         #endregion

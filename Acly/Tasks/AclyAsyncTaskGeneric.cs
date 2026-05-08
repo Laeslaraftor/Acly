@@ -123,7 +123,7 @@ namespace Acly.Tasks
 #pragma warning disable CS8604
             if (!LocalCompleted.TryInvoke(value, out Exception? error))
             {
-                Log.Error(error);
+                LogError(error);
             }
 #pragma warning restore CS8604
         }

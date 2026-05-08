@@ -66,7 +66,7 @@ namespace Acly.Requests
         /// <returns><inheritdoc/></returns>
         public async Task<string> Get(Uri uri, IProgress<double>? progress)
         {
-            Log.Message("GET: " + uri);
+            LogMessage("GET: " + uri);
             return await HttpClient.GetString(uri, progress);
         }
         /// <summary>
@@ -78,7 +78,7 @@ namespace Acly.Requests
         public async Task<T> Get<T>(Uri uri, IProgress<double>? progress)
             where T : new()
         {
-            Log.Message("GET: " + uri);
+            LogMessage("GET: " + uri);
             return await HttpClient.GetApi<T>(uri, progress);
         }
         /// <summary>
@@ -90,7 +90,7 @@ namespace Acly.Requests
         /// <returns><inheritdoc/></returns>
         public async Task<string> Post(Uri uri, IProgress<double>? progress, HttpContent? content)
         {
-            Log.Message("POST: " + uri);
+            LogMessage("POST: " + uri);
             return await HttpClient.PostString(uri, progress, content);
         }
         /// <summary>
@@ -103,7 +103,7 @@ namespace Acly.Requests
         public async Task<T> Post<T>(Uri uri, IProgress<double>? progress, HttpContent? content)
             where T : new()
         {
-            Log.Message("POST: " + uri);
+            LogMessage("POST: " + uri);
             return await HttpClient.PostApi<T>(uri, progress, content);
         }
         /// <summary>
@@ -115,7 +115,7 @@ namespace Acly.Requests
         /// <returns><inheritdoc/></returns>
         public async Task GetDownload(Uri uri, IProgress<double>? progress, Stream destination)
         {
-            Log.Message("GET downloading: " + uri);
+            LogMessage("GET downloading: " + uri);
             await HttpClient.ReadAsync(HttpMethod.Get, uri, destination, progress, null);
         }
         /// <summary>
@@ -128,7 +128,7 @@ namespace Acly.Requests
         /// <returns><inheritdoc/></returns>
         public async Task PostDownload(Uri uri, IProgress<double>? progress, HttpContent? content, Stream destination)
         {
-            Log.Message("POST downloading: " + uri);
+            LogMessage("POST downloading: " + uri);
             await HttpClient.ReadAsync(HttpMethod.Post, uri, destination, progress, content);
         }
 
