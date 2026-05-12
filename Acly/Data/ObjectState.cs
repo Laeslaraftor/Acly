@@ -8,7 +8,7 @@ namespace Acly
     /// <summary>
     /// Сохранённое состояние объекта
     /// </summary>
-    public class ObjectState
+    public readonly struct ObjectState : IEquatable<ObjectState>
     {
         /// <summary>
         /// Создать сохранённое состояние объекта
@@ -56,6 +56,56 @@ namespace Acly
             {
                 info.Key.SetValue(Object, info.Value);
             }
+        }
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="obj"><inheritdoc/></param>
+        /// <returns><inheritdoc/></returns>
+        public override bool Equals(object obj)
+        {
+            return obj is ObjectState other &&
+                   Equals(other);
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <returns><inheritdoc/></returns>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Object, Values);
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="other"><inheritdoc/></param>
+        /// <returns><inheritdoc/></returns>
+        public bool Equals(ObjectState other)
+        {
+            return Equals(Object, other.Object) &&
+                   Equals(Values, other.Values);
+        }
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="left"><inheritdoc/></param>
+        /// <param name="right"><inheritdoc/></param>
+        /// <returns><inheritdoc/></returns>
+        public static bool operator ==(ObjectState left, ObjectState right)
+        {
+            return left.Equals(right);
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="left"><inheritdoc/></param>
+        /// <param name="right"><inheritdoc/></param>
+        /// <returns><inheritdoc/></returns>
+        public static bool operator !=(ObjectState left, ObjectState right)
+        {
+            return !(left == right);
         }
 
         #endregion

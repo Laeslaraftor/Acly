@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Acly
@@ -37,6 +38,30 @@ namespace Acly
                 }
 
                 return true;
+            }
+        }
+        extension(IEnumerable enumerable)
+        {
+            /// <summary>
+            /// Получить индекс объекта в списке
+            /// </summary>
+            /// <param name="item">Элемент, индекс которого надо получить</param>
+            /// <returns>Индекс объекта в списке. Если объекта нет в списке будет возращено -1</returns>
+            public int IndexOf(object? item)
+            {
+                int index = 0;
+
+                foreach (var element in enumerable)
+                {
+                    if (Equals(element, item))
+                    {
+                        return index;
+                    }
+
+                    index++;
+                }
+
+                return -1;
             }
         }
     }

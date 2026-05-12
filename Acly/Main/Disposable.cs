@@ -71,6 +71,15 @@ namespace Acly
 
         #endregion
 
+        #region Константы
+
+        /// <summary>
+        /// Сообщение исключения о невозможности доступа к очищенному объекту
+        /// </summary>
+        public const string ObjectDisposedExceptionMessage = "Невозможно получить доступ, так как объект был очищен";
+
+        #endregion
+
         #region Статика
 
         /// <summary>

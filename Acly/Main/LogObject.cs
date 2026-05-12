@@ -5,6 +5,7 @@ namespace Acly
     /// <summary>
     /// Объект, логирующий свои события
     /// </summary>
+    [Serializable]
     public class LogObject
     {
         /// <summary>

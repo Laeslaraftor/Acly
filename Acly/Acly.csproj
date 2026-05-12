@@ -15,13 +15,13 @@
     <Title>Acly Main Library</Title>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>acly</PackageTags>
-    <Version>1.14.8</Version>
+    <Version>1.15.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Laeslaraftor/Acly</RepositoryUrl>
     <Authors>Laeslaraftor</Authors>
     <PackageIcon>Icon.png</PackageIcon>
     <Description>Библиотека со всякими приколюхами</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -33,15 +33,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="Icon.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Update="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
