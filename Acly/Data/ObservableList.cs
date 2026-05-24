@@ -138,6 +138,35 @@ namespace Acly
             _list.Clear();
             InvokeClear();
         }
+        /// <summary>
+        /// <see cref="List{T}.RemoveAll(Predicate{T})"/>
+        /// </summary>
+        /// <param name="match"><see cref="List{T}.RemoveAll(Predicate{T})"/></param>
+        /// <returns><see cref="List{T}.RemoveAll(Predicate{T})"/></returns>
+        public int RemoveAll(Predicate<T> match)
+        {
+            Dictionary<T, int> removedItems = [];
+            int index = 0;
+
+            foreach (var item in _list)
+            {
+                if (match(item))
+                {
+                    removedItems.Add(item, index);
+                }
+
+                index++;
+            }
+
+            int removedItemsCount = _list.RemoveAll(match);
+
+            foreach (var info in removedItems)
+            {
+                InvokeRemove(info.Key, info.Value);
+            }
+
+            return removedItemsCount;
+        }
 
         /// <summary>
         /// <inheritdoc/>

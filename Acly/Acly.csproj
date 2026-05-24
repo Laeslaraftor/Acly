@@ -15,7 +15,7 @@
     <Title>Acly Main Library</Title>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>acly</PackageTags>
-    <Version>1.15.0</Version>
+    <Version>1.15.1</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RepositoryUrl>https://github.com/Laeslaraftor/Acly</RepositoryUrl>
     <Authors>Laeslaraftor</Authors>
