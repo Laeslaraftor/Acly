@@ -10,7 +10,7 @@ namespace Acly
     /// Класс списка-ссылки только для чтения оригинального списка
     /// </summary>
     /// <typeparam name="T">Тип данных списка</typeparam>
-    public class ReferenceReadOnlyList<T> : Disposable, ICollection<T>, IReadOnlyList<T>, INotifyCollectionChanged
+    public class ReferenceReadOnlyList<T> : Disposable, ICollection<T>, IReadOnlyList<T>, IList<T>, INotifyCollectionChanged
     {
         /// <summary>
         /// Создать экземпляр класса списка-ссылки только для чтения оригинального списка
@@ -49,10 +49,25 @@ namespace Acly
         /// </summary>
         public bool IsReadOnly => true;
 
+        T IList<T>.this[int index]
+        {
+            get => _reference[index];
+            set => throw new InvalidOperationException(ReadOnlyCollectionInvalidExceptionMessage);
+        }
+
         private readonly IList<T> _reference;
 
         #region Управление
 
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="item"><inheritdoc/></param>
+        /// <returns><inheritdoc/></returns>
+        public int IndexOf(T item)
+        {
+            return _reference.IndexOf(item);
+        }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
@@ -99,6 +114,14 @@ namespace Acly
             throw new InvalidOperationException(ReadOnlyCollectionInvalidExceptionMessage);
         }
         bool ICollection<T>.Remove(T item)
+        {
+            throw new InvalidOperationException(ReadOnlyCollectionInvalidExceptionMessage);
+        }
+        void IList<T>.Insert(int index, T item)
+        {
+            throw new InvalidOperationException(ReadOnlyCollectionInvalidExceptionMessage);
+        }
+        void IList<T>.RemoveAt(int index)
         {
             throw new InvalidOperationException(ReadOnlyCollectionInvalidExceptionMessage);
         }
